@@ -297,6 +297,7 @@ test("A) 畫風可切換、持久保存，無效值會回落至熔岩", async ()
 
   const harness = await createHarness({ theme: "ember" });
   try {
+    assert.equal(harness.document.querySelectorAll(".ytce-theme-switch button").length, 4);
     harness.document.querySelector('[data-theme="aurora"]').click();
     assert.equal(harness.document.body.dataset.ytceTheme, "aurora");
     assert.equal(

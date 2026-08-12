@@ -27,7 +27,7 @@
   });
 
   const VALID_MODES = Object.freeze(["complete", "monitor", "reader"]);
-  const VALID_THEMES = Object.freeze(["ember", "aurora", "paper"]);
+  const VALID_THEMES = Object.freeze(["ember", "aurora", "paper", "starlight"]);
 
   const RENDERER_SELECTOR = [
     "yt-live-chat-text-message-renderer",
@@ -87,6 +87,9 @@
         </button>
         <button type="button" data-theme="paper" aria-label="切換為紙墨畫風">
           <span class="ytce-theme-swatch" aria-hidden="true"></span><span>紙墨</span>
+        </button>
+        <button type="button" data-theme="starlight" aria-label="切換為星夜畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>星夜</span>
         </button>
       </div>
 
