@@ -7,8 +7,8 @@ YT Chat Enlarger 是一個純本機的 Chrome 擴充功能，適合把另一台�
 - 從 YouTube 直播頁或 YouTube Studio 一鍵開啟獨立聊天室。
 - 放大留言、作者名稱與頭像，適合遠距離閱讀。
 - 完整、監看、朗讀三種模式。
-- 使用瀏覽器內建語音在本機朗讀留言。
-- 可選聲音、語速、音量及是否朗讀名字。
+- 只使用瀏覽器明確標示為本機的語音朗讀留言；找不到本機語音時不會退回線上服務。
+- 可選本機聲音、語速、音量，以及是否朗讀名字與時間。
 - 清理網址、過長內容與重複文字，降低機械朗讀干擾。
 - 支援一般留言、Super Chat、Super Sticker 與會員訊息。
 - 隱藏頭像、徽章及醒目標示關鍵字。
@@ -42,6 +42,8 @@ npm run build:extension
 
 `npm run build:extension` 會重建 `dist/yt-chat-enlarger/` 與 ZIP，並核對來源雜湊及封裝清單。`node_modules`、測試檔案、MissionCenter 與開發文件不會放入商店套件。
 
+建置套件可在 PowerShell 7 執行。商店截圖工具會自動尋找 Windows、macOS 或 Linux 的 Chrome，也可傳入 `-ChromePath`；圖示縮放目前使用 Windows 的 `System.Drawing`，因此只支援 Windows，其他平台請保留已驗證的 `icons/icon-*.png`。
+
 ## 資料夾用途
 
 - `icons/`：擴充功能圖示與可重新產生圖示的 SVG 來源。
@@ -50,4 +52,4 @@ npm run build:extension
 - `tests/`：背景服務、內容腳本與視覺 fixture。
 - `dist/`：可重建的發布產物，不應直接手動修改。
 - `MissionCenter/`：專案決策、任務與驗證紀錄。
-- `output/`：Mission Center HUD 與歷史 UI 驗證產物；不會打包進擴充功能。
+- `output/`：Mission Center HUD 產物；不會打包進擴充功能。一次性的 UI 截圖不留在專案內。

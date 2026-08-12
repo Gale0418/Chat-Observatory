@@ -1,15 +1,68 @@
 param(
-    [string]$ChromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+    [string]$ChromePath
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$sourcePath = Join-Path $projectRoot 'icons\source.svg'
+$sourcePath = Join-Path (Join-Path $projectRoot 'icons') 'source.svg'
 $iconDirectory = Join-Path $projectRoot 'icons'
 
-if (-not (Test-Path -LiteralPath $ChromePath)) {
-    throw "找不到 Chrome：$ChromePath"
+function Resolve-ChromeExecutable {
+    param([string]$RequestedPath)
+
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    if ($RequestedPath) {
+        $candidates.Add($RequestedPath)
+    }
+    else {
+        $isWindows = $env:OS -eq 'Windows_NT'
+        if ($isWindows) {
+            if ($env:ProgramFiles) {
+                $chromeRoot = Join-Path (Join-Path (Join-Path $env:ProgramFiles 'Google') 'Chrome') 'Application'
+                $candidates.Add((Join-Path $chromeRoot 'chrome.exe'))
+            }
+            if ($env:LOCALAPPDATA) {
+                $chromeRoot = Join-Path (Join-Path (Join-Path $env:LOCALAPPDATA 'Google') 'Chrome') 'Application'
+                $candidates.Add((Join-Path $chromeRoot 'chrome.exe'))
+            }
+        }
+        elseif ($IsMacOS) {
+            $candidates.Add((Join-Path (Join-Path (Join-Path '/Applications' 'Google Chrome.app') 'Contents') (Join-Path 'MacOS' 'Google Chrome')))
+            $candidates.Add((Join-Path (Join-Path (Join-Path '/Applications' 'Chromium.app') 'Contents') (Join-Path 'MacOS' 'Chromium')))
+        }
+        elseif ($IsLinux) {
+            $candidates.Add((Join-Path '/usr' (Join-Path 'bin' 'google-chrome')))
+            $candidates.Add((Join-Path '/usr' (Join-Path 'bin' 'chromium')))
+            $candidates.Add((Join-Path '/usr' (Join-Path 'bin' 'chromium-browser')))
+            $candidates.Add((Join-Path '/snap' (Join-Path 'bin' 'chromium')))
+        }
+    }
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            return [IO.Path]::GetFullPath($candidate)
+        }
+    }
+
+    if (-not $RequestedPath) {
+        foreach ($commandName in @('chrome', 'google-chrome', 'chromium', 'chromium-browser')) {
+            $command = Get-Command $commandName -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($command) {
+                return $command.Source
+            }
+        }
+    }
+
+    throw "找不到 Chrome。請使用 -ChromePath <可執行檔路徑>，或將 chrome/google-chrome/chromium 加入 PATH。"
 }
+
+# System.Drawing 的圖示縮放在非 Windows 不受支援；避免產生不可靠的圖示檔。
+$isWindowsPlatform = $env:OS -eq 'Windows_NT'
+if (-not $isWindowsPlatform) {
+    throw "非 Windows 平台已阻擋圖示縮放：本腳本使用 System.Drawing，請改在 Windows 執行；商店截圖腳本不受此限制。"
+}
+
+$ChromePath = Resolve-ChromeExecutable $ChromePath
 
 if (-not (Test-Path -LiteralPath $sourcePath)) {
     throw "找不到圖示來源：$sourcePath"
@@ -17,7 +70,7 @@ if (-not (Test-Path -LiteralPath $sourcePath)) {
 
 $sourceUri = [Uri]::new($sourcePath).AbsoluteUri
 $masterPath = Join-Path $iconDirectory 'master-512.png'
-$profilePath = Join-Path $env:TEMP "ytce-icon-$([guid]::NewGuid().ToString('N'))"
+$profilePath = Join-Path ([IO.Path]::GetTempPath()) "ytce-icon-$([guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory -Path $profilePath | Out-Null
 
 try {
@@ -33,11 +86,16 @@ try {
         '--window-size=512,512' `
         "--screenshot=$masterPath" `
         $sourceUri | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Chrome 產生圖示主圖失敗（退出碼：$LASTEXITCODE）：$ChromePath"
+    }
 }
 finally {
     $resolvedProfile = [IO.Path]::GetFullPath($profilePath)
-    $resolvedTemp = [IO.Path]::GetFullPath($env:TEMP)
-    if ($resolvedProfile.StartsWith($resolvedTemp, [StringComparison]::OrdinalIgnoreCase)) {
+    $resolvedTemp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+    $relativeProfile = [IO.Path]::GetRelativePath($resolvedTemp, $resolvedProfile).Replace('\', '/')
+    $relativeProfileParts = $relativeProfile -split '/'
+    if ($relativeProfileParts.Count -gt 0 -and $relativeProfileParts[0] -ne '..') {
         Remove-Item -LiteralPath $resolvedProfile -Recurse -Force -ErrorAction SilentlyContinue
     }
 }

@@ -25,6 +25,8 @@
     highlightKeywords: ""
   });
 
+  const VALID_MODES = Object.freeze(["complete", "monitor", "reader"]);
+
   const RENDERER_SELECTOR = [
     "yt-live-chat-text-message-renderer",
     "yt-live-chat-paid-message-renderer",
@@ -36,11 +38,19 @@
 
   let settings = { ...DEFAULT_SETTINGS };
   let saveTimer = null;
+  let isCleanedUp = false;
   let keywordList = [];
   let ttsQueue = [];
   let activeUtterance = null;
   let speechGeneration = 0;
+  let watchdogTimer = null;
   const processedNodes = new WeakSet();
+
+  let documentObserver = null;
+  let messageObserver = null;
+  let currentItemsContainer = null;
+  const pendingNodes = new Set();
+  let microtaskScheduled = false;
 
   const panel = document.createElement("section");
   panel.id = "ytce-control-panel";
@@ -109,9 +119,9 @@
         </div>
 
         <label class="ytce-field">
-          <span>聲音</span>
+          <span>聲音 <small class="ytce-privacy-tip">（僅列出本機語音）</small></span>
           <select id="ytce-voice-select">
-            <option value="">系統預設</option>
+            <option value="">正在尋找本機語音…</option>
           </select>
         </label>
 
@@ -203,33 +213,94 @@
   };
 
   function clampNumber(value, min, max, fallback) {
-    const number = Number(value);
-    return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+    if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+    return Math.min(max, Math.max(min, value));
   }
 
   function sanitizeSettings(value) {
-    const mode = ["complete", "monitor", "reader"].includes(value.mode)
-      ? value.mode
-      : DEFAULT_SETTINGS.mode;
+    if (!value || typeof value !== "object") return { ...DEFAULT_SETTINGS };
 
-    return {
-      ...DEFAULT_SETTINGS,
-      ...value,
-      mode,
-      fontSize: clampNumber(value.fontSize, 16, 64, DEFAULT_SETTINGS.fontSize),
-      avatarSize: clampNumber(value.avatarSize, 24, 88, DEFAULT_SETTINGS.avatarSize),
-      ttsVolume: clampNumber(value.ttsVolume, 0, 100, DEFAULT_SETTINGS.ttsVolume),
-      ttsRate: clampNumber(value.ttsRate, 0.7, 1.6, DEFAULT_SETTINGS.ttsRate),
-      ttsPitch: clampNumber(value.ttsPitch, 0.5, 2, DEFAULT_SETTINGS.ttsPitch),
-      maxMessageLength: clampNumber(value.maxMessageLength, 30, 300, DEFAULT_SETTINGS.maxMessageLength),
-      queueLimit: clampNumber(value.queueLimit, 3, 50, DEFAULT_SETTINGS.queueLimit),
-      staleAfterSeconds: clampNumber(value.staleAfterSeconds, 5, 120, DEFAULT_SETTINGS.staleAfterSeconds)
-    };
+    const sanitized = { ...DEFAULT_SETTINGS };
+
+    if (typeof value.mode === "string" && VALID_MODES.includes(value.mode)) {
+      sanitized.mode = value.mode;
+    }
+
+    const boolKeys = [
+      "isCollapsed",
+      "ttsEnabled",
+      "ttsReadName",
+      "ttsReadTime",
+      "readEmoji",
+      "cleanUrls",
+      "collapseRepeats",
+      "hideAvatars",
+      "hideBadges"
+    ];
+    boolKeys.forEach((key) => {
+      if (typeof value[key] === "boolean") {
+        sanitized[key] = value[key];
+      }
+    });
+
+    if (typeof value.ttsVoiceURI === "string") {
+      sanitized.ttsVoiceURI = value.ttsVoiceURI;
+    }
+    if (typeof value.highlightKeywords === "string") {
+      sanitized.highlightKeywords = value.highlightKeywords;
+    }
+
+    sanitized.fontSize = clampNumber(value.fontSize, 16, 64, DEFAULT_SETTINGS.fontSize);
+    sanitized.avatarSize = clampNumber(value.avatarSize, 24, 88, DEFAULT_SETTINGS.avatarSize);
+    sanitized.ttsVolume = clampNumber(value.ttsVolume, 0, 100, DEFAULT_SETTINGS.ttsVolume);
+    sanitized.ttsRate = clampNumber(value.ttsRate, 0.7, 1.6, DEFAULT_SETTINGS.ttsRate);
+    sanitized.ttsPitch = clampNumber(value.ttsPitch, 0.5, 2.0, DEFAULT_SETTINGS.ttsPitch);
+    sanitized.maxMessageLength = clampNumber(value.maxMessageLength, 30, 300, DEFAULT_SETTINGS.maxMessageLength);
+    sanitized.queueLimit = clampNumber(value.queueLimit, 3, 50, DEFAULT_SETTINGS.queueLimit);
+    sanitized.staleAfterSeconds = clampNumber(value.staleAfterSeconds, 5, 120, DEFAULT_SETTINGS.staleAfterSeconds);
+
+    return sanitized;
   }
 
   function scheduleSave() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => chrome.storage.local.set(settings), 250);
+    window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(async () => {
+      saveTimer = null;
+      if (isCleanedUp || !window.chrome?.storage?.local?.set) return;
+      try {
+        await chrome.storage.local.set({ ...settings });
+      } catch {
+        updateSpeechStatus("設定暫時無法儲存");
+      }
+    }, 250);
+  }
+
+  function handleStorageChange(changes, areaName) {
+    if (areaName !== "local" || isCleanedUp) return;
+
+    const wasSpeaking = shouldSpeak();
+    let hasChange = false;
+    const nextSettings = { ...settings };
+
+    for (const [key, change] of Object.entries(changes)) {
+      if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) {
+        if (change && "newValue" in change) {
+          nextSettings[key] = change.newValue;
+          hasChange = true;
+        }
+      }
+    }
+
+    if (hasChange) {
+      settings = sanitizeSettings(nextSettings);
+      applySettings({ save: false });
+      populateVoices();
+      if (wasSpeaking && !shouldSpeak()) {
+        stopSpeech({ clearQueue: true });
+      } else if (shouldSpeak()) {
+        speakNext();
+      }
+    }
   }
 
   function refreshKeywords() {
@@ -339,10 +410,18 @@
     return settings.ttsEnabled && settings.mode !== "monitor";
   }
 
+  function getLocalVoices() {
+    if (!window.speechSynthesis || typeof window.speechSynthesis.getVoices !== "function") {
+      return [];
+    }
+    const voices = window.speechSynthesis.getVoices() || [];
+    return voices.filter((voice) => voice && voice.localService === true);
+  }
+
   function getSelectedVoice() {
-    return window.speechSynthesis
-      .getVoices()
-      .find((voice) => voice.voiceURI === settings.ttsVoiceURI);
+    const localVoices = getLocalVoices();
+    if (!settings.ttsVoiceURI) return null;
+    return localVoices.find((voice) => voice.voiceURI === settings.ttsVoiceURI) || null;
   }
 
   function updateSpeechStatus(message = "") {
@@ -353,11 +432,50 @@
     readerStage.classList.toggle("is-speaking", Boolean(activeUtterance));
   }
 
+  function clearWatchdog() {
+    if (watchdogTimer) {
+      window.clearTimeout(watchdogTimer);
+      watchdogTimer = null;
+    }
+  }
+
   function finishUtterance(generation) {
-    if (generation !== speechGeneration) return;
+    if (generation !== speechGeneration || isCleanedUp) return;
+    clearWatchdog();
     activeUtterance = null;
     updateSpeechStatus();
     speakNext();
+  }
+
+  function safeSpeak(utterance, generation) {
+    try {
+      clearWatchdog();
+      const textLen = (utterance.text || "").length;
+      const rate = utterance.rate || 1;
+      const timeoutMs = Math.min(180000, Math.max(10000, Math.round((textLen * 400) / rate + 5000)));
+
+      watchdogTimer = window.setTimeout(() => {
+        if (generation === speechGeneration) {
+          try {
+            window.speechSynthesis.cancel();
+          } catch (_) {}
+          finishUtterance(generation);
+        }
+      }, timeoutMs);
+
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      finishUtterance(generation);
+    }
+  }
+
+  function startUtterance(utterance, statusMessage = "") {
+    const generation = ++speechGeneration;
+    activeUtterance = utterance;
+    utterance.onend = () => finishUtterance(generation);
+    utterance.onerror = () => finishUtterance(generation);
+    updateSpeechStatus(statusMessage);
+    safeSpeak(utterance, generation);
   }
 
   function speakNext() {
@@ -369,6 +487,12 @@
     const staleBefore = Date.now() - settings.staleAfterSeconds * 1000;
     while (ttsQueue.length && ttsQueue[0].queuedAt < staleBefore) ttsQueue.shift();
 
+    const selectedVoice = getSelectedVoice();
+    if (!selectedVoice) {
+      updateSpeechStatus("找不到可用的本機語音");
+      return;
+    }
+
     const next = ttsQueue.shift();
     if (!next) {
       updateSpeechStatus();
@@ -376,33 +500,26 @@
     }
 
     const utterance = new SpeechSynthesisUtterance(next.text);
-    const selectedVoice = getSelectedVoice();
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-      utterance.lang = selectedVoice.lang;
-    } else {
-      utterance.lang = "zh-TW";
-    }
+    utterance.voice = selectedVoice;
+    utterance.lang = selectedVoice.lang;
 
     utterance.volume = settings.ttsVolume / 100;
     utterance.rate = settings.ttsRate;
     utterance.pitch = settings.ttsPitch;
 
-    const generation = ++speechGeneration;
-    activeUtterance = utterance;
-    utterance.onend = () => finishUtterance(generation);
-    utterance.onerror = () => finishUtterance(generation);
-    updateSpeechStatus();
-    window.speechSynthesis.speak(utterance);
+    startUtterance(utterance);
   }
 
   function stopSpeech({ clearQueue = false, continueQueue = false } = {}) {
+    clearWatchdog();
     speechGeneration += 1;
     activeUtterance = null;
     if (clearQueue) ttsQueue = [];
-    window.speechSynthesis.cancel();
+    try {
+      window.speechSynthesis.cancel();
+    } catch (_) {}
     updateSpeechStatus(clearQueue ? "語音佇列已清空" : "已跳過目前留言");
-    if (continueQueue && shouldSpeak()) queueMicrotask(speakNext);
+    if (continueQueue && shouldSpeak()) window.queueMicrotask(speakNext);
   }
 
   function queueSpeech(author, rawMessage, type, timestamp) {
@@ -447,6 +564,30 @@
     return [...renderers];
   }
 
+  function processPendingNodes() {
+    if (isCleanedUp) return;
+    const nodesToProcess = Array.from(pendingNodes);
+    pendingNodes.clear();
+    microtaskScheduled = false;
+
+    for (const node of nodesToProcess) {
+      processRenderer(node);
+    }
+  }
+
+  function scheduleNodeProcessing(renderers) {
+    for (const renderer of renderers) {
+      if (!processedNodes.has(renderer)) {
+        pendingNodes.add(renderer);
+      }
+    }
+
+    if (pendingNodes.size > 0 && !microtaskScheduled) {
+      microtaskScheduled = true;
+      window.queueMicrotask(processPendingNodes);
+    }
+  }
+
   function refreshVisibleMessages() {
     document.querySelectorAll(RENDERER_SELECTOR).forEach((node) => {
       const data = getMessageData(node);
@@ -455,20 +596,42 @@
   }
 
   function populateVoices() {
-    const voices = window.speechSynthesis.getVoices();
+    const localVoices = getLocalVoices();
     const currentValue = settings.ttsVoiceURI;
-    ui.voiceSelect.replaceChildren(new Option("系統預設", ""));
+    ui.voiceSelect.replaceChildren();
 
-    voices
+    localVoices
       .sort((left, right) => left.lang.localeCompare(right.lang) || left.name.localeCompare(right.name))
       .forEach((voice) => {
-        const label = `${voice.name} · ${voice.lang}${voice.localService ? "" : " · 線上"}`;
+        const label = `${voice.name} · ${voice.lang}`;
         ui.voiceSelect.add(new Option(label, voice.voiceURI));
       });
 
-    ui.voiceSelect.value = voices.some((voice) => voice.voiceURI === currentValue)
-      ? currentValue
-      : "";
+    const currentVoice = localVoices.find((voice) => voice.voiceURI === currentValue);
+    const preferredVoice = currentVoice ||
+      localVoices.find((voice) => /^zh-(TW|Hant)/i.test(voice.lang)) ||
+      localVoices.find((voice) => /^zh/i.test(voice.lang)) ||
+      localVoices[0] || null;
+
+    if (preferredVoice) {
+      ui.voiceSelect.disabled = false;
+      ui.voiceSelect.value = preferredVoice.voiceURI;
+      if (settings.ttsVoiceURI !== preferredVoice.voiceURI) {
+        settings.ttsVoiceURI = preferredVoice.voiceURI;
+        scheduleSave();
+      }
+    } else {
+      const unavailable = new Option("找不到明確標示為本機的語音", "");
+      unavailable.disabled = true;
+      ui.voiceSelect.add(unavailable);
+      ui.voiceSelect.disabled = true;
+      if (settings.ttsVoiceURI !== "") {
+        settings.ttsVoiceURI = "";
+        scheduleSave();
+      }
+    }
+
+    if (shouldSpeak() && !activeUtterance) speakNext();
   }
 
   function syncControls() {
@@ -540,10 +703,14 @@
   ui.modeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       settings.mode = button.dataset.mode;
-      if (settings.mode === "reader") settings.ttsEnabled = true;
-      if (settings.mode === "monitor" && activeUtterance) stopSpeech({ clearQueue: true });
+      if (settings.mode === "reader") settings.ttsEnabled = Boolean(getSelectedVoice());
+      if (settings.mode === "monitor") stopSpeech({ clearQueue: true });
       applySettings();
-      if (shouldSpeak()) speakNext();
+      if (shouldSpeak()) {
+        speakNext();
+      } else if (settings.mode === "reader") {
+        updateSpeechStatus("找不到可用的本機語音");
+      }
     });
   });
 
@@ -579,13 +746,19 @@
     if (!settings.ttsEnabled) {
       stopSpeech({ clearQueue: true });
     } else {
-      applySettings();
-      const confirmation = new SpeechSynthesisUtterance("語音朗讀已開啟");
       const voice = getSelectedVoice();
-      if (voice) confirmation.voice = voice;
+      if (!voice) {
+        settings.ttsEnabled = false;
+        applySettings();
+        updateSpeechStatus("找不到可用的本機語音");
+        return;
+      }
+      const confirmation = new SpeechSynthesisUtterance("語音朗讀已開啟");
+      confirmation.voice = voice;
+      confirmation.lang = voice.lang;
       confirmation.volume = settings.ttsVolume / 100;
       confirmation.rate = settings.ttsRate;
-      window.speechSynthesis.speak(confirmation);
+      startUtterance(confirmation, "語音朗讀已開啟");
     }
     applySettings();
   });
@@ -596,14 +769,20 @@
   });
 
   ui.testVoice.addEventListener("click", () => {
-    stopSpeech();
-    const test = new SpeechSynthesisUtterance("歡迎使用 YT Chat Enlarger，這是目前的語音效果。");
     const voice = getSelectedVoice();
-    if (voice) test.voice = voice;
+    if (!voice) {
+      updateSpeechStatus("找不到可用的本機語音");
+      return;
+    }
+    stopSpeech({ clearQueue: false, continueQueue: false });
+    const test = new SpeechSynthesisUtterance("歡迎使用 YT Chat Enlarger，這是目前的語音效果。");
+    test.voice = voice;
+    test.lang = voice.lang;
     test.volume = settings.ttsVolume / 100;
     test.rate = settings.ttsRate;
     test.pitch = settings.ttsPitch;
-    window.speechSynthesis.speak(test);
+
+    startUtterance(test, "語音試聽中…");
   });
 
   ui.skipSpeech.addEventListener("click", () => {
@@ -614,33 +793,115 @@
     stopSpeech({ clearQueue: true });
   });
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        collectRenderers(node).forEach((renderer) => processRenderer(renderer));
-      });
-    });
-  });
+  function setupMessageObserver(itemsContainer) {
+    if (currentItemsContainer === itemsContainer && messageObserver) return;
 
-  function startObserver() {
-    const itemsContainer = document.querySelector("#items.yt-live-chat-item-list-renderer");
-    if (!itemsContainer) {
-      setTimeout(startObserver, 750);
-      return;
+    if (messageObserver) {
+      messageObserver.disconnect();
+      messageObserver = null;
     }
+
+    currentItemsContainer = itemsContainer;
+    if (!itemsContainer) return;
 
     itemsContainer.querySelectorAll(RENDERER_SELECTOR).forEach((node) => {
       processRenderer(node, { speak: false });
     });
-    observer.observe(itemsContainer, { childList: true, subtree: true });
+
+    messageObserver = new MutationObserver((mutations) => {
+      const renderersToSchedule = [];
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          collectRenderers(node).forEach((renderer) => renderersToSchedule.push(renderer));
+        });
+      });
+      if (renderersToSchedule.length > 0) {
+        scheduleNodeProcessing(renderersToSchedule);
+      }
+    });
+
+    messageObserver.observe(itemsContainer, { childList: true, subtree: true });
   }
 
-  chrome.storage.local.get(DEFAULT_SETTINGS, (stored) => {
+  function startDiscoveryObserver() {
+    const checkItems = () => {
+      const itemsContainer = document.querySelector("#items.yt-live-chat-item-list-renderer");
+      if (itemsContainer !== currentItemsContainer) {
+        setupMessageObserver(itemsContainer);
+      }
+    };
+
+    checkItems();
+
+    documentObserver = new MutationObserver(() => {
+      if (currentItemsContainer?.isConnected) return;
+      checkItems();
+    });
+
+    if (document.documentElement || document.body) {
+      documentObserver.observe(document.documentElement || document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
+  }
+
+  function cleanup() {
+    if (isCleanedUp) return;
+    isCleanedUp = true;
+    window.clearTimeout(saveTimer);
+    saveTimer = null;
+    clearWatchdog();
+
+    if (documentObserver) {
+      documentObserver.disconnect();
+      documentObserver = null;
+    }
+    if (messageObserver) {
+      messageObserver.disconnect();
+      messageObserver = null;
+    }
+    currentItemsContainer = null;
+
+    if (window.chrome?.storage?.onChanged?.removeListener) {
+      try {
+        chrome.storage.onChanged.removeListener(handleStorageChange);
+      } catch (_) {}
+    }
+
+    window.speechSynthesis?.removeEventListener("voiceschanged", populateVoices);
+    window.removeEventListener("pagehide", cleanup);
+    window.removeEventListener("unload", cleanup);
+
+    try {
+      window.speechSynthesis?.cancel();
+    } catch (_) {}
+
+    ttsQueue = [];
+    activeUtterance = null;
+    pendingNodes.clear();
+  }
+
+  async function initialize() {
+    let stored = DEFAULT_SETTINGS;
+    try {
+      stored = await chrome.storage.local.get(DEFAULT_SETTINGS);
+    } catch {
+      updateSpeechStatus("無法讀取設定，已使用預設值");
+    }
+    if (isCleanedUp) return;
     settings = sanitizeSettings(stored);
     applySettings({ save: false });
     populateVoices();
-    startObserver();
-  });
+    startDiscoveryObserver();
+  }
 
-  window.speechSynthesis.addEventListener("voiceschanged", populateVoices);
+  if (window.chrome?.storage?.onChanged?.addListener) {
+    chrome.storage.onChanged.addListener(handleStorageChange);
+  }
+
+  window.speechSynthesis?.addEventListener("voiceschanged", populateVoices);
+  window.addEventListener("pagehide", cleanup);
+  window.addEventListener("unload", cleanup);
+  void initialize();
 })();

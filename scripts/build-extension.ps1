@@ -1,5 +1,5 @@
 param(
-    [string]$OutputDirectory = (Join-Path $PSScriptRoot '../dist')
+    [string]$OutputDirectory = (Join-Path (Join-Path $PSScriptRoot '..') 'dist')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -8,37 +8,67 @@ $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
 $stagingRoot = Join-Path $outputRoot 'yt-chat-enlarger'
 $zipPath = Join-Path $outputRoot 'yt-chat-enlarger.zip'
 
-if (-not $outputRoot.StartsWith($projectRoot, [StringComparison]::OrdinalIgnoreCase)) {
-    throw "輸出資料夾必須位於專案內：$projectRoot"
+$relativeOutput = [IO.Path]::GetRelativePath($projectRoot, $outputRoot).Replace('\', '/')
+$isProjectRoot = $relativeOutput -eq '.'
+$relativeOutputParts = $relativeOutput -split '/'
+$isOutsideProject = $relativeOutputParts.Count -gt 0 -and $relativeOutputParts[0] -eq '..'
+if ($isProjectRoot -or $isOutsideProject) {
+    throw "輸出資料夾必須是專案內的子資料夾（不可是專案本身或專案外）：$projectRoot"
+}
+
+function Test-ReparsePoint {
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $false
+    }
+    $item = Get-Item -LiteralPath $Path -Force
+    return ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0
+}
+
+if (Test-ReparsePoint $outputRoot) {
+    throw "輸出資料夾不可是符號連結或其他重解析點：$outputRoot"
 }
 
 if (Test-Path -LiteralPath $stagingRoot) {
+    if (Test-ReparsePoint $stagingRoot) {
+        throw "拒絕刪除符號連結或其他重解析點：$stagingRoot"
+    }
     Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 }
 
 if (Test-Path -LiteralPath $zipPath) {
+    if (Test-ReparsePoint $zipPath) {
+        throw "拒絕刪除符號連結或其他重解析點：$zipPath"
+    }
     Remove-Item -LiteralPath $zipPath -Force
 }
 
 New-Item -ItemType Directory -Path $stagingRoot -Force | Out-Null
 
 $requiredFiles = @(
-    'manifest.json',
-    'background.js',
-    'content.js',
-    'content.css',
-    'icons/icon-16.png',
-    'icons/icon-32.png',
-    'icons/icon-48.png',
-    'icons/icon-128.png'
+    @('manifest.json'),
+    @('background.js'),
+    @('content.js'),
+    @('content.css'),
+    @('icons', 'icon-16.png'),
+    @('icons', 'icon-32.png'),
+    @('icons', 'icon-48.png'),
+    @('icons', 'icon-128.png')
 )
 
-foreach ($relativePath in $requiredFiles) {
-    $source = Join-Path $projectRoot $relativePath
+foreach ($pathSegments in $requiredFiles) {
+    $relativePath = $pathSegments -join '/'
+    $source = $projectRoot
+    foreach ($segment in $pathSegments) {
+        $source = Join-Path $source $segment
+    }
     if (-not (Test-Path -LiteralPath $source)) {
         throw "缺少必要檔案：$relativePath"
     }
-    $destination = Join-Path $stagingRoot $relativePath
+    $destination = $stagingRoot
+    foreach ($segment in $pathSegments) {
+        $destination = Join-Path $destination $segment
+    }
     $destinationDirectory = Split-Path -Parent $destination
     New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
     Copy-Item -LiteralPath $source -Destination $destination
@@ -63,7 +93,7 @@ try {
     )
     $expectedEntries = @(
         $requiredFiles |
-            ForEach-Object { $_.Replace('\', '/') } |
+            ForEach-Object { ($_ -join '/').Replace('\', '/') } |
             Sort-Object
     )
     $unexpectedEntries = @(Compare-Object -ReferenceObject $expectedEntries -DifferenceObject $actualEntries)
