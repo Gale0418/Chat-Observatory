@@ -1,21 +1,22 @@
 <!-- Generated materialized view. Do not edit directly; rebuild from canonical MissionCenter files. -->
-<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=ed21de50fedcc2ef658ca6a7827698c38c55a1467f1472bffb444b75da9a26ab -->
+<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=1a8e714dd312e915b457205e13378965f06d8e5c6d80ad826ca84add9d8f30d9 -->
 # 任務簡報
 
 - Last organized: 2026-08-12
-- Source fingerprint: `ed21de50fedcc2ef658ca6a7827698c38c55a1467f1472bffb444b75da9a26ab`
+- Source fingerprint: `1a8e714dd312e915b457205e13378965f06d8e5c6d80ad826ca84add9d8f30d9`
 - Source of truth: `tasks.md`
 - 專案: YT Chat Enlarger 上架版
 - 北極星: 維護純本機第二電腦大字監看與 TTS 擴充功能，並保持發布產物可重建、可驗證
 - 週期: v3.0.0 上架準備
 
-## 未完成 P0 (3)
+## 未完成 P0 (4)
 - YTCE-E1 · 發布純本機大字聊天室與 TTS 擴充功能 · In Progress
 - YTCE-M1 · 完成純本機核心與高雅介面 · Review
+- YTCE-H5 · 對齊隱私、商店文件與 Chrome 實機驗收 · Review
 - YTCE-V1 · 執行實機驗證與上架前收尾 · Backlog
 
 ## 今日摘要 · 2026-08-12
-- 無
+- 完成 URL、MV3、TTS、Observer、無障礙、發布工具與 Chrome 實機全面強化；待手動重載新版後最終驗收 已記錄 Smoke tests: 13.
 
 ## 重要護欄 (0)
 - 無

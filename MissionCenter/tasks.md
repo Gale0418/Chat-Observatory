@@ -10,5 +10,9 @@
 | YTCE-S3 | 補齊特殊訊息與巢狀節點處理 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S1 | 以真實直播確認選擇器 | DOM fixture 驗證通過 | 1 | execution, verification |  |
 | YTCE-S4 | 縮減權限並改善啟動錯誤提示 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S1 | 以一般 Chrome 確認啟動 | manifest 與 URL 案例檢查通過 | 1 | execution, verification |  |
 | YTCE-P1 | 完成商店圖示、說明與隱私文件 | Task | YTCE-E1 | P1 | In Progress | Codex | YTCE-M1 | 補支援信箱與公開隱私政策網址 | 商店必要素材清單完整 | 3 | execution, verification | 圖示、截圖與文案已完成 |
-| YTCE-H1 | 整理專案並強化發布驗證 | Task | YTCE-E1 | P1 | Done | Codex | YTCE-S1 | 維持建置與測試綠燈 | 10 項測試通過、ZIP 僅含 8 個允許檔案且 staging 與來源一致 | 2 | execution, verification | 已移除 Thumbs.db 與過期 zip-check；低風險非感知改動，Completion Critic 依規則略過 |
+| YTCE-H1 | 整理專案並強化發布驗證 | Task | YTCE-E1 | P1 | Done | Codex | YTCE-S1 | 維持建置與測試綠燈 | 34 項測試通過、ZIP 僅含 8 個允許檔案且 staging 與來源一致 | 2 | execution, verification | 已移除 Thumbs.db、過期 zip-check 與無引用 ui-review；保留商店素材與 HUD |
+| YTCE-H2 | 強化 URL、MV3 視窗與發布安全邊界 | Task | YTCE-E1 | P0 | Done | Codex | YTCE-H1 | 維持 URL、session 與輸出邊界回歸測試 | 背景測試涵蓋主機白名單、session、尺寸合併與 API 失敗；專案外輸出被拒絕 | 4 | execution, verification | storage.session、foreign popup、action serialization、bounds debounce／flush、symlink 防護均已驗證 |
+| YTCE-H3 | 修復 TTS、設定與聊天室重連生命週期 | Task | YTCE-E1 | P0 | Done | Codex | YTCE-H2 | 維持 TTS／設定／Observer 回歸測試 | TTS 例外／逾時能恢復，容器替換後仍處理留言，設定異常不崩潰 | 5 | execution, verification | 只允許 localService=true；無本機語音時不朗讀 |
+| YTCE-H4 | 完成測試 teardown、無障礙與跨平台工具強化 | Task | YTCE-E1 | P1 | Done | Codex | YTCE-H3 | 在各發布平台維持工具 smoke | Node 測試自然退出；鍵盤焦點可見；工具提供可操作的跨平台錯誤 | 3 | execution, verification | JSDOM 延遲主因為 NAS I/O；已移除 force-exit 並清理所有頁面資源 |
+| YTCE-H5 | 對齊隱私、商店文件與 Chrome 實機驗收 | Task | YTCE-E1 | P0 | Review | Codex | YTCE-H4 | 在 chrome://extensions 手動重新載入後重跑真實聊天室 smoke | 自動化、Chrome 實機與發布包驗證均有證據；未解 blocker 明列 | 4 | verification, closeout | 新版 fixture 通過；Chrome 安全政策禁止自動重載既有未封裝擴充功能 |
 | YTCE-V1 | 執行實機驗證與上架前收尾 | Task | YTCE-E1 | P0 | Backlog | Codex | YTCE-P1 | Chrome 載入並跑完整流程 | smoke tests 與上架檢查已記錄 | 3 | verification, closeout |  |

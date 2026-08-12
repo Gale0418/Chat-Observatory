@@ -11,3 +11,7 @@
 | 2026-07-17 | YTCE-M1 | 真實 YouTube headless 嘗試 | Chrome 150 載入未封裝擴充功能並開啟 live_chat URL | YouTube 顯示聊天室並注入控制面板 | YouTube 對 headless 回傳「請更新瀏覽器」降級頁，無法驗證聊天室注入 | 失敗 | automated |
 | 2026-08-12 | YTCE-H1 | 語法、核心行為與朗讀時間回歸 | `npm run verify` | 背景與內容腳本語法正確，所有測試通過 | 10 項測試全部通過，包含新增的朗讀時間案例 | 通過 | automated |
 | 2026-08-12 | YTCE-H1 | 發布套件同步與白名單 | `npm run build:extension`、`unzip -Z1`、逐檔 `cmp` | ZIP 僅含 4 個執行檔與 4 個 PNG，staging 與來源一致 | 8 個允許檔案全數存在，無額外檔案，8/8 來源比對一致 | 通過 | automated |
+| 2026-08-12 | YTCE-H2 | URL、MV3 視窗與發布安全邊界 | `npm run verify`、PowerShell parser、輸出路徑／symlink smoke | 僅正式 HTTPS YouTube URL；session 可跨 SW；錯誤不造成 unhandled；刪除不越界 | 背景 16 項案例通過，包含連點序列化、foreign popup、bounds debounce／flush；專案本身／外部／相鄰前綴／symlink 均拒絕 | 通過 | automated |
+| 2026-08-12 | YTCE-H3 | TTS、設定與聊天室容器重連 | jsdom 模擬 speak throw／watchdog／storage reject／跨視窗監看／容器替換／無本機 voice | 佇列可恢復、壞設定不崩潰、只使用本機 voice、新容器繼續處理 | 內容與 CSS 案例全數通過；總計 34/34 tests | 通過 | automated |
+| 2026-08-12 | YTCE-H4 | 自然退出、鍵盤焦點與發布工具 | 移除 `--test-force-exit` 後 `npm run verify`；Chrome fixture Tab；失敗式截圖 staging | Node 自然退出、focus-visible 可見、截圖失敗不破壞舊素材 | 自然退出成功；焦點 2px solid；故意傳 `/usr/bin/false` 後兩張素材 SHA-256 不變 | 通過 | automated |
+| 2026-08-12 | YTCE-H5 | Chrome 真實 YouTube 直播聊天室 | 一般 Chrome 開啟 `live_chat`，檢查面板、items 與 renderer；本機 fixture 檢查新版 UI | 新版注入真實聊天室且顯示本機語音限制 | 已安裝舊版在真實直播找到 `#items` 與 73 則留言、監看靜音成功；新版 fixture 選中 zh-TW 本機 voice。Chrome 安全政策阻擋自動重載，待手動重驗新版 | 待重驗 | manual |

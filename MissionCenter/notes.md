@@ -14,3 +14,13 @@
 | --- | --- | --- | --- |
 | 全面重整資料夾可能最乾淨 | 本機 README、建置腳本、檔案引用與測試結果 | 保留現有小型原生架構；用用途說明與發布白名單取代大搬家 | 本機專案，不涉及外部授權 |
 | `dist/` 可能可直接沿用 | 根目錄與 staging 檔案時間、內容比較 | 發現 `content.js` 已過期，重建並加入逐檔一致性驗證 | 本機專案，不涉及外部授權 |
+
+## 2026-08-12 全面強化研究
+
+| 搜尋前構想 | 參考來源 | 採納內容 | 授權狀態 |
+| --- | --- | --- | --- |
+| MV3 可用全域變數追蹤視窗 | Chrome Extensions：service worker lifecycle、storage、windows | SW 休眠會遺失全域狀態；採 `storage.session` 並重新驗證視窗 | 官方文件；僅採 API 契約 |
+| 短延遲工作可改 `chrome.alarms` | Chrome Extensions：alarms | alarms 最短週期不適合 4.5 秒提示；保留最佳努力並於下次 action 清理 | 官方文件；僅採 API 契約 |
+| 所有系統語音都能算純本機 | MDN：SpeechSynthesisVoice.localService | `false` 代表遠端服務；只列明確本機 voice，沒有本機語音就不朗讀 | MDN；僅採平台契約 |
+| Observer 綁一次即可 | MDN：MutationObserver.observe/disconnect | 容器移除後需重新 discover／disconnect／observe，並批次處理新增節點 | MDN；僅採平台契約 |
+| `--test-force-exit` 是正常 teardown | Node.js CLI／test runner | force-exit 會掩蓋 event-loop 殘留；修正 fixture cleanup 後移除 | 官方文件；僅採測試契約 |
