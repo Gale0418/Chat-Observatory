@@ -1,5 +1,5 @@
 <!-- Generated materialized view. Do not edit directly; rebuild from canonical MissionCenter files. -->
-<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=73dcfc94b30c4ff3c1b8f0e000d54480b5eceb7baa4bc75caf16f8c58c9dc148 -->
+<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=1584af86f1bf12703d4a19bb874914f9568a39fecb89deb3dc17179d78c8c358 -->
 # P0 焦點
 
 - 唯一真實來源: `tasks.md`

@@ -16,9 +16,109 @@
     --ytce-muted: #a89c96;
     --ytce-shadow: rgba(8, 5, 4, 0.58);
     --ytce-warning: #d9a45d;
+    --ytce-panel-glow: rgba(233, 120, 111, 0.12);
+    --ytce-accent-glow: rgba(233, 120, 111, 0.3);
+    --ytce-accent-shadow: rgba(126, 42, 38, 0.27);
+    --ytce-control-hover: rgba(245, 226, 215, 0.1);
+    --ytce-control-subtle: rgba(245, 226, 215, 0.055);
+    --ytce-section-fill: rgba(245, 226, 215, 0.026);
+    --ytce-section-hover: rgba(245, 226, 215, 0.032);
+    --ytce-track: rgba(245, 226, 215, 0.14);
+    --ytce-thumb-ring: #f8e9e2;
+    --ytce-active-text: #fff8f4;
+    --ytce-knob: #f9eee8;
+    --ytce-danger-text: #f1aaa4;
+    --ytce-danger-border: rgba(233, 120, 111, 0.18);
+    --ytce-danger-fill: rgba(201, 85, 80, 0.09);
+    --ytce-focus-surface: rgba(10, 8, 8, 0.52);
+    --ytce-reader-center: #181412;
+    --ytce-reader-glow: rgba(233, 120, 111, 0.11);
+    --ytce-chat-text: #f5efeb;
+    --ytce-chat-border: rgba(245, 226, 215, 0.055);
+    --ytce-chat-inset: rgba(255, 255, 255, 0.022);
+    --ytce-highlight-fill: rgba(217, 164, 93, 0.2);
+    --ytce-highlight-fade: rgba(217, 164, 93, 0.035);
+    --ytce-highlight-border: rgba(217, 164, 93, 0.22);
     --ytce-radius-shell: 20px;
     --ytce-radius-section: 11px;
     --ytce-radius-control: 7px;
+}
+
+body[data-ytce-theme="aurora"] {
+    --ytce-accent: #49d6c8;
+    --ytce-accent-strong: #159c9f;
+    --ytce-accent-soft: rgba(73, 214, 200, 0.17);
+    --ytce-canvas: #071013;
+    --ytce-surface: rgba(10, 25, 30, 0.97);
+    --ytce-surface-raised: rgba(163, 238, 232, 0.07);
+    --ytce-surface-inset: rgba(2, 12, 16, 0.5);
+    --ytce-border: rgba(163, 238, 232, 0.13);
+    --ytce-border-strong: rgba(163, 238, 232, 0.24);
+    --ytce-text: #e8f8f6;
+    --ytce-text-soft: #c5dcda;
+    --ytce-muted: #8ba7a6;
+    --ytce-shadow: rgba(0, 8, 12, 0.68);
+    --ytce-warning: #f2bd66;
+    --ytce-panel-glow: rgba(73, 214, 200, 0.13);
+    --ytce-accent-glow: rgba(73, 214, 200, 0.3);
+    --ytce-accent-shadow: rgba(7, 104, 109, 0.3);
+    --ytce-control-hover: rgba(163, 238, 232, 0.1);
+    --ytce-control-subtle: rgba(163, 238, 232, 0.055);
+    --ytce-section-fill: rgba(163, 238, 232, 0.026);
+    --ytce-section-hover: rgba(163, 238, 232, 0.04);
+    --ytce-track: rgba(163, 238, 232, 0.16);
+    --ytce-thumb-ring: #dff8f5;
+    --ytce-active-text: #efffff;
+    --ytce-knob: #e6fffc;
+    --ytce-danger-text: #ffaaa0;
+    --ytce-danger-border: rgba(242, 118, 102, 0.22);
+    --ytce-danger-fill: rgba(182, 66, 54, 0.12);
+    --ytce-focus-surface: rgba(2, 13, 17, 0.68);
+    --ytce-reader-center: #0b1b20;
+    --ytce-reader-glow: rgba(73, 214, 200, 0.12);
+    --ytce-chat-text: #e9f8f6;
+    --ytce-chat-border: rgba(163, 238, 232, 0.07);
+    --ytce-chat-inset: rgba(178, 255, 248, 0.025);
+}
+
+body[data-ytce-theme="paper"] {
+    --ytce-accent: #d5634f;
+    --ytce-accent-strong: #a84235;
+    --ytce-accent-soft: rgba(213, 99, 79, 0.15);
+    --ytce-canvas: #ebe4d9;
+    --ytce-surface: rgba(250, 247, 240, 0.975);
+    --ytce-surface-raised: rgba(73, 55, 43, 0.055);
+    --ytce-surface-inset: rgba(91, 71, 57, 0.065);
+    --ytce-border: rgba(69, 51, 39, 0.14);
+    --ytce-border-strong: rgba(69, 51, 39, 0.24);
+    --ytce-text: #302821;
+    --ytce-text-soft: #574b42;
+    --ytce-muted: #817268;
+    --ytce-shadow: rgba(63, 45, 34, 0.25);
+    --ytce-warning: #a66a16;
+    --ytce-panel-glow: rgba(213, 99, 79, 0.09);
+    --ytce-accent-glow: rgba(213, 99, 79, 0.24);
+    --ytce-accent-shadow: rgba(130, 54, 43, 0.2);
+    --ytce-control-hover: rgba(73, 55, 43, 0.09);
+    --ytce-control-subtle: rgba(73, 55, 43, 0.055);
+    --ytce-section-fill: rgba(73, 55, 43, 0.025);
+    --ytce-section-hover: rgba(73, 55, 43, 0.045);
+    --ytce-track: rgba(73, 55, 43, 0.2);
+    --ytce-thumb-ring: #fffaf2;
+    --ytce-active-text: #fffaf5;
+    --ytce-knob: #fffaf2;
+    --ytce-danger-text: #a84235;
+    --ytce-danger-border: rgba(168, 66, 53, 0.22);
+    --ytce-danger-fill: rgba(213, 99, 79, 0.08);
+    --ytce-focus-surface: rgba(255, 252, 246, 0.9);
+    --ytce-reader-center: #f8f3e9;
+    --ytce-reader-glow: rgba(213, 99, 79, 0.1);
+    --ytce-chat-text: #302821;
+    --ytce-chat-border: rgba(69, 51, 39, 0.11);
+    --ytce-chat-inset: rgba(255, 255, 255, 0.38);
+    --ytce-highlight-fill: rgba(185, 120, 28, 0.17);
+    --ytce-highlight-fade: rgba(185, 120, 28, 0.035);
+    --ytce-highlight-border: rgba(166, 106, 22, 0.25);
 }
 
 #ytce-control-panel,
@@ -34,7 +134,7 @@
     width: min(680px, calc(100vw - 28px));
     color: var(--ytce-text);
     background:
-        radial-gradient(circle at 12% -8%, rgba(233, 120, 111, 0.12), transparent 32%),
+        radial-gradient(circle at 12% -8%, var(--ytce-panel-glow), transparent 32%),
         linear-gradient(155deg, rgba(255, 255, 255, 0.028), transparent 45%),
         var(--ytce-surface);
     border: 1px solid var(--ytce-border);
@@ -81,8 +181,8 @@
     height: 30px;
     flex: 0 0 auto;
     border-radius: 3px;
-    background: linear-gradient(180deg, #f09287, var(--ytce-accent-strong));
-    box-shadow: 0 0 20px rgba(233, 120, 111, 0.32);
+    background: linear-gradient(180deg, var(--ytce-accent), var(--ytce-accent-strong));
+    box-shadow: 0 0 20px var(--ytce-accent-glow);
 }
 
 .ytce-brand div {
@@ -110,7 +210,8 @@
 
 .ytce-icon-button,
 .ytce-actions button,
-.ytce-mode-switch button {
+.ytce-mode-switch button,
+.ytce-theme-switch button {
     border: 0;
     color: inherit;
     font: inherit;
@@ -131,7 +232,7 @@
 
 .ytce-icon-button:hover {
     border-color: var(--ytce-border-strong);
-    background: rgba(245, 226, 215, 0.1);
+    background: var(--ytce-control-hover);
     transform: translateY(-1px);
 }
 
@@ -164,6 +265,67 @@
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.035), 0 4px 14px rgba(0, 0, 0, 0.14) inset;
 }
 
+.ytce-theme-switch {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.ytce-theme-switch button {
+    min-height: 34px;
+    padding: 5px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid var(--ytce-border);
+    border-radius: var(--ytce-radius-control);
+    color: var(--ytce-muted);
+    background: var(--ytce-control-subtle);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    transition: border-color 180ms ease, color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.ytce-theme-switch button:hover {
+    color: var(--ytce-text);
+    border-color: var(--ytce-border-strong);
+    background: var(--ytce-control-hover);
+}
+
+.ytce-theme-switch button.is-active {
+    color: var(--ytce-text);
+    border-color: var(--ytce-accent);
+    background: var(--ytce-accent-soft);
+}
+
+.ytce-theme-switch button:active {
+    transform: translateY(1px);
+}
+
+.ytce-theme-swatch {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="ember"] .ytce-theme-swatch {
+    background: linear-gradient(135deg, #231b18 50%, #e9786f 50%);
+}
+
+[data-theme="aurora"] .ytce-theme-swatch {
+    background: linear-gradient(135deg, #071b21 50%, #49d6c8 50%);
+}
+
+[data-theme="paper"] .ytce-theme-swatch {
+    border-color: rgba(69, 51, 39, 0.25);
+    background: linear-gradient(135deg, #f6f0e6 50%, #d5634f 50%);
+}
+
 .ytce-mode-switch button {
     min-height: 39px;
     border-radius: 6px;
@@ -177,14 +339,14 @@
 
 .ytce-mode-switch button:hover {
     color: var(--ytce-text);
-    background: rgba(245, 226, 215, 0.055);
+    background: var(--ytce-control-subtle);
 }
 
 .ytce-mode-switch button.is-active {
-    color: #fff8f4;
+    color: var(--ytce-active-text);
     background: linear-gradient(180deg, var(--ytce-accent), var(--ytce-accent-strong));
     box-shadow:
-        0 7px 18px rgba(126, 42, 38, 0.27),
+        0 7px 18px var(--ytce-accent-shadow),
         0 1px 0 rgba(255, 255, 255, 0.24) inset;
 }
 
@@ -200,7 +362,7 @@
     border-radius: var(--ytce-radius-section);
     background:
         linear-gradient(115deg, rgba(255, 255, 255, 0.025), transparent 45%),
-        rgba(245, 226, 215, 0.026);
+        var(--ytce-section-fill);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.032) inset;
     transition: border-color 180ms ease, opacity 180ms ease, background 180ms ease;
 }
@@ -209,7 +371,7 @@
     border-color: var(--ytce-border-strong);
     background:
         linear-gradient(115deg, rgba(255, 255, 255, 0.034), transparent 45%),
-        rgba(245, 226, 215, 0.032);
+        var(--ytce-section-hover);
 }
 
 .ytce-section.is-muted {
@@ -268,7 +430,7 @@
     height: 4px;
     margin: 6px 0;
     border-radius: 999px;
-    background: rgba(245, 226, 215, 0.14);
+    background: var(--ytce-track);
     accent-color: var(--ytce-accent);
     cursor: pointer;
 }
@@ -276,7 +438,7 @@
 .ytce-slider-row input[type="range"]::-webkit-slider-thumb {
     width: 16px;
     height: 16px;
-    border: 3px solid #f8e9e2;
+    border: 3px solid var(--ytce-thumb-ring);
     border-radius: 50%;
     appearance: none;
     -webkit-appearance: none;
@@ -287,7 +449,7 @@
 
 .ytce-slider-row input[type="range"]:hover::-webkit-slider-thumb {
     transform: scale(1.08);
-    box-shadow: 0 2px 12px rgba(233, 120, 111, 0.3);
+    box-shadow: 0 2px 12px var(--ytce-accent-glow);
 }
 
 .ytce-field input,
@@ -327,8 +489,8 @@
 }
 .ytce-field input:focus,
 .ytce-field select:focus {
-    border-color: rgba(233, 120, 111, 0.72);
-    background: rgba(10, 8, 8, 0.52);
+    border-color: var(--ytce-accent);
+    background: var(--ytce-focus-surface);
     box-shadow: 0 0 0 3px var(--ytce-accent-soft);
 }
 
@@ -384,7 +546,7 @@
     inset: 0;
     border-radius: 999px;
     border: 1px solid var(--ytce-border);
-    background: rgba(245, 226, 215, 0.1);
+    background: var(--ytce-control-hover);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.17) inset;
     transition: border-color 180ms ease, background 180ms ease;
 }
@@ -397,13 +559,13 @@
     width: 15px;
     height: 15px;
     border-radius: 50%;
-    background: #f9eee8;
+    background: var(--ytce-knob);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
     transition: transform 180ms ease;
 }
 
 .ytce-switch input:checked + span {
-    border-color: rgba(233, 120, 111, 0.7);
+    border-color: var(--ytce-accent);
     background: linear-gradient(180deg, var(--ytce-accent), var(--ytce-accent-strong));
 }
 
@@ -422,7 +584,7 @@
     border: 1px solid var(--ytce-border);
     border-radius: var(--ytce-radius-control);
     color: var(--ytce-text-soft);
-    background: rgba(245, 226, 215, 0.055);
+    background: var(--ytce-control-subtle);
     font-size: 11px;
     font-weight: 650;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.035) inset;
@@ -432,7 +594,7 @@
 .ytce-actions button:hover {
     border-color: var(--ytce-border-strong);
     color: var(--ytce-text);
-    background: rgba(245, 226, 215, 0.1);
+    background: var(--ytce-control-hover);
     transform: translateY(-1px);
 }
 
@@ -441,9 +603,9 @@
 }
 
 .ytce-actions button.ytce-danger {
-    border-color: rgba(233, 120, 111, 0.18);
-    color: #f1aaa4;
-    background: rgba(201, 85, 80, 0.09);
+    border-color: var(--ytce-danger-border);
+    color: var(--ytce-danger-text);
+    background: var(--ytce-danger-fill);
 }
 
 #ytce-reader-stage {
@@ -456,8 +618,8 @@
     gap: 13px;
     color: var(--ytce-text);
     background:
-        radial-gradient(circle at 50% 42%, rgba(233, 120, 111, 0.11), transparent 32%),
-        radial-gradient(circle at 50% 50%, #181412, var(--ytce-canvas) 70%);
+        radial-gradient(circle at 50% 42%, var(--ytce-reader-glow), transparent 32%),
+        radial-gradient(circle at 50% 50%, var(--ytce-reader-center), var(--ytce-canvas) 70%);
     font-family: "Avenir Next", "SF Pro Display", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
     text-align: center;
 }
@@ -493,7 +655,7 @@
     height: 36px;
     border: 3px solid var(--ytce-accent);
     border-radius: 10px;
-    box-shadow: 0 0 28px rgba(233, 120, 111, 0.28);
+    box-shadow: 0 0 28px var(--ytce-accent-glow);
 }
 
 #ytce-reader-stage.is-speaking .ytce-reader-orb {
@@ -508,13 +670,17 @@ body[data-ytce-mode="reader"] yt-live-chat-item-list-renderer {
     visibility: hidden !important;
 }
 
+body.ytce-active[data-ytce-theme="paper"] {
+    background: var(--ytce-canvas) !important;
+}
+
 body.ytce-active yt-live-chat-text-message-renderer #message,
 body.ytce-active yt-live-chat-paid-message-renderer #content,
 body.ytce-active yt-live-chat-membership-item-renderer #message,
 body.ytce-active yt-live-chat-membership-item-renderer #header-subtext {
     font-size: var(--ytce-font-size) !important;
     line-height: var(--ytce-line-height) !important;
-    color: #f5efeb !important;
+    color: var(--ytce-chat-text) !important;
     letter-spacing: 0.002em !important;
     text-wrap: pretty !important;
 }
@@ -562,9 +728,9 @@ body.ytce-active yt-live-chat-sponsorships-gift-purchase-announcement-renderer,
 body.ytce-active yt-live-chat-sponsorships-gift-redemption-announcement-renderer {
     padding: calc(var(--ytce-font-size) * 0.36) 18px !important;
     margin: 0 9px 9px !important;
-    border: 1px solid rgba(245, 226, 215, 0.055) !important;
+    border: 1px solid var(--ytce-chat-border) !important;
     border-radius: 9px !important;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.022) inset !important;
+    box-shadow: 0 1px 0 var(--ytce-chat-inset) inset !important;
 }
 
 body.ytce-hide-avatars yt-live-chat-text-message-renderer #avatar,
@@ -585,8 +751,8 @@ body.ytce-hide-badges yt-live-chat-author-badge-renderer {
 
 .ytce-highlighted {
     background:
-        linear-gradient(90deg, rgba(217, 164, 93, 0.2), rgba(217, 164, 93, 0.035)) !important;
-    border-color: rgba(217, 164, 93, 0.22) !important;
+        linear-gradient(90deg, var(--ytce-highlight-fill), var(--ytce-highlight-fade)) !important;
+    border-color: var(--ytce-highlight-border) !important;
     box-shadow: 3px 0 0 var(--ytce-warning) inset !important;
 }
 
@@ -594,11 +760,11 @@ body.ytce-hide-badges yt-live-chat-author-badge-renderer {
     0%,
     100% {
         transform: scale(1);
-        box-shadow: 0 0 0 rgba(233, 120, 111, 0);
+        box-shadow: 0 0 0 transparent;
     }
     50% {
         transform: scale(1.08);
-        box-shadow: 0 0 42px rgba(233, 120, 111, 0.2);
+        box-shadow: 0 0 42px var(--ytce-accent-soft);
     }
 }
 
@@ -624,7 +790,7 @@ body.ytce-hide-badges yt-live-chat-author-badge-renderer {
         border-color: var(--ytce-border);
         background:
             linear-gradient(115deg, rgba(255, 255, 255, 0.025), transparent 45%),
-            rgba(245, 226, 215, 0.026);
+            var(--ytce-section-fill);
     }
 }
 

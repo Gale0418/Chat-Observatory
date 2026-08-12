@@ -93,6 +93,7 @@
   <script>
     const fixtureParams = new URLSearchParams(location.search);
     const fixtureMode = fixtureParams.get("mode") || "complete";
+    const fixtureTheme = fixtureParams.get("theme") || "ember";
     const fixtureCollapsed = fixtureParams.has("collapsed");
     document.getElementById("items").style.paddingTop = fixtureCollapsed ? "96px" : "560px";
 
@@ -103,6 +104,7 @@
             return {
               ...defaults,
               mode: fixtureMode,
+              theme: fixtureTheme,
               isCollapsed: fixtureCollapsed,
               ttsEnabled: true,
               ttsReadName: true,
@@ -153,6 +155,9 @@
 
       if (!document.querySelector(`[data-mode="${fixtureMode}"]`).classList.contains("is-active")) {
         document.querySelector(`[data-mode="${fixtureMode}"]`).click();
+      }
+      if (!document.querySelector(`[data-theme="${fixtureTheme}"]`).classList.contains("is-active")) {
+        document.querySelector(`[data-theme="${fixtureTheme}"]`).click();
       }
       const panelBody = document.getElementById("ytce-panel-body");
       if (panelBody.hidden !== fixtureCollapsed) {

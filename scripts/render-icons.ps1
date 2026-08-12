@@ -15,8 +15,8 @@ function Resolve-ChromeExecutable {
         $candidates.Add($RequestedPath)
     }
     else {
-        $isWindows = $env:OS -eq 'Windows_NT'
-        if ($isWindows) {
+        $runningOnWindows = $env:OS -eq 'Windows_NT'
+        if ($runningOnWindows) {
             if ($env:ProgramFiles) {
                 $chromeRoot = Join-Path (Join-Path (Join-Path $env:ProgramFiles 'Google') 'Chrome') 'Application'
                 $candidates.Add((Join-Path $chromeRoot 'chrome.exe'))

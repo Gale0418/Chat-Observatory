@@ -283,18 +283,47 @@ test("A) Settings sanitize 遇到壞資料會 fallback 預設值且 Whitelist", 
   }
 });
 
+test("A) 畫風可切換、持久保存，無效值會回落至熔岩", async () => {
+  const invalidHarness = await createHarness({ theme: "rainbow-hacker" });
+  try {
+    assert.equal(invalidHarness.document.body.dataset.ytceTheme, "ember");
+    assert.equal(
+      invalidHarness.document.querySelector('[data-theme="ember"]').getAttribute("aria-pressed"),
+      "true"
+    );
+  } finally {
+    invalidHarness.cleanup();
+  }
+
+  const harness = await createHarness({ theme: "ember" });
+  try {
+    harness.document.querySelector('[data-theme="aurora"]').click();
+    assert.equal(harness.document.body.dataset.ytceTheme, "aurora");
+    assert.equal(
+      harness.document.querySelector('[data-theme="aurora"]').getAttribute("aria-pressed"),
+      "true"
+    );
+    await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
+    assert.equal(harness.saved.at(-1).theme, "aurora");
+  } finally {
+    harness.cleanup();
+  }
+});
+
 test("A) Storage onChanged 進行 partial merge 且不造成 save loop", async () => {
   const harness = await createHarness({ ttsVolume: 50 });
   try {
     await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
     const initialSavedCount = harness.saved.length;
     harness.triggerStorageChange({
-      ttsVolume: { oldValue: 50, newValue: 80 }
+      ttsVolume: { oldValue: 50, newValue: 80 },
+      theme: { oldValue: "ember", newValue: "paper" }
     });
     await waitForMutations(harness.window);
 
     const volumeSlider = harness.document.getElementById("ytce-volume-slider");
     assert.equal(volumeSlider.value, "80");
+    assert.equal(harness.document.body.dataset.ytceTheme, "paper");
     assert.equal(harness.saved.length, initialSavedCount, "不應二次觸發 storage.set 造成 save loop");
   } finally {
     harness.cleanup();

@@ -4,6 +4,7 @@
 
   const DEFAULT_SETTINGS = Object.freeze({
     mode: "complete",
+    theme: "ember",
     fontSize: 28,
     avatarSize: 48,
     isCollapsed: false,
@@ -26,6 +27,7 @@
   });
 
   const VALID_MODES = Object.freeze(["complete", "monitor", "reader"]);
+  const VALID_THEMES = Object.freeze(["ember", "aurora", "paper"]);
 
   const RENDERER_SELECTOR = [
     "yt-live-chat-text-message-renderer",
@@ -74,6 +76,18 @@
         <button type="button" data-mode="complete">完整</button>
         <button type="button" data-mode="monitor">監看</button>
         <button type="button" data-mode="reader">朗讀</button>
+      </div>
+
+      <div class="ytce-theme-switch" role="group" aria-label="介面畫風">
+        <button type="button" data-theme="ember" aria-label="切換為熔岩畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>熔岩</span>
+        </button>
+        <button type="button" data-theme="aurora" aria-label="切換為極光畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>極光</span>
+        </button>
+        <button type="button" data-theme="paper" aria-label="切換為紙墨畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>紙墨</span>
+        </button>
       </div>
 
       <div class="ytce-section">
@@ -187,6 +201,7 @@
     statusLine: document.getElementById("ytce-status-line"),
     readerStatus: document.getElementById("ytce-reader-status"),
     modeButtons: [...panel.querySelectorAll("[data-mode]")],
+    themeButtons: [...panel.querySelectorAll("[data-theme]")],
     fontSlider: document.getElementById("ytce-font-slider"),
     fontValue: document.getElementById("ytce-font-value"),
     avatarSlider: document.getElementById("ytce-avatar-slider"),
@@ -224,6 +239,9 @@
 
     if (typeof value.mode === "string" && VALID_MODES.includes(value.mode)) {
       sanitized.mode = value.mode;
+    }
+    if (typeof value.theme === "string" && VALID_THEMES.includes(value.theme)) {
+      sanitized.theme = value.theme;
     }
 
     const boolKeys = [
@@ -640,6 +658,11 @@
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
+    ui.themeButtons.forEach((button) => {
+      const selected = button.dataset.theme === settings.theme;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
 
     ui.fontSlider.value = settings.fontSize;
     ui.fontValue.value = `${settings.fontSize}px`;
@@ -670,6 +693,7 @@
     document.body.classList.toggle("ytce-hide-avatars", settings.hideAvatars);
     document.body.classList.toggle("ytce-hide-badges", settings.hideBadges);
     document.body.dataset.ytceMode = settings.mode;
+    document.body.dataset.ytceTheme = settings.theme;
     ui.avatarRow.hidden = settings.hideAvatars;
     ui.ttsSection.classList.toggle("is-muted", settings.mode === "monitor");
 
@@ -711,6 +735,13 @@
       } else if (settings.mode === "reader") {
         updateSpeechStatus("找不到可用的本機語音");
       }
+    });
+  });
+
+  ui.themeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      settings.theme = button.dataset.theme;
+      applySettings();
     });
   });
 

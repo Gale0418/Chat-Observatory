@@ -9,7 +9,7 @@
 | YTCE-S2 | 建立完整／監看／朗讀三種模式 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S1 | 維持視覺與模式測試 | 三種模式渲染與切換正確 | 1 | execution |  |
 | YTCE-S3 | 補齊特殊訊息與巢狀節點處理 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S1 | 以真實直播確認選擇器 | DOM fixture 驗證通過 | 1 | execution, verification |  |
 | YTCE-S4 | 縮減權限並改善啟動錯誤提示 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S1 | 以一般 Chrome 確認啟動 | manifest 與 URL 案例檢查通過 | 1 | execution, verification |  |
-| YTCE-D1 | 升級直播導播控制台視覺系統 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S2 | 維持單一重點色、共同圓角與響應式回歸測試 | 1280×800、430×800、收合與閱讀模式視覺驗收通過 | 2 | design, execution, verification | 無框架、遠端字型、外部素材或新增權限 |
+| YTCE-D1 | 升級直播導播控制台視覺系統 | Subtask | YTCE-M1 | P1 | Done | Codex | YTCE-S2 | 維持主題 token、設定同步與響應式回歸測試 | 熔岩、極光、紙墨於 1280×800、430×800、收合與閱讀模式驗收通過 | 3 | design, execution, verification | 三套各維持單一重點色；無框架、遠端字型、外部素材或新增權限 |
 | YTCE-P1 | 完成商店圖示、說明與隱私文件 | Task | YTCE-E1 | P1 | In Progress | Codex | YTCE-M1 | 補支援信箱與公開隱私政策網址 | 商店必要素材清單完整 | 3 | execution, verification | 圖示、截圖與文案已完成 |
 | YTCE-H1 | 整理專案並強化發布驗證 | Task | YTCE-E1 | P1 | Done | Codex | YTCE-S1 | 維持建置與測試綠燈 | 34 項測試通過、ZIP 僅含 8 個允許檔案且 staging 與來源一致 | 2 | execution, verification | 已移除 Thumbs.db、過期 zip-check 與無引用 ui-review；保留商店素材與 HUD |
 | YTCE-H2 | 強化 URL、MV3 視窗與發布安全邊界 | Task | YTCE-E1 | P0 | Done | Codex | YTCE-H1 | 維持 URL、session 與輸出邊界回歸測試 | 背景測試涵蓋主機白名單、session、尺寸合併與 API 失敗；專案外輸出被拒絕 | 4 | execution, verification | storage.session、foreign popup、action serialization、bounds debounce／flush、symlink 防護均已驗證 |
