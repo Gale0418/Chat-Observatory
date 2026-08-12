@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YT Chat Enlarger Visual Fixture</title>
+  <link rel="stylesheet" href="../content.css">
+  <style>
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #0f0f10;
+      color: white;
+      font-family: Roboto, "Noto Sans TC", sans-serif;
+    }
+
+    #items {
+      display: block;
+      padding: 610px 12px 24px;
+    }
+
+    yt-live-chat-text-message-renderer,
+    yt-live-chat-paid-message-renderer,
+    yt-live-chat-membership-item-renderer {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: start;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    #avatar {
+      display: block;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #484b54, #23252b);
+    }
+
+    #content {
+      display: block;
+    }
+
+    #author-name,
+    #message {
+      display: block;
+    }
+
+    #author-name {
+      margin-bottom: 3px;
+      color: #aaa;
+    }
+
+    .paid {
+      background: linear-gradient(100deg, rgba(17, 140, 190, 0.55), rgba(17, 140, 190, 0.18));
+    }
+
+    .member {
+      background: linear-gradient(100deg, rgba(16, 120, 90, 0.45), rgba(16, 120, 90, 0.12));
+    }
+  </style>
+</head>
+<body>
+  <div id="items" class="yt-live-chat-item-list-renderer">
+    <yt-live-chat-text-message-renderer>
+      <span id="avatar"></span>
+      <span id="content">
+        <span id="author-name">小明</span>
+        <span id="message">主人，右邊那條路好像還有一個寶箱！</span>
+      </span>
+    </yt-live-chat-text-message-renderer>
+
+    <yt-live-chat-paid-message-renderer class="paid">
+      <span id="avatar"></span>
+      <span id="content">
+        <span id="author-name">支持者阿華</span>
+        <span id="purchase-amount">NT$150</span>
+        <span id="message">今天的直播很有趣，慢慢玩就好～</span>
+      </span>
+    </yt-live-chat-paid-message-renderer>
+
+    <yt-live-chat-membership-item-renderer class="member">
+      <span id="avatar"></span>
+      <span id="content">
+        <span id="author-name">綿羊會員</span>
+        <span id="header-subtext">加入會員滿 6 個月</span>
+        <span id="message">半年簽到！大家晚上好。</span>
+      </span>
+    </yt-live-chat-membership-item-renderer>
+  </div>
+
+  <script>
+    const fixtureParams = new URLSearchParams(location.search);
+    const fixtureMode = fixtureParams.get("mode") || "complete";
+    const fixtureCollapsed = fixtureParams.has("collapsed");
+    document.getElementById("items").style.paddingTop = fixtureCollapsed ? "96px" : "560px";
+
+    window.chrome = {
+      storage: {
+        local: {
+          get(defaults, callback) {
+            callback({
+              ...defaults,
+              mode: fixtureMode,
+              isCollapsed: fixtureCollapsed,
+              ttsEnabled: true,
+              ttsReadName: true,
+              highlightKeywords: "寶箱"
+            });
+          },
+          set() {}
+        }
+      }
+    };
+
+    window.SpeechSynthesisUtterance = class {
+      constructor(text) {
+        this.text = text;
+      }
+    };
+
+    window.speechSynthesis = {
+      getVoices() {
+        return [{
+          name: "Microsoft HsiaoChen",
+          lang: "zh-TW",
+          voiceURI: "fixture-voice",
+          localService: true
+        }];
+      },
+      addEventListener() {},
+      speak() {},
+      cancel() {}
+    };
+  </script>
+  <script src="../content.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "YT Chat Enlarger Pro",
+  "version": "3.0.0",
+  "description": "一鍵彈出 YouTube 直播聊天室，以高雅大字介面監看並在本機朗讀留言。",
+  "permissions": ["activeTab", "storage"],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "彈出聊天室控制中心",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/live_chat*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "all_frames": false
+    }
+  ]
+}

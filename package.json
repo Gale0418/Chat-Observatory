@@ -1,0 +1,17 @@
+{
+  "name": "yt-chat-enlarger",
+  "version": "3.0.0",
+  "private": true,
+  "description": "YT Chat Enlarger 的本機測試與驗證工具，不會打包進 Chrome 擴充功能。",
+  "scripts": {
+    "check": "node --check background.js && node --check content.js",
+    "test": "node --test --test-force-exit tests/*.test.js",
+    "verify": "npm run check && npm test",
+    "render:icons": "pwsh -NoLogo -NoProfile -File scripts/render-icons.ps1",
+    "render:store": "pwsh -NoLogo -NoProfile -File scripts/render-store-assets.ps1",
+    "build:extension": "pwsh -NoLogo -NoProfile -File scripts/build-extension.ps1"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
