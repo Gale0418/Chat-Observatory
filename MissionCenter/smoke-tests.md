@@ -15,3 +15,4 @@
 | 2026-08-12 | YTCE-H3 | TTS、設定與聊天室容器重連 | jsdom 模擬 speak throw／watchdog／storage reject／跨視窗監看／容器替換／無本機 voice | 佇列可恢復、壞設定不崩潰、只使用本機 voice、新容器繼續處理 | 內容與 CSS 案例全數通過；總計 34/34 tests | 通過 | automated |
 | 2026-08-12 | YTCE-H4 | 自然退出、鍵盤焦點與發布工具 | 移除 `--test-force-exit` 後 `npm run verify`；Chrome fixture Tab；失敗式截圖 staging | Node 自然退出、focus-visible 可見、截圖失敗不破壞舊素材 | 自然退出成功；焦點 2px solid；故意傳 `/usr/bin/false` 後兩張素材 SHA-256 不變 | 通過 | automated |
 | 2026-08-12 | YTCE-H5 | Chrome 真實 YouTube 直播聊天室 | 一般 Chrome 開啟 `live_chat`，檢查面板、items 與 renderer；本機 fixture 檢查新版 UI | 新版注入真實聊天室且顯示本機語音限制 | 已安裝舊版在真實直播找到 `#items` 與 73 則留言、監看靜音成功；新版 fixture 選中 zh-TW 本機 voice。Chrome 安全政策阻擋自動重載，待手動重驗新版 | 待重驗 | manual |
+| 2026-08-12 | YTCE-D1 | 導播控制台視覺、響應式與狀態回歸 | 瀏覽器載入 deterministic fixture，檢查 1280×800、430×800、收合與閱讀模式；`npm run verify` | 無水平溢出、閱讀模式隱藏原聊天室、收合狀態正確、視覺規範有自動測試 | 桌面面板 680px、窄版 414px 且無水平溢出；閱讀模式 stage 顯示並隱藏聊天室；商店 PNG 維持 1280×800；34/34 tests 通過 | 通過 | automated |

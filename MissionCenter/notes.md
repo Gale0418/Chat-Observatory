@@ -24,3 +24,9 @@
 | 所有系統語音都能算純本機 | MDN：SpeechSynthesisVoice.localService | `false` 代表遠端服務；只列明確本機 voice，沒有本機語音就不朗讀 | MDN；僅採平台契約 |
 | Observer 綁一次即可 | MDN：MutationObserver.observe/disconnect | 容器移除後需重新 discover／disconnect／observe，並批次處理新增節點 | MDN；僅採平台契約 |
 | `--test-force-exit` 是正常 teardown | Node.js CLI／test runner | force-exit 會掩蓋 event-loop 殘留；修正 fixture cleanup 後移除 | 官方文件；僅採測試契約 |
+
+## 2026-08-12 視覺升級研究
+
+| 搜尋前構想 | 參考來源 | 採納內容 | 授權狀態 |
+| --- | --- | --- | --- |
+| 原有深色控制台可再強化層次與個性 | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) 的 README、redesign skill 與 changelog | 採既有產品 scan／diagnose／fix、單一重點色、圓角層級、觸感互動、減少動態與反雜亂原則；拒絕落地頁式 AIDA／Hero／GSAP | MIT；僅採一般原則，未複製程式碼、文字或素材，無新增依賴 |

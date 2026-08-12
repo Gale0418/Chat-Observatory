@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <div id="items" class="yt-live-chat-item-list-renderer">
+  <yt-live-chat-item-list-renderer id="items" class="yt-live-chat-item-list-renderer">
     <yt-live-chat-text-message-renderer>
       <span id="avatar"></span>
       <span id="content">
@@ -88,7 +88,7 @@
         <span id="message">半年簽到！大家晚上好。</span>
       </span>
     </yt-live-chat-membership-item-renderer>
-  </div>
+  </yt-live-chat-item-list-renderer>
 
   <script>
     const fixtureParams = new URLSearchParams(location.search);
@@ -96,31 +96,36 @@
     const fixtureCollapsed = fixtureParams.has("collapsed");
     document.getElementById("items").style.paddingTop = fixtureCollapsed ? "96px" : "560px";
 
-    window.chrome = {
+    const fixtureChrome = {
       storage: {
         local: {
-          get(defaults, callback) {
-            callback({
+          async get(defaults) {
+            return {
               ...defaults,
               mode: fixtureMode,
               isCollapsed: fixtureCollapsed,
               ttsEnabled: true,
               ttsReadName: true,
               highlightKeywords: "寶箱"
-            });
+            };
           },
-          set() {}
+          async set() {}
         }
       }
     };
+    try {
+      if (!window.chrome) window.chrome = fixtureChrome;
+      else if (!window.chrome.storage) window.chrome.storage = fixtureChrome.storage;
+    } catch {
+      // 部分 Chromium 將內建物件設為唯讀；content.js 會安全回退至預設值。
+    }
 
-    window.SpeechSynthesisUtterance = class {
+    const FixtureUtterance = class {
       constructor(text) {
         this.text = text;
       }
     };
-
-    window.speechSynthesis = {
+    const fixtureSpeechSynthesis = {
       getVoices() {
         return [{
           name: "Microsoft HsiaoChen",
@@ -130,10 +135,35 @@
         }];
       },
       addEventListener() {},
+      removeEventListener() {},
       speak() {},
       cancel() {}
     };
+    if (!window.SpeechSynthesisUtterance) window.SpeechSynthesisUtterance = FixtureUtterance;
+    if (!window.speechSynthesis) window.speechSynthesis = fixtureSpeechSynthesis;
   </script>
   <script src="../content.js"></script>
+  <script>
+    // Chromium 的內建 chrome／speechSynthesis 物件可能無法被頁面覆寫；
+    // 最終以公開 UI 操作建立可重現的視覺狀態。
+    window.setTimeout(() => {
+      const keywords = document.getElementById("ytce-keywords-input");
+      keywords.value = "寶箱";
+      keywords.dispatchEvent(new Event("input", { bubbles: true }));
+
+      if (!document.querySelector(`[data-mode="${fixtureMode}"]`).classList.contains("is-active")) {
+        document.querySelector(`[data-mode="${fixtureMode}"]`).click();
+      }
+      const panelBody = document.getElementById("ytce-panel-body");
+      if (panelBody.hidden !== fixtureCollapsed) {
+        document.getElementById("ytce-collapse-button").click();
+      }
+
+      const voiceSelect = document.getElementById("ytce-voice-select");
+      voiceSelect.replaceChildren(new Option("美佳 · zh-TW", "fixture-voice"));
+      voiceSelect.value = "fixture-voice";
+      document.body.dataset.fixtureReady = "true";
+    }, 100);
+  </script>
 </body>
 </html>

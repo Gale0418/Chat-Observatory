@@ -447,6 +447,10 @@ test("F) CSS 規範檢查：無 outline:none 且包含 :focus-visible", () => {
   assert.equal(cssContent.includes("outline: none"), false, "不可使用 outline: none");
   assert.equal(cssContent.includes("outline:none"), false, "不可使用 outline:none");
   assert.ok(cssContent.includes(":focus-visible"), "必須包含 :focus-visible 焦距環設定");
+  assert.ok(cssContent.includes("--ytce-radius-shell"), "視覺圓角應由共同 token 管理");
+  assert.ok(cssContent.includes("--ytce-accent: #e9786f"), "介面應維持單一珊瑚重點色");
+  assert.ok(cssContent.includes("prefers-reduced-motion: reduce"), "必須尊重減少動態偏好");
+  assert.equal(/@import|url\(\s*["']?https?:/i.test(cssContent), false, "不得依賴遠端字型或素材");
 });
 
 test("E) Storage API 拒絕時仍可啟動並安全清理", async () => {
