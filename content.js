@@ -153,7 +153,7 @@
             </select>
           </label>
         </div>
-        <small class="ytce-voice-hint">自動模式會依文字特徵保守配對；無法判定時使用預設語音。</small>
+        <small class="ytce-voice-hint">自動模式會依語言挑選推薦人聲；沒有公開評分，仍可切到固定語音逐一試聽。</small>
 
         <div class="ytce-two-columns">
           <label class="ytce-slider-row">
@@ -478,13 +478,61 @@
     return localVoices.find((voice) => voice.voiceURI === settings.ttsVoiceURI) || null;
   }
 
+  function normalizeVoiceLang(value) {
+    return String(value || "").toLowerCase().replaceAll("_", "-");
+  }
+
+  function voiceQualityScore(voice, langTag = "") {
+    const name = String(voice?.name || "");
+    const lowerName = name.toLocaleLowerCase();
+    const voiceLang = normalizeVoiceLang(voice?.lang);
+    let score = 0;
+
+    if (voice?.default) score += 350;
+    if (/premium|enhanced|natural|neural|高品質|進階|優質/iu.test(name)) score += 300;
+    if (!/[()（）]/u.test(name)) score += 40;
+    if (/compact/iu.test(name)) score -= 240;
+    if (/eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|bahh|bells|boing|bubbles|cellos|jester|organ|trinoids|whisper|wobble|zarvox/iu.test(lowerName)) {
+      score -= 260;
+    }
+
+    const standardVoiceNames = {
+      ja: /siri|kyoko|otoya|響|京子/iu,
+      ko: /yuna|유나/iu,
+      zh: /美佳|mei[- ]?jia|meijia|sin[- ]?ji|ting[- ]?ting|tingting/iu,
+      en: /siri|samantha|serena|alex|ava|daniel|karen|moira|tessa|rishi/iu,
+      es: /siri|marisol|jorge|mónica|monica|paulina/iu,
+      fr: /amélie|amelie|jacques/iu,
+      de: /anna/iu,
+      it: /alice/iu,
+      pt: /luciana/iu,
+      ru: /milena|yuri/iu,
+      ar: /majed/iu
+    };
+    const baseLang = langTag === "cyrl" ? "ru" : String(langTag || voiceLang).split("-")[0];
+    if (standardVoiceNames[baseLang]?.test(name)) score += 220;
+
+    if (langTag === "zh" && /^zh-(tw|hant)/iu.test(voiceLang)) score += 160;
+    if (langTag && voiceLang === normalizeVoiceLang(langTag)) score += 80;
+
+    return score;
+  }
+
+  function pickRecommendedVoice(voices, langTag = "") {
+    if (!Array.isArray(voices) || voices.length === 0) return null;
+    return [...voices].sort((left, right) => {
+      const scoreDifference = voiceQualityScore(right, langTag) - voiceQualityScore(left, langTag);
+      if (scoreDifference !== 0) return scoreDifference;
+      return String(left.name || "").localeCompare(String(right.name || ""));
+    })[0] || null;
+  }
+
   function getFallbackVoice(localVoices = getLocalVoices()) {
     const selectedVoice = localVoices.find((voice) => voice.voiceURI === settings.ttsVoiceURI);
     return selectedVoice ||
-      localVoices.find((voice) => /^zh-(TW|Hant)/i.test(voice.lang)) ||
-      localVoices.find((voice) => /^zh/i.test(voice.lang)) ||
-      localVoices.find((voice) => voice.default) ||
-      localVoices[0] || null;
+      pickRecommendedVoice(localVoices.filter((voice) => /^zh-(TW|Hant)/i.test(voice.lang)), "zh") ||
+      pickRecommendedVoice(localVoices.filter((voice) => /^zh/i.test(voice.lang)), "zh") ||
+      pickRecommendedVoice(localVoices) || null;
   }
 
   function getUsableVoice(localVoices = getLocalVoices()) {
@@ -619,45 +667,8 @@
 
   function findLocalVoiceForLang(localVoices, langTag) {
     if (!Array.isArray(localVoices) || localVoices.length === 0) return null;
-
-    if (langTag === "zh") {
-      return (
-        localVoices.find((v) => /^zh-(TW|Hant)/i.test(v.lang)) ||
-        localVoices.find((v) => /^zh/i.test(v.lang)) ||
-        null
-      );
-    }
-    if (langTag === "ja") {
-      return localVoices.find((v) => /^ja/i.test(v.lang)) || null;
-    }
-    if (langTag === "ko") {
-      return localVoices.find((v) => /^ko/i.test(v.lang)) || null;
-    }
-    if (langTag === "en") {
-      return localVoices.find((v) => /^en/i.test(v.lang)) || null;
-    }
-    if (langTag === "ar") {
-      return localVoices.find((v) => /^ar/i.test(v.lang)) || null;
-    }
-    if (langTag === "he") {
-      return localVoices.find((v) => /^he/i.test(v.lang)) || null;
-    }
-    if (langTag === "el") {
-      return localVoices.find((v) => /^el/i.test(v.lang)) || null;
-    }
-    if (langTag === "th") {
-      return localVoices.find((v) => /^th/i.test(v.lang)) || null;
-    }
-    if (langTag === "deva") {
-      return localVoices.find((v) => /^(hi|mr|ne)/i.test(v.lang)) || null;
-    }
-    if (langTag === "cyrl") {
-      return localVoices.find((v) => /^(ru|uk|bg|be|sr|mk|ky)/i.test(v.lang)) || null;
-    }
-    return localVoices.find((v) => {
-      const voiceLang = String(v.lang || "").toLowerCase().replace("_", "-");
-      return voiceLang === langTag || voiceLang.startsWith(`${langTag}-`);
-    }) || null;
+    const matchingVoices = localVoices.filter((voice) => isVoiceMatchLang(voice, langTag));
+    return pickRecommendedVoice(matchingVoices, langTag);
   }
 
   function resolveVoiceForText(text, currentSettings, localVoices) {
@@ -895,10 +906,28 @@
     const currentValue = settings.ttsVoiceURI;
     ui.voiceSelect.replaceChildren();
 
+    const recommendedUris = new Set();
+    const languageGroups = new Map();
+    localVoices.forEach((voice) => {
+      const baseLang = normalizeVoiceLang(voice.lang).split("-")[0] || "und";
+      if (!languageGroups.has(baseLang)) languageGroups.set(baseLang, []);
+      languageGroups.get(baseLang).push(voice);
+    });
+    languageGroups.forEach((voices, baseLang) => {
+      const recommended = pickRecommendedVoice(voices, baseLang);
+      if (recommended) recommendedUris.add(recommended.voiceURI);
+    });
+
     localVoices
-      .sort((left, right) => left.lang.localeCompare(right.lang) || left.name.localeCompare(right.name))
+      .sort((left, right) => {
+        const languageDifference = normalizeVoiceLang(left.lang).localeCompare(normalizeVoiceLang(right.lang));
+        if (languageDifference !== 0) return languageDifference;
+        const recommendationDifference = Number(recommendedUris.has(right.voiceURI)) - Number(recommendedUris.has(left.voiceURI));
+        return recommendationDifference || left.name.localeCompare(right.name);
+      })
       .forEach((voice) => {
-        const label = `${voice.name} · ${voice.lang}`;
+        const recommendation = recommendedUris.has(voice.voiceURI) ? " · 推薦" : "";
+        const label = `${voice.name} · ${voice.lang}${recommendation}`;
         ui.voiceSelect.add(new Option(label, voice.voiceURI));
       });
 

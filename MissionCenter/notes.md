@@ -43,3 +43,4 @@
 | --- | --- | --- | --- |
 | 只設定 `utterance.lang` 即可讓 Chrome 自動挑本機 voice | MDN `SpeechSynthesisVoice.lang`／`localService`、`SpeechSynthesisUtterance.lang`、`voiceschanged`；W3C Web Speech API | 指定 voice 後瀏覽器必須使用該 voice；未指定 voice 的預設服務可能是遠端。因此自行從 `localService=true` 清單配對 voice，並在 `speak()` 前同步設定 `voice` 與 BCP 47 `lang` | 官方／一手規格；僅採 API 契約 |
 | Web Speech API 能精準偵測聊天室文字語言 | W3C Web Speech API synthesis 介面 | 合成 API 沒有文字語言偵測功能；採無依賴 script 統計與有限常用詞提示，UI 明示「保守配對」，混合或低信心時退回預設 voice | 官方／一手規格；未加入模型、網路服務或第三方程式碼 |
+| 每個 voice 都有可直接比較的公開評分 | Reddit LearnJapanese、AppleVis、Anki Forums 與 Apple 使用者討論；Chrome `tts.TtsVoice` 契約 | API 沒有 rating；採 Premium／Enhanced／Natural／Siri、系統預設與社群常見人聲加分，對 novelty／角色聲降權。日文優先 Siri／Kyoko／Otoya，韓文 Yuna，繁中 Mei-Jia，阿拉伯 Majed；其他語言證據不足時尊重系統預設 | 社群經驗僅作排序提示；未複製程式碼，未宣稱客觀音質排名 |

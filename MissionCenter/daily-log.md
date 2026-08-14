@@ -6,6 +6,7 @@
 - 修復 INC-001：控制面板不再插入 YouTube #items，改為 BODY fixed 並以 ResizeObserver 同步聊天區 offset；補留言順序測試與真實內部 scroller fixture，Chrome 兩尺寸捲動驗收重疊 0px，37/37 tests 與 ZIP 通過。
 - 修復 TTS 開啟意圖被延遲 voice 覆寫：等待語音時保留開關並顯示明確狀態，voiceschanged 後自動續讀；新增 12 則批次留言 1→12 順序朗讀測試，全套 38/38 通過。
 - 新增純本機多語 voice 路由：可切換自動保守配對／固定聲音，依原始留言選 voice 且維持單一 FIFO；Chrome 實機確認 180+ 本機 voice、自動與固定狀態、四主題零溢位，46/46 tests 與 ZIP 通過。
+- 依社群聽感強化每語言推薦排序：Premium／Enhanced／Natural／Siri、系統預設與常見標準人聲加分，角色／搞怪 voice 降權；日文確定由 Eddy／Flo 改選 Kyoko，47/47 tests 與 ZIP 通過。
 
 ## 2026-08-14
 - MissionCenter 已遷移至最新任務模式：去除重複驗收任務、補齊工作集與重大教訓層，並重新產生摘要與 HUD。 已記錄冒煙測試: 17.

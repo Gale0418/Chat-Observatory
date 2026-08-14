@@ -619,6 +619,30 @@ test("自動模式不會在 voiceschanged 時偷偷覆寫預設語音設定", as
   }
 });
 
+test("自動模式依社群品質訊號避開日文角色聲並推薦 Kyoko", async () => {
+  const harness = await createHarness({ ttsEnabled: true, ttsVoiceMode: "auto" });
+  try {
+    harness.setVoices([
+      { name: "Eddy (日文（日本）)", lang: "ja-JP", voiceURI: "voice-ja-eddy", localService: true },
+      { name: "Flo (日文（日本）)", lang: "ja-JP", voiceURI: "voice-ja-flo", localService: true },
+      { name: "Kyoko", lang: "ja-JP", voiceURI: "voice-ja-kyoko", localService: true },
+      { name: "Remote Google 日本語", lang: "ja-JP", voiceURI: "voice-ja-google", localService: false }
+    ]);
+    harness.triggerVoicesChanged();
+
+    harness.items.append(createTextMessage(harness.document, "User", "こんにちは、今日もよろしくお願いします"));
+    await waitForMutations(harness.window);
+
+    assert.equal(harness.spoken.at(-1).voice.voiceURI, "voice-ja-kyoko");
+    const labels = [...harness.document.getElementById("ytce-voice-select").options]
+      .map((option) => option.textContent);
+    assert.ok(labels.some((label) => /Kyoko.+推薦/.test(label)));
+    assert.equal(labels.some((label) => /Remote Google/.test(label)), false, "遠端 voice 不得混入純本機推薦");
+  } finally {
+    harness.cleanup();
+  }
+});
+
 test("自動模式下依語言挑選本機 voice，且多語留言仍維持 FIFO", async () => {
   const harness = await createHarness({ ttsEnabled: true, ttsVoiceMode: "auto" });
   try {
