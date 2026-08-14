@@ -12,6 +12,7 @@
     ttsVolume: 65,
     ttsRate: 1.05,
     ttsPitch: 1,
+    ttsVoiceMode: "auto",
     ttsVoiceURI: "",
     ttsReadName: false,
     ttsReadTime: false,
@@ -28,6 +29,7 @@
 
   const VALID_MODES = Object.freeze(["complete", "monitor", "reader"]);
   const VALID_THEMES = Object.freeze(["ember", "aurora", "paper", "starlight"]);
+  const VALID_VOICE_MODES = Object.freeze(["auto", "fixed"]);
 
   const RENDERER_SELECTOR = [
     "yt-live-chat-text-message-renderer",
@@ -50,6 +52,7 @@
 
   let documentObserver = null;
   let messageObserver = null;
+  let panelResizeObserver = null;
   let currentItemsContainer = null;
   const pendingNodes = new Set();
   let microtaskScheduled = false;
@@ -63,11 +66,11 @@
         <span class="ytce-brand-mark" aria-hidden="true"></span>
         <div>
           <strong>YT Chat Enlarger</strong>
-          <span id="ytce-status-line">準備就緒</span>
+          <span id="ytce-status-line" aria-live="polite">準備就緒</span>
         </div>
       </div>
       <button class="ytce-icon-button" id="ytce-collapse-button" type="button" aria-label="收合控制面板" aria-expanded="true">
-        <span aria-hidden="true">⌃</span>
+        <span aria-hidden="true"></span>
       </button>
     </header>
 
@@ -135,12 +138,22 @@
           </label>
         </div>
 
-        <label class="ytce-field">
-          <span>聲音 <small class="ytce-privacy-tip">（僅列出本機語音）</small></span>
-          <select id="ytce-voice-select">
-            <option value="">正在尋找本機語音…</option>
-          </select>
-        </label>
+        <div class="ytce-two-columns">
+          <label class="ytce-field">
+            <span>語音模式</span>
+            <select id="ytce-voice-mode-select">
+              <option value="auto">自動配對語言</option>
+              <option value="fixed">固定選定語音</option>
+            </select>
+          </label>
+          <label class="ytce-field">
+            <span>預設／固定語音 <small class="ytce-privacy-tip">（僅本機）</small></span>
+            <select id="ytce-voice-select">
+              <option value="">正在尋找本機語音…</option>
+            </select>
+          </label>
+        </div>
+        <small class="ytce-voice-hint">自動模式會依文字特徵保守配對；無法判定時使用預設語音。</small>
 
         <div class="ytce-two-columns">
           <label class="ytce-slider-row">
@@ -197,6 +210,7 @@
   document.body.prepend(readerStage);
   document.body.prepend(panel);
   document.body.classList.add("ytce-active");
+  document.documentElement.classList.add("ytce-active");
 
   const ui = {
     body: document.getElementById("ytce-panel-body"),
@@ -215,6 +229,7 @@
     keywords: document.getElementById("ytce-keywords-input"),
     ttsSection: document.getElementById("ytce-tts-section"),
     ttsToggle: document.getElementById("ytce-tts-toggle"),
+    voiceModeSelect: document.getElementById("ytce-voice-mode-select"),
     voiceSelect: document.getElementById("ytce-voice-select"),
     rateSlider: document.getElementById("ytce-rate-slider"),
     rateValue: document.getElementById("ytce-rate-value"),
@@ -229,6 +244,21 @@
     skipSpeech: document.getElementById("ytce-skip-speech"),
     clearSpeech: document.getElementById("ytce-clear-speech")
   };
+
+  function syncPanelOffset() {
+    const panelHeight = Math.ceil(panel.getBoundingClientRect().height);
+    document.documentElement.style.setProperty(
+      "--ytce-panel-offset",
+      `${Math.max(84, panelHeight + 16)}px`
+    );
+  }
+
+  syncPanelOffset();
+  if (typeof ResizeObserver === "function") {
+    panelResizeObserver = new ResizeObserver(syncPanelOffset);
+    panelResizeObserver.observe(panel);
+  }
+  window.addEventListener("resize", syncPanelOffset);
 
   function clampNumber(value, min, max, fallback) {
     if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
@@ -264,8 +294,11 @@
       }
     });
 
+    if (typeof value.ttsVoiceMode === "string" && VALID_VOICE_MODES.includes(value.ttsVoiceMode)) {
+      sanitized.ttsVoiceMode = value.ttsVoiceMode;
+    }
     if (typeof value.ttsVoiceURI === "string") {
-      sanitized.ttsVoiceURI = value.ttsVoiceURI;
+      sanitized.ttsVoiceURI = value.ttsVoiceURI.slice(0, 512);
     }
     if (typeof value.highlightKeywords === "string") {
       sanitized.highlightKeywords = value.highlightKeywords;
@@ -445,9 +478,245 @@
     return localVoices.find((voice) => voice.voiceURI === settings.ttsVoiceURI) || null;
   }
 
+  function getFallbackVoice(localVoices = getLocalVoices()) {
+    const selectedVoice = localVoices.find((voice) => voice.voiceURI === settings.ttsVoiceURI);
+    return selectedVoice ||
+      localVoices.find((voice) => /^zh-(TW|Hant)/i.test(voice.lang)) ||
+      localVoices.find((voice) => /^zh/i.test(voice.lang)) ||
+      localVoices.find((voice) => voice.default) ||
+      localVoices[0] || null;
+  }
+
+  function getUsableVoice(localVoices = getLocalVoices()) {
+    return settings.ttsVoiceMode === "fixed"
+      ? getSelectedVoice()
+      : getFallbackVoice(localVoices);
+  }
+
+  function detectLanguageTag(text) {
+    if (!text || typeof text !== "string") return null;
+
+    const clean = text
+      .replace(/https?:\/\/\S+|www\.\S+/giu, "")
+      .replace(/[\s\d\p{P}\p{S}\p{Extended_Pictographic}]/gu, "");
+    if (clean.length === 0) return null;
+
+    const kanaMatches = clean.match(/[\p{Script=Hiragana}\p{Script=Katakana}]/gu);
+    const kanaCount = kanaMatches ? kanaMatches.length : 0;
+
+    const hangulMatches = clean.match(/\p{Script=Hangul}/gu);
+    const hangulCount = hangulMatches ? hangulMatches.length : 0;
+
+    const hanMatches = clean.match(/\p{Script=Han}/gu);
+    const hanCount = hanMatches ? hanMatches.length : 0;
+
+    const arabicMatches = clean.match(/\p{Script=Arabic}/gu);
+    const arabicCount = arabicMatches ? arabicMatches.length : 0;
+
+    const hebrewMatches = clean.match(/\p{Script=Hebrew}/gu);
+    const hebrewCount = hebrewMatches ? hebrewMatches.length : 0;
+
+    const greekMatches = clean.match(/\p{Script=Greek}/gu);
+    const greekCount = greekMatches ? greekMatches.length : 0;
+
+    const thaiMatches = clean.match(/\p{Script=Thai}/gu);
+    const thaiCount = thaiMatches ? thaiMatches.length : 0;
+
+    const devanagariMatches = clean.match(/\p{Script=Devanagari}/gu);
+    const devanagariCount = devanagariMatches ? devanagariMatches.length : 0;
+
+    const cyrillicMatches = clean.match(/\p{Script=Cyrillic}/gu);
+    const cyrillicCount = cyrillicMatches ? cyrillicMatches.length : 0;
+
+    const latinMatches = clean.match(/\p{Script=Latin}/gu);
+    const latinCount = latinMatches ? latinMatches.length : 0;
+
+    if (kanaCount > 0) return "ja";
+
+    if (latinCount > 0) {
+      const lowerText = text.toLocaleLowerCase();
+      const tokens = lowerText.match(/\p{Script=Latin}+/gu) || [];
+      const hints = {
+        es: ["hola", "gracias", "buenas", "amigo", "amiga", "para", "porque", "como", "usted"],
+        fr: ["bonjour", "merci", "salut", "avec", "pour", "vous", "nous", "très", "être"],
+        de: ["hallo", "danke", "bitte", "nicht", "guten", "ich", "du", "und", "für"],
+        pt: ["olá", "obrigado", "obrigada", "você", "vocês", "não", "para", "bom", "boa"],
+        it: ["ciao", "grazie", "buongiorno", "buonasera", "per", "che", "non", "come"],
+        id: ["halo", "terima", "kasih", "yang", "untuk", "tidak", "apa", "dan"],
+        tr: ["merhaba", "teşekkür", "için", "değil", "nasıl", "bir", "ve"],
+        vi: ["xin", "chào", "cảm", "ơn", "không", "bạn", "và", "cho"]
+      };
+      const distinctivePatterns = [
+        ["vi", /[ăâđêôơưàảãạằắẳẵặầấẩẫậèẻẽẹềếểễệìỉĩịòỏõọồốổỗộờớởỡợùủũụừứửữựỳỷỹỵ]/iu],
+        ["tr", /[ğış]/iu],
+        ["pt", /[ãõ]/iu],
+        ["de", /ß/u],
+        ["es", /[¿¡ñ]/iu],
+        ["fr", /[œç]/iu]
+      ];
+      const distinctive = distinctivePatterns.find(([, pattern]) => pattern.test(lowerText));
+      if (distinctive) return distinctive[0];
+
+      const scored = Object.entries(hints)
+        .map(([tag, words]) => ({ tag, count: tokens.filter((token) => words.includes(token)).length }))
+        .sort((left, right) => right.count - left.count);
+      if (scored[0]?.count >= 2 && scored[0].count > (scored[1]?.count || 0)) return scored[0].tag;
+      if (tokens.length === 1) {
+        const greeting = scored.find(({ count }) => count === 1);
+        if (greeting) return greeting.tag;
+      }
+    }
+
+    const counts = [
+      { tag: "ko", count: hangulCount },
+      { tag: "zh", count: hanCount },
+      { tag: "ar", count: arabicCount },
+      { tag: "he", count: hebrewCount },
+      { tag: "el", count: greekCount },
+      { tag: "th", count: thaiCount },
+      { tag: "deva", count: devanagariCount },
+      { tag: "cyrl", count: cyrillicCount },
+      { tag: "en", count: latinCount }
+    ];
+
+    counts.sort((a, b) => b.count - a.count);
+
+    const top = counts[0];
+    const runnerUp = counts[1];
+    if (!top || top.count === 0) return null;
+    if (runnerUp && runnerUp.count > 0 && top.count / runnerUp.count < 1.5) return null;
+    return top.tag;
+  }
+
+  function isVoiceMatchLang(voice, langTag) {
+    if (!voice || !voice.lang) return false;
+    const vlang = voice.lang.toLowerCase();
+    switch (langTag) {
+      case "zh":
+        return vlang.startsWith("zh");
+      case "ja":
+        return vlang.startsWith("ja");
+      case "ko":
+        return vlang.startsWith("ko");
+      case "en":
+        return vlang.startsWith("en");
+      case "ar":
+        return vlang.startsWith("ar");
+      case "he":
+        return vlang.startsWith("he");
+      case "el":
+        return vlang.startsWith("el");
+      case "th":
+        return vlang.startsWith("th");
+      case "deva":
+        return /^(hi|mr|ne)/i.test(vlang);
+      case "cyrl":
+        return /^(ru|uk|bg|be|sr|mk|ky)/i.test(vlang);
+      default:
+        return vlang === langTag || vlang.startsWith(`${langTag}-`);
+    }
+  }
+
+  function findLocalVoiceForLang(localVoices, langTag) {
+    if (!Array.isArray(localVoices) || localVoices.length === 0) return null;
+
+    if (langTag === "zh") {
+      return (
+        localVoices.find((v) => /^zh-(TW|Hant)/i.test(v.lang)) ||
+        localVoices.find((v) => /^zh/i.test(v.lang)) ||
+        null
+      );
+    }
+    if (langTag === "ja") {
+      return localVoices.find((v) => /^ja/i.test(v.lang)) || null;
+    }
+    if (langTag === "ko") {
+      return localVoices.find((v) => /^ko/i.test(v.lang)) || null;
+    }
+    if (langTag === "en") {
+      return localVoices.find((v) => /^en/i.test(v.lang)) || null;
+    }
+    if (langTag === "ar") {
+      return localVoices.find((v) => /^ar/i.test(v.lang)) || null;
+    }
+    if (langTag === "he") {
+      return localVoices.find((v) => /^he/i.test(v.lang)) || null;
+    }
+    if (langTag === "el") {
+      return localVoices.find((v) => /^el/i.test(v.lang)) || null;
+    }
+    if (langTag === "th") {
+      return localVoices.find((v) => /^th/i.test(v.lang)) || null;
+    }
+    if (langTag === "deva") {
+      return localVoices.find((v) => /^(hi|mr|ne)/i.test(v.lang)) || null;
+    }
+    if (langTag === "cyrl") {
+      return localVoices.find((v) => /^(ru|uk|bg|be|sr|mk|ky)/i.test(v.lang)) || null;
+    }
+    return localVoices.find((v) => {
+      const voiceLang = String(v.lang || "").toLowerCase().replace("_", "-");
+      return voiceLang === langTag || voiceLang.startsWith(`${langTag}-`);
+    }) || null;
+  }
+
+  function resolveVoiceForText(text, currentSettings, localVoices) {
+    const selectedVoice = getSelectedVoice();
+    const fallbackVoice = getFallbackVoice(localVoices);
+    if (currentSettings.ttsVoiceMode !== "auto") {
+      return selectedVoice;
+    }
+
+    const langTag = detectLanguageTag(text);
+    if (!langTag) {
+      return fallbackVoice;
+    }
+
+    if (selectedVoice && isVoiceMatchLang(selectedVoice, langTag)) {
+      return selectedVoice;
+    }
+
+    const matched = findLocalVoiceForLang(localVoices, langTag);
+    return matched || fallbackVoice;
+  }
+
+  function getVoicePreviewText(voice) {
+    const lang = String(voice?.lang || "").toLowerCase().split("-")[0];
+    const samples = {
+      ar: "مرحبًا، القراءة الصوتية جاهزة.",
+      de: "Hallo, die Sprachausgabe ist bereit.",
+      en: "Hello, voice reading is ready.",
+      es: "Hola, la lectura por voz está lista.",
+      fr: "Bonjour, la lecture vocale est prête.",
+      he: "שלום, ההקראה הקולית מוכנה.",
+      hi: "नमस्ते, वॉइस रीडिंग तैयार है।",
+      it: "Ciao, la lettura vocale è pronta.",
+      ja: "こんにちは。音声読み上げの準備ができました。",
+      ko: "안녕하세요. 음성 읽기가 준비되었습니다.",
+      pt: "Olá, a leitura por voz está pronta.",
+      ru: "Здравствуйте, голосовое чтение готово.",
+      th: "สวัสดี ระบบอ่านออกเสียงพร้อมแล้ว",
+      tr: "Merhaba, sesli okuma hazır.",
+      vi: "Xin chào, tính năng đọc bằng giọng nói đã sẵn sàng.",
+      zh: "語音朗讀已開啟。"
+    };
+    return samples[lang] || "Voice reading is ready.";
+  }
+
   function updateSpeechStatus(message = "") {
     const queueText = ttsQueue.length ? ` · 等待 ${ttsQueue.length} 則` : "";
-    const state = shouldSpeak() ? (activeUtterance ? "朗讀中" : "語音已開啟") : "語音已暫停";
+    let state = "語音未開啟";
+    if (settings.ttsEnabled && settings.mode === "monitor") {
+      state = "監看模式 · 語音暫停";
+    } else if (shouldSpeak() && activeUtterance) {
+      state = "朗讀中";
+    } else if (shouldSpeak() && !getUsableVoice()) {
+      state = settings.ttsVoiceMode === "fixed"
+        ? "固定語音不可用 · 請重新選擇"
+        : "自動配對 · 等待本機語音";
+    } else if (shouldSpeak()) {
+      state = settings.ttsVoiceMode === "auto" ? "自動配對 · 語音已開啟" : "固定語音 · 已開啟";
+    }
     ui.statusLine.textContent = message || `${state}${queueText}`;
     ui.readerStatus.textContent = message || (activeUtterance ? "正在朗讀留言" : "等待新留言");
     readerStage.classList.toggle("is-speaking", Boolean(activeUtterance));
@@ -508,9 +777,12 @@
     const staleBefore = Date.now() - settings.staleAfterSeconds * 1000;
     while (ttsQueue.length && ttsQueue[0].queuedAt < staleBefore) ttsQueue.shift();
 
-    const selectedVoice = getSelectedVoice();
-    if (!selectedVoice) {
-      updateSpeechStatus("找不到可用的本機語音");
+    const localVoices = getLocalVoices();
+    const usableVoice = getUsableVoice(localVoices);
+    if (!usableVoice) {
+      updateSpeechStatus(settings.ttsVoiceMode === "fixed"
+        ? "固定語音不可用 · 請重新選擇"
+        : "自動配對 · 等待本機語音");
       return;
     }
 
@@ -521,8 +793,10 @@
     }
 
     const utterance = new SpeechSynthesisUtterance(next.text);
-    utterance.voice = selectedVoice;
-    utterance.lang = selectedVoice.lang;
+    const voiceToUse = resolveVoiceForText(next.languageText, settings, localVoices) || usableVoice;
+
+    utterance.voice = voiceToUse;
+    utterance.lang = voiceToUse.lang;
 
     utterance.volume = settings.ttsVolume / 100;
     utterance.rate = settings.ttsRate;
@@ -554,7 +828,7 @@
     const text = `${prefix}${timeText}${nameText}${message}`;
 
     while (ttsQueue.length >= settings.queueLimit) ttsQueue.shift();
-    ttsQueue.push({ text, queuedAt: Date.now() });
+    ttsQueue.push({ text, languageText: rawMessage, queuedAt: Date.now() });
     updateSpeechStatus();
     speakNext();
   }
@@ -629,27 +903,22 @@
       });
 
     const currentVoice = localVoices.find((voice) => voice.voiceURI === currentValue);
-    const preferredVoice = currentVoice ||
-      localVoices.find((voice) => /^zh-(TW|Hant)/i.test(voice.lang)) ||
-      localVoices.find((voice) => /^zh/i.test(voice.lang)) ||
-      localVoices[0] || null;
+    const preferredVoice = currentVoice || getFallbackVoice(localVoices);
 
-    if (preferredVoice) {
+    if (settings.ttsVoiceMode === "fixed" && settings.ttsVoiceURI && !currentVoice) {
+      const missing = new Option("原本的固定語音已不可用，請重新選擇", "");
+      missing.disabled = true;
+      ui.voiceSelect.add(missing, 0);
+      ui.voiceSelect.disabled = false;
+      ui.voiceSelect.value = "";
+    } else if (preferredVoice) {
       ui.voiceSelect.disabled = false;
       ui.voiceSelect.value = preferredVoice.voiceURI;
-      if (settings.ttsVoiceURI !== preferredVoice.voiceURI) {
-        settings.ttsVoiceURI = preferredVoice.voiceURI;
-        scheduleSave();
-      }
     } else {
       const unavailable = new Option("找不到明確標示為本機的語音", "");
       unavailable.disabled = true;
       ui.voiceSelect.add(unavailable);
       ui.voiceSelect.disabled = true;
-      if (settings.ttsVoiceURI !== "") {
-        settings.ttsVoiceURI = "";
-        scheduleSave();
-      }
     }
 
     if (shouldSpeak() && !activeUtterance) speakNext();
@@ -675,7 +944,14 @@
     ui.hideBadges.checked = settings.hideBadges;
     ui.keywords.value = settings.highlightKeywords;
     ui.ttsToggle.checked = settings.ttsEnabled;
-    ui.voiceSelect.value = settings.ttsVoiceURI;
+    ui.voiceModeSelect.value = settings.ttsVoiceMode;
+    const savedVoiceIsVisible = [...ui.voiceSelect.options]
+      .some((option) => option.value === settings.ttsVoiceURI && option.value !== "");
+    if (savedVoiceIsVisible) {
+      ui.voiceSelect.value = settings.ttsVoiceURI;
+    } else if (settings.ttsVoiceMode === "fixed") {
+      ui.voiceSelect.value = "";
+    }
     ui.rateSlider.value = settings.ttsRate;
     ui.rateValue.value = `${Number(settings.ttsRate).toFixed(2)}×`;
     ui.volumeSlider.value = settings.ttsVolume;
@@ -697,6 +973,8 @@
     document.body.classList.toggle("ytce-hide-badges", settings.hideBadges);
     document.body.dataset.ytceMode = settings.mode;
     document.body.dataset.ytceTheme = settings.theme;
+    document.documentElement.dataset.ytceMode = settings.mode;
+    document.documentElement.dataset.ytceTheme = settings.theme;
     ui.avatarRow.hidden = settings.hideAvatars;
     ui.ttsSection.classList.toggle("is-muted", settings.mode === "monitor");
 
@@ -706,11 +984,10 @@
       "aria-label",
       settings.isCollapsed ? "展開控制面板" : "收合控制面板"
     );
-    ui.collapseButton.firstElementChild.textContent = settings.isCollapsed ? "⌄" : "⌃";
-
     refreshKeywords();
     syncControls();
     updateSpeechStatus();
+    syncPanelOffset();
     if (save) scheduleSave();
   }
 
@@ -730,7 +1007,7 @@
   ui.modeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       settings.mode = button.dataset.mode;
-      if (settings.mode === "reader") settings.ttsEnabled = Boolean(getSelectedVoice());
+      if (settings.mode === "reader") settings.ttsEnabled = Boolean(getUsableVoice());
       if (settings.mode === "monitor") stopSpeech({ clearQueue: true });
       applySettings();
       if (shouldSpeak()) {
@@ -780,14 +1057,13 @@
     if (!settings.ttsEnabled) {
       stopSpeech({ clearQueue: true });
     } else {
-      const voice = getSelectedVoice();
+      const voice = getUsableVoice();
       if (!voice) {
-        settings.ttsEnabled = false;
         applySettings();
-        updateSpeechStatus("找不到可用的本機語音");
+        updateSpeechStatus("正在等待本機語音");
         return;
       }
-      const confirmation = new SpeechSynthesisUtterance("語音朗讀已開啟");
+      const confirmation = new SpeechSynthesisUtterance(getVoicePreviewText(voice));
       confirmation.voice = voice;
       confirmation.lang = voice.lang;
       confirmation.volume = settings.ttsVolume / 100;
@@ -797,19 +1073,32 @@
     applySettings();
   });
 
+  ui.voiceModeSelect.addEventListener("change", () => {
+    settings.ttsVoiceMode = ui.voiceModeSelect.value;
+    if (settings.ttsVoiceMode === "fixed" && !getSelectedVoice()) {
+      const visibleVoice = getLocalVoices().find((voice) => voice.voiceURI === ui.voiceSelect.value);
+      if (visibleVoice) settings.ttsVoiceURI = visibleVoice.voiceURI;
+    }
+    applySettings();
+    populateVoices();
+    if (shouldSpeak()) speakNext();
+  });
+
   ui.voiceSelect.addEventListener("change", () => {
     settings.ttsVoiceURI = ui.voiceSelect.value;
     applySettings();
   });
 
   ui.testVoice.addEventListener("click", () => {
-    const voice = getSelectedVoice();
+    const localVoices = getLocalVoices();
+    const voice = localVoices.find((candidate) => candidate.voiceURI === ui.voiceSelect.value) ||
+      getUsableVoice(localVoices);
     if (!voice) {
       updateSpeechStatus("找不到可用的本機語音");
       return;
     }
     stopSpeech({ clearQueue: false, continueQueue: false });
-    const test = new SpeechSynthesisUtterance("歡迎使用 YT Chat Enlarger，這是目前的語音效果。");
+    const test = new SpeechSynthesisUtterance(getVoicePreviewText(voice));
     test.voice = voice;
     test.lang = voice.lang;
     test.volume = settings.ttsVolume / 100;
@@ -895,6 +1184,10 @@
       messageObserver.disconnect();
       messageObserver = null;
     }
+    if (panelResizeObserver) {
+      panelResizeObserver.disconnect();
+      panelResizeObserver = null;
+    }
     currentItemsContainer = null;
 
     if (window.chrome?.storage?.onChanged?.removeListener) {
@@ -904,6 +1197,7 @@
     }
 
     window.speechSynthesis?.removeEventListener("voiceschanged", populateVoices);
+    window.removeEventListener("resize", syncPanelOffset);
     window.removeEventListener("pagehide", cleanup);
     window.removeEventListener("unload", cleanup);
 

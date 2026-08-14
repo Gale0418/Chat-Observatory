@@ -1,30 +1,24 @@
 <!-- Generated materialized view. Do not edit directly; rebuild from canonical MissionCenter files. -->
-<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=79ea56f1498dcf96655d5ce5884180b07cb3a3e15dabadd33cdbc8df8b916914 -->
+<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=826a0de9645e2489b8e03093692829ccdc080bb4725f241d088ff5d93b0a6af3 -->
 # 任務簡報
 
-- Last organized: 2026-08-12
-- Source fingerprint: `79ea56f1498dcf96655d5ce5884180b07cb3a3e15dabadd33cdbc8df8b916914`
-- Source of truth: `tasks.md`
+- 最後整理: 2026-08-15
+- 來源指紋: `826a0de9645e2489b8e03093692829ccdc080bb4725f241d088ff5d93b0a6af3`
+- 唯一真實來源: `tasks.md`
 - 專案: YT Chat Enlarger 上架版
 - 北極星: 維護純本機第二電腦大字監看與 TTS 擴充功能，並保持發布產物可重建、可驗證
 - 週期: v3.0.0 上架準備
 
-## 未完成 P0 (4)
-- YTCE-E1 · 發布純本機大字聊天室與 TTS 擴充功能 · In Progress
-- YTCE-M1 · 完成純本機核心與高雅介面 · Review
-- YTCE-H5 · 對齊隱私、商店文件與 Chrome 實機驗收 · Review
-- YTCE-V1 · 執行實機驗證與上架前收尾 · Backlog
-
-## 今日摘要 · 2026-08-12
-- 完成 URL、MV3、TTS、Observer、無障礙、發布工具與 Chrome 實機全面強化；待手動重載新版後最終驗收 已記錄 Smoke tests: 13.
-- 完成直播導播控制台視覺升級；依 taste-skill 的既有產品 redesign 原則統一單一重點色、圓角、表面與互動，並完成桌面、窄版、收合、閱讀模式與自動測試驗收。
-- 新增熔岩、極光、紙墨三套可持久化畫風；完成設定白名單、跨視窗同步、桌面與窄版視覺驗收，並修正 PowerShell 在 macOS 的 IsWindows 變數碰撞。
-- 依使用者決定將畫風固定為四套並全面華麗化：熔岩、極光、紙墨、星夜以材質、圓角、字體、頭像與聊天卡建立顯著差異；桌面、430px 窄版與 35 項回歸均通過。
+## 今日摘要 · 2026-08-15
+- 修復 INC-001：控制面板不再插入 YouTube #items，改為 BODY fixed 並以 ResizeObserver 同步聊天區 offset；補留言順序測試與真實內部 scroller fixture，Chrome 兩尺寸捲動驗收重疊 0px，37/37 tests 與 ZIP 通過。
+- 修復 TTS 開啟意圖被延遲 voice 覆寫：等待語音時保留開關並顯示明確狀態，voiceschanged 後自動續讀；新增 12 則批次留言 1→12 順序朗讀測試，全套 38/38 通過。
+- 新增純本機多語 voice 路由：可切換自動保守配對／固定聲音，依原始留言選 voice 且維持單一 FIFO；Chrome 實機確認 180+ 本機 voice、自動與固定狀態、四主題零溢位，46/46 tests 與 ZIP 通過。
 
 ## 重要護欄 (0)
 - 無
 
 ## 需要時再讀
-- Modify task lifecycle/order → `tasks.md`
-- Need rationale/evidence → `decisions.md`, `notes.md`, `smoke-tests.md`
-- Brief/focus stale or truncated → run `mission_maintenance.py sync` and open canonical files
+- 目前工作（3 項）→ `working-set.md`
+- 修改任務生命週期／順序 → `tasks.md`
+- 查閱理由／證據 → `decisions.md`、`notes.md`、`smoke-tests.md`
+- 簡報／工作集過期或截斷 → 執行 `mission_maintenance.py sync` 後再讀 canonical files

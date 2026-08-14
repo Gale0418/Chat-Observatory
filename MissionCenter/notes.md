@@ -30,3 +30,16 @@
 | 搜尋前構想 | 參考來源 | 採納內容 | 授權狀態 |
 | --- | --- | --- | --- |
 | 原有深色控制台可再強化層次與個性 | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) 的 README、redesign skill 與 changelog | 採既有產品 scan／diagnose／fix、單一重點色、圓角層級、觸感互動、減少動態與反雜亂原則；拒絕落地頁式 AIDA／Hero／GSAP | MIT；僅採一般原則，未複製程式碼、文字或素材，無新增依賴 |
+
+## 2026-08-14 Impeccable 精修研究
+
+| 搜尋前構想 | 參考來源 | 採納內容 | 授權狀態 |
+| --- | --- | --- | --- |
+| 四套華麗主題需要再加更多裝飾才算 BUFF | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) 4.0.4 的 skill、polish 與 craft-floor 參考文件 | 工具型 UI 應優先保持掃讀性與一致性；以 bounded polish 補齊 CSS 幾何收合圖示、主題化 selection／caret／scrollbar、原生 color-scheme、disabled／selected 狀態與 40px 操作高度，並以 Chrome 實際渲染驗證；不改寫四套已核准美術方向 | Apache-2.0；僅採一般設計與驗證原則，未安裝技能、hooks、素材或程式依賴 |
+
+## 2026-08-15 多語 TTS 研究
+
+| 搜尋前構想 | 參考來源 | 採納內容 | 授權狀態 |
+| --- | --- | --- | --- |
+| 只設定 `utterance.lang` 即可讓 Chrome 自動挑本機 voice | MDN `SpeechSynthesisVoice.lang`／`localService`、`SpeechSynthesisUtterance.lang`、`voiceschanged`；W3C Web Speech API | 指定 voice 後瀏覽器必須使用該 voice；未指定 voice 的預設服務可能是遠端。因此自行從 `localService=true` 清單配對 voice，並在 `speak()` 前同步設定 `voice` 與 BCP 47 `lang` | 官方／一手規格；僅採 API 契約 |
+| Web Speech API 能精準偵測聊天室文字語言 | W3C Web Speech API synthesis 介面 | 合成 API 沒有文字語言偵測功能；採無依賴 script 統計與有限常用詞提示，UI 明示「保守配對」，混合或低信心時退回預設 voice | 官方／一手規格；未加入模型、網路服務或第三方程式碼 |

@@ -9,15 +9,55 @@
     html,
     body {
       margin: 0;
+      height: 100%;
       min-height: 100%;
+      overflow: hidden;
       background: #0f0f10;
       color: white;
       font-family: Roboto, "Noto Sans TC", sans-serif;
     }
 
+    yt-live-chat-app {
+      height: 100%;
+      display: block;
+    }
+
+    yt-live-chat-renderer {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat-messages {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    #chat-messages,
+    #chat-messages > #contents,
+    yt-live-chat-item-list-renderer {
+      height: 100%;
+      min-height: 0;
+      display: block;
+      background: #0f0f10;
+    }
+
+    #item-scroller {
+      height: 100%;
+      min-height: 0;
+      display: block;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: #0f0f10;
+    }
+
+    #input-panel {
+      flex: 0 0 auto;
+    }
+
     #items {
       display: block;
-      padding: 610px 12px 24px;
+      padding: 1px 12px 24px;
     }
 
     yt-live-chat-text-message-renderer,
@@ -62,7 +102,13 @@
   </style>
 </head>
 <body>
-  <yt-live-chat-item-list-renderer id="items" class="yt-live-chat-item-list-renderer">
+  <yt-live-chat-app>
+    <yt-live-chat-renderer id="chat">
+      <div id="chat-messages">
+        <div id="contents">
+          <yt-live-chat-item-list-renderer>
+            <div id="item-scroller" class="yt-live-chat-item-list-renderer">
+              <div id="items" class="yt-live-chat-item-list-renderer">
     <yt-live-chat-text-message-renderer>
       <span id="avatar"></span>
       <span id="content">
@@ -88,14 +134,25 @@
         <span id="message">半年簽到！大家晚上好。</span>
       </span>
     </yt-live-chat-membership-item-renderer>
-  </yt-live-chat-item-list-renderer>
+              </div>
+            </div>
+          </yt-live-chat-item-list-renderer>
+        </div>
+      </div>
+      <div id="input-panel">
+        <yt-live-chat-message-input-renderer>
+          <div id="input-container">輸入區保留原生互動表面</div>
+        </yt-live-chat-message-input-renderer>
+      </div>
+    </yt-live-chat-renderer>
+  </yt-live-chat-app>
 
   <script>
     const fixtureParams = new URLSearchParams(location.search);
     const fixtureMode = fixtureParams.get("mode") || "complete";
     const fixtureTheme = fixtureParams.get("theme") || "ember";
     const fixtureCollapsed = fixtureParams.has("collapsed");
-    document.getElementById("items").style.paddingTop = fixtureCollapsed ? "96px" : "560px";
+    const fixtureHasVoice = !fixtureParams.has("no-voice");
 
     const fixtureChrome = {
       storage: {
@@ -129,12 +186,12 @@
     };
     const fixtureSpeechSynthesis = {
       getVoices() {
-        return [{
+        return fixtureHasVoice ? [{
           name: "Microsoft HsiaoChen",
           lang: "zh-TW",
           voiceURI: "fixture-voice",
           localService: true
-        }];
+        }] : [];
       },
       addEventListener() {},
       removeEventListener() {},
@@ -148,8 +205,10 @@
   <script>
     // Chromium 的內建 chrome／speechSynthesis 物件可能無法被頁面覆寫；
     // 最終以公開 UI 操作建立可重現的視覺狀態。
-    window.setTimeout(() => {
+    const prepareFixture = () => {
       const keywords = document.getElementById("ytce-keywords-input");
+      if (!keywords) return false;
+
       keywords.value = "寶箱";
       keywords.dispatchEvent(new Event("input", { bubbles: true }));
 
@@ -165,10 +224,25 @@
       }
 
       const voiceSelect = document.getElementById("ytce-voice-select");
-      voiceSelect.replaceChildren(new Option("美佳 · zh-TW", "fixture-voice"));
-      voiceSelect.value = "fixture-voice";
+      if (fixtureHasVoice) {
+        voiceSelect.replaceChildren(new Option("美佳 · zh-TW", "fixture-voice"));
+        voiceSelect.value = "fixture-voice";
+      }
       document.body.dataset.fixtureReady = "true";
-    }, 100);
+      return true;
+    };
+
+    const fixtureDeadline = performance.now() + 5000;
+    const waitForFixture = () => {
+      if (prepareFixture()) return;
+      if (performance.now() >= fixtureDeadline) {
+        document.body.dataset.fixtureReady = "error";
+        console.error("YTCE visual fixture timed out while waiting for the control panel.");
+        return;
+      }
+      window.requestAnimationFrame(waitForFixture);
+    };
+    window.requestAnimationFrame(waitForFixture);
   </script>
 </body>
 </html>
