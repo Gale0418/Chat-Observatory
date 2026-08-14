@@ -7,6 +7,27 @@ const { JSDOM } = require("jsdom");
 const contentScript = fs.readFileSync(path.join(__dirname, "..", "content.js"), "utf8");
 const contentStyles = fs.readFileSync(path.join(__dirname, "..", "content.css"), "utf8");
 
+function colorContrast(foreground, background) {
+  const luminance = (hex) => {
+    const channels = hex.match(/[\da-f]{2}/gi).map((value) => parseInt(value, 16) / 255);
+    const linear = channels.map((value) => value <= 0.04045
+      ? value / 12.92
+      : ((value + 0.055) / 1.055) ** 2.4);
+    return (0.2126 * linear[0]) + (0.7152 * linear[1]) + (0.0722 * linear[2]);
+  };
+  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}
+
+function getThemeToken(theme, token) {
+  const selector = theme === "ember" ? ":root" : `body[data-ytce-theme="${theme}"]`;
+  const block = contentStyles.match(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([\\s\\S]*?)\\n\\}`));
+  assert.ok(block, `${theme} 應有畫風色票`);
+  const value = block[1].match(new RegExp(`${token}:\\s*(#[\\da-f]{6})`, "i"));
+  assert.ok(value, `${theme} 的 ${token} 應使用可驗證的實色`);
+  return value[1];
+}
+
 function waitForMutations(window) {
   return new Promise((resolve) => {
     window.queueMicrotask(() => {
@@ -215,6 +236,40 @@ test("聊天室主體使用畫風 canvas，且不以全域規則覆蓋輸入與�
   assert.doesNotMatch(contentStyles, /yt-emoji-picker-renderer[^,{]*,[\s\S]*--ytce-canvas/);
   assert.match(contentStyles, /#ytce-control-panel\s*\{[\s\S]*position: fixed;/);
   assert.match(contentStyles, /padding-top: var\(--ytce-panel-offset, 84px\) !important;/);
+});
+
+test("輸入列與表情面板使用各畫風的高對比語意色票", () => {
+  for (const token of [
+    "--ytce-input-surface",
+    "--ytce-input-text",
+    "--ytce-input-placeholder",
+    "--ytce-input-icon",
+    "--ytce-input-icon-hover",
+    "--ytce-picker-surface",
+    "--ytce-picker-hover"
+  ]) {
+    assert.match(contentStyles, new RegExp(`${token}:`), `${token} 應有預設值`);
+  }
+
+  assert.match(contentStyles, /yt-live-chat-message-input-renderer\s*\{[\s\S]*--yt-live-chat-text-input-field-placeholder-color: var\(--ytce-input-placeholder\);/);
+  assert.match(contentStyles, /yt-live-chat-message-input-renderer #input-container,[\s\S]*background-color: var\(--ytce-input-surface\) !important;/);
+  assert.match(contentStyles, /yt-emoji-picker-renderer\s*\{[\s\S]*--yt-live-chat-picker-button-active-color: var\(--ytce-accent\);/);
+  assert.match(contentStyles, /yt-emoji-picker-renderer #categories,[\s\S]*background-color: var\(--ytce-picker-surface\) !important;/);
+  assert.doesNotMatch(contentStyles, /body\.ytce-active\s+yt-live-chat-renderer\s+\*/);
+});
+
+test("四套畫風的輸入文字與表情圖示皆符合對比門檻", () => {
+  for (const theme of ["ember", "aurora", "paper", "starlight"]) {
+    const inputSurface = getThemeToken(theme, "--ytce-input-surface");
+    const pickerSurface = getThemeToken(theme, "--ytce-picker-surface");
+    const inputText = getThemeToken(theme, "--ytce-input-text");
+    const inputIcon = getThemeToken(theme, "--ytce-input-icon");
+
+    assert.ok(colorContrast(inputText, inputSurface) >= 4.5, `${theme} 輸入文字對比不足`);
+    assert.ok(colorContrast(inputIcon, inputSurface) >= 3, `${theme} 表情按鈕對比不足`);
+    assert.ok(colorContrast(inputText, pickerSurface) >= 4.5, `${theme} 表情面板文字對比不足`);
+    assert.ok(colorContrast(inputIcon, pickerSurface) >= 3, `${theme} 表情面板圖示對比不足`);
+  }
 });
 
 test("固定控制面板不會污染 YouTube 留言子節點順序", async () => {

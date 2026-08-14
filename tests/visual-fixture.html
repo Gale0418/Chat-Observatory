@@ -55,6 +55,60 @@
       flex: 0 0 auto;
     }
 
+    yt-live-chat-message-input-renderer {
+      display: block;
+      padding: 12px;
+    }
+
+    yt-live-chat-message-input-renderer #input-container {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 6px 8px 6px 14px;
+      border: 1px solid currentColor;
+      border-radius: 12px;
+    }
+
+    yt-live-chat-message-input-renderer #input {
+      min-width: 0;
+      padding: 6px 0;
+      outline: none;
+    }
+
+    #emoji-button,
+    yt-emoji-picker-renderer button {
+      display: inline-grid;
+      place-items: center;
+      min-width: 36px;
+      min-height: 36px;
+      padding: 6px;
+      border: 0;
+      border-radius: 9px;
+      font: inherit;
+      background: transparent;
+    }
+
+    yt-emoji-picker-renderer {
+      display: block;
+      margin: 0 12px 12px;
+      padding: 10px;
+      border: 1px solid currentColor;
+      border-radius: 12px;
+    }
+
+    yt-emoji-picker-renderer #categories,
+    yt-emoji-picker-renderer #emoji-grid {
+      display: flex;
+      gap: 6px;
+    }
+
+    yt-emoji-picker-renderer #categories {
+      padding-bottom: 8px;
+      border-bottom: 1px solid currentColor;
+    }
+
     #items {
       display: block;
       padding: 1px 12px 24px;
@@ -141,8 +195,22 @@
       </div>
       <div id="input-panel">
         <yt-live-chat-message-input-renderer>
-          <div id="input-container">輸入區保留原生互動表面</div>
+          <div id="input-container">
+            <div id="input" contenteditable="true" data-placeholder="輸入訊息">正在輸入文字</div>
+            <button id="emoji-button" type="button" aria-label="選擇表情符號">☺</button>
+          </div>
         </yt-live-chat-message-input-renderer>
+        <yt-emoji-picker-renderer aria-label="表情符號">
+          <div id="categories">
+            <button type="button" aria-label="常用表情">★</button>
+            <button type="button" aria-label="笑臉表情">☺</button>
+          </div>
+          <div id="emoji-grid">
+            <button type="button" aria-label="笑臉">😀</button>
+            <button type="button" aria-label="愛心眼">😍</button>
+            <button type="button" aria-label="歡呼">🎉</button>
+          </div>
+        </yt-emoji-picker-renderer>
       </div>
     </yt-live-chat-renderer>
   </yt-live-chat-app>

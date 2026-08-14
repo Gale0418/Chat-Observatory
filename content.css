@@ -38,6 +38,13 @@
     --ytce-chat-surface-hover: rgba(245, 226, 215, 0.065);
     --ytce-chat-border: rgba(245, 226, 215, 0.055);
     --ytce-chat-inset: rgba(255, 255, 255, 0.022);
+    --ytce-input-surface: #1b1817;
+    --ytce-input-text: #f5efeb;
+    --ytce-input-placeholder: #b8aaa3;
+    --ytce-input-icon: #d8cbc5;
+    --ytce-input-icon-hover: #fff8f4;
+    --ytce-picker-surface: #211d1b;
+    --ytce-picker-hover: rgba(245, 226, 215, 0.1);
     --ytce-highlight-fill: rgba(217, 164, 93, 0.2);
     --ytce-highlight-fade: rgba(217, 164, 93, 0.035);
     --ytce-highlight-border: rgba(217, 164, 93, 0.22);
@@ -96,6 +103,13 @@ body[data-ytce-theme="aurora"] {
     --ytce-chat-surface-hover: rgba(73, 214, 200, 0.11);
     --ytce-chat-border: rgba(163, 238, 232, 0.07);
     --ytce-chat-inset: rgba(178, 255, 248, 0.025);
+    --ytce-input-surface: #0d2026;
+    --ytce-input-text: #e9f8f6;
+    --ytce-input-placeholder: #9fb9b7;
+    --ytce-input-icon: #bfe2de;
+    --ytce-input-icon-hover: #efffff;
+    --ytce-picker-surface: #10282e;
+    --ytce-picker-hover: rgba(73, 214, 200, 0.14);
     --ytce-panel-art:
         radial-gradient(circle at 16% -5%, rgba(73, 214, 200, 0.22), transparent 32%),
         radial-gradient(circle at 88% 12%, rgba(133, 92, 255, 0.18), transparent 28%),
@@ -150,6 +164,13 @@ body[data-ytce-theme="paper"] {
     --ytce-chat-surface-hover: rgba(255, 250, 241, 0.94);
     --ytce-chat-border: rgba(69, 51, 39, 0.11);
     --ytce-chat-inset: rgba(255, 255, 255, 0.38);
+    --ytce-input-surface: #fffaf2;
+    --ytce-input-text: #302821;
+    --ytce-input-placeholder: #706158;
+    --ytce-input-icon: #574b42;
+    --ytce-input-icon-hover: #302821;
+    --ytce-picker-surface: #fffaf2;
+    --ytce-picker-hover: rgba(73, 55, 43, 0.1);
     --ytce-highlight-fill: rgba(185, 120, 28, 0.17);
     --ytce-highlight-fade: rgba(185, 120, 28, 0.035);
     --ytce-highlight-border: rgba(166, 106, 22, 0.25);
@@ -208,6 +229,13 @@ body[data-ytce-theme="starlight"] {
     --ytce-chat-surface-hover: rgba(97, 61, 135, 0.38);
     --ytce-chat-border: rgba(224, 190, 255, 0.085);
     --ytce-chat-inset: rgba(255, 240, 255, 0.03);
+    --ytce-input-surface: #211437;
+    --ytce-input-text: #faf3ff;
+    --ytce-input-placeholder: #baa8c7;
+    --ytce-input-icon: #dfcfeb;
+    --ytce-input-icon-hover: #fffaf0;
+    --ytce-picker-surface: #291942;
+    --ytce-picker-hover: rgba(216, 178, 106, 0.14);
     --ytce-highlight-fill: rgba(216, 178, 106, 0.2);
     --ytce-highlight-fade: rgba(155, 111, 232, 0.045);
     --ytce-highlight-border: rgba(216, 178, 106, 0.28);
@@ -919,6 +947,78 @@ body.ytce-active yt-live-chat-viewer-engagement-message-renderer {
     color: var(--ytce-chat-text) !important;
     background-color: var(--ytce-surface) !important;
     border-color: var(--ytce-border) !important;
+}
+
+body.ytce-active yt-live-chat-message-input-renderer {
+    --yt-live-chat-text-input-field-placeholder-color: var(--ytce-input-placeholder);
+    --yt-live-chat-text-input-field-inactive-underline-color: var(--ytce-border-strong);
+    --yt-live-chat-text-input-field-active-underline-color: var(--ytce-accent);
+    --yt-live-chat-icon-button-color: var(--ytce-input-icon);
+    --yt-live-chat-enabled-send-button-color: var(--ytce-accent);
+    --yt-live-chat-disabled-icon-button-color: var(--ytce-muted);
+    --yt-spec-icon-inactive: var(--ytce-input-icon);
+    --yt-spec-icon-active-other: var(--ytce-input-icon-hover);
+}
+
+body.ytce-active yt-live-chat-message-input-renderer #input-container,
+body.ytce-active yt-live-chat-message-input-renderer #input {
+    color: var(--ytce-input-text) !important;
+    background-color: var(--ytce-input-surface) !important;
+    caret-color: var(--ytce-accent) !important;
+}
+
+body.ytce-active yt-live-chat-message-input-renderer #input[data-placeholder]::before {
+    color: var(--ytce-input-placeholder) !important;
+}
+
+body.ytce-active yt-live-chat-message-input-renderer #emoji-button,
+body.ytce-active yt-live-chat-message-input-renderer #picker-buttons,
+body.ytce-active yt-live-chat-message-input-renderer #send-button {
+    color: var(--ytce-input-icon) !important;
+}
+
+body.ytce-active yt-live-chat-message-input-renderer #emoji-button:hover,
+body.ytce-active yt-live-chat-message-input-renderer #emoji-button:focus-visible,
+body.ytce-active yt-live-chat-message-input-renderer #picker-buttons:hover,
+body.ytce-active yt-live-chat-message-input-renderer #picker-buttons:focus-visible,
+body.ytce-active yt-live-chat-message-input-renderer #send-button:hover,
+body.ytce-active yt-live-chat-message-input-renderer #send-button:focus-visible {
+    color: var(--ytce-input-icon-hover) !important;
+    background-color: var(--ytce-picker-hover) !important;
+    outline: 2px solid var(--ytce-accent);
+    outline-offset: 2px;
+}
+
+body.ytce-active yt-emoji-picker-renderer {
+    --yt-live-chat-dialog-background-color: var(--ytce-picker-surface);
+    --yt-live-chat-dialog-text-color: var(--ytce-input-text);
+    --yt-live-chat-picker-button-color: var(--ytce-input-icon);
+    --yt-live-chat-picker-button-active-color: var(--ytce-accent);
+    color: var(--ytce-input-text) !important;
+    background-color: var(--ytce-picker-surface) !important;
+    border-color: var(--ytce-border-strong) !important;
+}
+
+body.ytce-active yt-emoji-picker-renderer #categories,
+body.ytce-active yt-emoji-picker-renderer #search-panel,
+body.ytce-active yt-emoji-picker-renderer #emoji-grid {
+    color: var(--ytce-input-text) !important;
+    background-color: var(--ytce-picker-surface) !important;
+}
+
+body.ytce-active yt-emoji-picker-renderer button,
+body.ytce-active yt-emoji-picker-renderer [role="button"] {
+    color: var(--ytce-input-icon) !important;
+}
+
+body.ytce-active yt-emoji-picker-renderer button:hover,
+body.ytce-active yt-emoji-picker-renderer button:focus-visible,
+body.ytce-active yt-emoji-picker-renderer [role="button"]:hover,
+body.ytce-active yt-emoji-picker-renderer [role="button"]:focus-visible {
+    color: var(--ytce-input-icon-hover) !important;
+    background-color: var(--ytce-picker-hover) !important;
+    outline: 2px solid var(--ytce-accent);
+    outline-offset: 1px;
 }
 
 body.ytce-active yt-live-chat-text-message-renderer #message,
