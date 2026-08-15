@@ -26,3 +26,4 @@
 - 2026-08-15：多語 TTS 採單一 FIFO 上的逐則 voice 路由，不依語言拆分佇列或拆分混合句；auto 只從 `localService=true` 清單依 script 與有限文字提示保守配對，無法判定時退回使用者預設 voice。固定 voice 消失則停住並提示，不靜默改用其他或來源不明的系統預設。
 - 2026-08-15：Web Speech voice 沒有評分或音質欄位，因此介面只稱「推薦」；排序採可解釋的社群偏好與 metadata heuristic，不捏造星等。遠端 Google／第三方 TTS engine 不納入純本機推薦，除非未來另設明確 opt-in、權限與隱私揭露。
 - 2026-08-15：四主題顯示規格改為紅黑綠黃順序的赤曜／玄曜／翠曜／金曜；底層 `ember`／`aurora`／`paper`／`starlight` ID 保留以維持既有儲存相容。視覺允許高調電競漸層、材質紋理與小面積流光，但動畫只作用於飾線、內框與啟用控制，並由 `prefers-reduced-motion` 完整停用。
+- 2026-08-15：四主題的宇宙背景採本機封裝 JPEG，不依賴遠端素材；只透過 `web_accessible_resources` 暴露給正式 `https://www.youtube.com/live_chat*`。圖片只鋪在面板與聊天室外層畫布，留言虛擬清單保持原 DOM 與透明內層；亮色文字用近黑描邊，深色啟用文字改用主題亮色反描邊。

@@ -237,7 +237,8 @@ test("建立三種模式與高雅控制面板", async () => {
 });
 
 test("聊天室主體使用畫風 canvas，且不以全域規則覆蓋輸入與表情面板", () => {
-  assert.match(contentStyles, /body\.ytce-active yt-live-chat-app,[\s\S]*background-color: var\(--ytce-canvas\) !important;/);
+  assert.match(contentStyles, /body\.ytce-active\s*\{[\s\S]*var\(--ytce-panel-image\) center \/ cover no-repeat,[\s\S]*var\(--ytce-canvas\) !important;/);
+  assert.match(contentStyles, /body\.ytce-active yt-live-chat-app,[\s\S]*background-color: transparent !important;/);
   assert.match(contentStyles, /yt-live-chat-renderer #chat-messages/);
   assert.match(contentStyles, /#item-scroller\.yt-live-chat-item-list-renderer/);
   assert.doesNotMatch(contentStyles, /yt-live-chat-renderer \*/);
@@ -946,6 +947,7 @@ test("F) CSS 規範檢查：無 outline:none 且包含 :focus-visible", () => {
   assert.ok(cssContent.includes(":focus-visible"), "必須包含 :focus-visible 焦距環設定");
   assert.ok(cssContent.includes("--ytce-radius-shell"), "視覺圓角應由共同 token 管理");
   assert.ok(cssContent.includes("--ytce-accent: #ff4d5a"), "赤曜應維持鮮紅重點色");
+  assert.ok(cssContent.includes("--ytce-active-text: #200208"), "赤曜亮紅啟用面應使用高對比深色文字");
   assert.ok(cssContent.includes("--ytce-accent: #b9d8ff"), "玄曜應維持黑鉻冷光重點色");
   assert.ok(cssContent.includes("--ytce-accent: #35e6a3"), "翠曜應維持祖母綠重點色");
   assert.ok(cssContent.includes("--ytce-accent: #ffd15a"), "金曜應維持亮金黃重點色");
@@ -958,12 +960,34 @@ test("F) CSS 規範檢查：無 outline:none 且包含 :focus-visible", () => {
   assert.ok(cssContent.includes("--ytce-panel-gradient"), "控制面板應使用明顯主題漸層");
   assert.ok(cssContent.includes("--ytce-chat-gradient"), "聊天室卡片應使用方向性漸層");
   assert.ok(cssContent.includes("--ytce-input-gradient"), "輸入區應使用主題漸層");
+  for (const asset of ["cosmic-crimson.jpg", "cosmic-black-hole.jpg", "cosmic-emerald.jpg", "cosmic-gold.jpg"]) {
+    assert.ok(cssContent.includes(`assets/themes/${asset}`), `CSS 應引用宇宙背景 ${asset}`);
+    assert.ok(fs.existsSync(path.join(__dirname, "..", "assets", "themes", asset)), `應封裝宇宙背景 ${asset}`);
+  }
+  assert.ok(cssContent.includes("--ytce-title-text"), "四套主題應提供標題文字色");
+  assert.ok(cssContent.includes("--ytce-text-outline"), "文字應提供反色描邊 token");
+  assert.ok(cssContent.includes("--ytce-active-outline"), "深色啟用文字應提供亮色反描邊 token");
+  assert.ok(cssContent.includes("--ytce-text-glow"), "文字應提供主題柔光 token");
+  assert.match(cssContent, /text-shadow:[\s\S]*var\(--ytce-text-outline\)/, "面板與留言文字應套用反色描邊");
+  assert.match(cssContent, /body\.ytce-active \{[\s\S]*var\(--ytce-chat-image-overlay\),[\s\S]*var\(--ytce-panel-image\) center \/ cover no-repeat/, "聊天室外層畫布應延伸主題背景");
+  assert.equal(cssContent.includes("body.ytce-active yt-live-chat-renderer *"), false, "不可用全域後代選擇器破壞 YouTube 元件背景");
   assert.match(cssContent, /prefers-reduced-motion: reduce[\s\S]*#ytce-control-panel::before,[\s\S]*animation: none !important;/, "減少動態偏好必須停用流光偽元素");
   assert.equal(/@import|url\(\s*["']?https?:/i.test(cssContent), false, "不得依賴遠端字型或素材");
   assert.match(cssContent, /body\.ytce-active ::selection/, "文字選取色應納入主題系統");
   assert.match(cssContent, /caret-color: var\(--ytce-accent\)/, "文字游標應納入主題系統");
   assert.equal(cssContent.includes("color-scheme: light"), false, "四套精品深色畫風皆應使用 dark 原生表面");
   assert.match(cssContent, /#ytce-panel-body::\-webkit-scrollbar-thumb/, "面板捲軸應納入主題系統");
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "manifest.json"), "utf8"));
+  assert.deepEqual(manifest.web_accessible_resources, [{
+    resources: [
+      "assets/themes/cosmic-crimson.jpg",
+      "assets/themes/cosmic-black-hole.jpg",
+      "assets/themes/cosmic-emerald.jpg",
+      "assets/themes/cosmic-gold.jpg"
+    ],
+    matches: ["https://www.youtube.com/live_chat*"]
+  }], "僅應向 YouTube 暴露四張本機主題背景");
 });
 
 test("E) Storage API 拒絕時仍可啟動並安全清理", async () => {

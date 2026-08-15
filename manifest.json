@@ -28,5 +28,16 @@
       "css": ["content.css"],
       "all_frames": false
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/themes/cosmic-crimson.jpg",
+        "assets/themes/cosmic-black-hole.jpg",
+        "assets/themes/cosmic-emerald.jpg",
+        "assets/themes/cosmic-gold.jpg"
+      ],
+      "matches": ["https://www.youtube.com/live_chat*"]
+    }
   ]
 }

@@ -241,8 +241,22 @@
       }
     };
     try {
-      if (!window.chrome) window.chrome = fixtureChrome;
-      else if (!window.chrome.storage) window.chrome.storage = fixtureChrome.storage;
+      if (typeof chrome === "object" && chrome) {
+        Object.defineProperty(chrome, "storage", {
+          value: fixtureChrome.storage,
+          configurable: true
+        });
+      } else if (!window.chrome) {
+        Object.defineProperty(window, "chrome", {
+          value: fixtureChrome,
+          configurable: true
+        });
+      } else if (!window.chrome.storage) {
+        Object.defineProperty(window.chrome, "storage", {
+          value: fixtureChrome.storage,
+          configurable: true
+        });
+      }
     } catch {
       // 部分 Chromium 將內建物件設為唯讀；content.js 會安全回退至預設值。
     }
