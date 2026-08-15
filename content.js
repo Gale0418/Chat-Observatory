@@ -30,6 +30,12 @@
   const VALID_MODES = Object.freeze(["complete", "monitor", "reader"]);
   const VALID_THEMES = Object.freeze(["ember", "aurora", "paper", "starlight"]);
   const VALID_VOICE_MODES = Object.freeze(["auto", "fixed"]);
+  const THEME_IMAGE_PATHS = Object.freeze({
+    ember: "assets/themes/cosmic-crimson.jpg",
+    aurora: "assets/themes/cosmic-black-hole.jpg",
+    paper: "assets/themes/cosmic-emerald.jpg",
+    starlight: "assets/themes/cosmic-gold.jpg"
+  });
 
   const RENDERER_SELECTOR = [
     "yt-live-chat-text-message-renderer",
@@ -997,6 +1003,17 @@
     rootStyle.setProperty("--ytce-font-size", `${settings.fontSize}px`);
     rootStyle.setProperty("--ytce-avatar-size", `${settings.avatarSize}px`);
     rootStyle.setProperty("--ytce-line-height", `${Math.round(settings.fontSize * 1.38)}px`);
+
+    const themeImagePath = THEME_IMAGE_PATHS[settings.theme] || THEME_IMAGE_PATHS.ember;
+    let themeImageUrl = themeImagePath;
+    try {
+      if (typeof window.chrome?.runtime?.getURL === "function") {
+        themeImageUrl = window.chrome.runtime.getURL(themeImagePath);
+      }
+    } catch {
+      // 一般網頁視覺 fixture 沒有 extension runtime，保留相對路徑作為離線預覽備援。
+    }
+    document.body.style.setProperty("--ytce-panel-image", `url("${themeImageUrl}")`);
 
     document.body.classList.toggle("ytce-hide-avatars", settings.hideAvatars);
     document.body.classList.toggle("ytce-hide-badges", settings.hideBadges);

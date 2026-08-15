@@ -138,6 +138,9 @@ async function createHarness(overrides = {}, options = {}) {
   };
 
   dom.window.chrome = {
+    runtime: {
+      getURL: (resourcePath) => `chrome-extension://test-extension/${resourcePath}`
+    },
     storage: {
       local: {
         get: async (defaults) => {
@@ -472,6 +475,10 @@ test("A) 畫風可切換、持久保存，無效值會回落至赤曜", async ()
   try {
     assert.equal(invalidHarness.document.body.dataset.ytceTheme, "ember");
     assert.equal(
+      invalidHarness.document.body.style.getPropertyValue("--ytce-panel-image"),
+      'url("chrome-extension://test-extension/assets/themes/cosmic-crimson.jpg")'
+    );
+    assert.equal(
       invalidHarness.document.querySelector('[data-theme="ember"]').getAttribute("aria-pressed"),
       "true"
     );
@@ -482,15 +489,27 @@ test("A) 畫風可切換、持久保存，無效值會回落至赤曜", async ()
   const harness = await createHarness({ theme: "ember" });
   try {
     assert.equal(harness.document.querySelectorAll(".ytce-theme-switch button").length, 4);
-    harness.document.querySelector('[data-theme="aurora"]').click();
-    assert.equal(harness.document.body.dataset.ytceTheme, "aurora");
-    assert.equal(harness.document.documentElement.dataset.ytceTheme, "aurora");
+    const themeImages = {
+      ember: "cosmic-crimson.jpg",
+      aurora: "cosmic-black-hole.jpg",
+      paper: "cosmic-emerald.jpg",
+      starlight: "cosmic-gold.jpg"
+    };
+    for (const [theme, image] of Object.entries(themeImages)) {
+      harness.document.querySelector(`[data-theme="${theme}"]`).click();
+      assert.equal(harness.document.body.dataset.ytceTheme, theme);
+      assert.equal(harness.document.documentElement.dataset.ytceTheme, theme);
+      assert.equal(
+        harness.document.body.style.getPropertyValue("--ytce-panel-image"),
+        `url("chrome-extension://test-extension/assets/themes/${image}")`
+      );
+    }
     assert.equal(
-      harness.document.querySelector('[data-theme="aurora"]').getAttribute("aria-pressed"),
+      harness.document.querySelector('[data-theme="starlight"]').getAttribute("aria-pressed"),
       "true"
     );
     await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
-    assert.equal(harness.saved.at(-1).theme, "aurora");
+    assert.equal(harness.saved.at(-1).theme, "starlight");
   } finally {
     harness.cleanup();
   }
