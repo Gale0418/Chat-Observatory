@@ -252,10 +252,17 @@
   };
 
   function syncPanelOffset() {
-    const panelHeight = Math.ceil(panel.getBoundingClientRect().height);
+    const panelHeader = panel.querySelector(".ytce-panel-header");
+    const nativeChatHeader = document.querySelector("yt-live-chat-header-renderer");
+    const panelHeaderHeight = Math.ceil(panelHeader?.getBoundingClientRect().height || 0);
+    const nativeChatHeaderHeight = Math.ceil(nativeChatHeader?.getBoundingClientRect().height || 0);
+    document.documentElement.style.setProperty(
+      "--ytce-native-header-offset",
+      `${nativeChatHeaderHeight}px`
+    );
     document.documentElement.style.setProperty(
       "--ytce-panel-offset",
-      `${Math.max(84, panelHeight + 16)}px`
+      `${Math.max(84, panelHeaderHeight + 16)}px`
     );
   }
 
@@ -263,6 +270,8 @@
   if (typeof ResizeObserver === "function") {
     panelResizeObserver = new ResizeObserver(syncPanelOffset);
     panelResizeObserver.observe(panel);
+    const nativeChatHeader = document.querySelector("yt-live-chat-header-renderer");
+    if (nativeChatHeader) panelResizeObserver.observe(nativeChatHeader);
   }
   window.addEventListener("resize", syncPanelOffset);
 

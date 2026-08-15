@@ -28,6 +28,22 @@
       flex-direction: column;
     }
 
+    yt-live-chat-header-renderer {
+      min-height: 48px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid currentColor;
+    }
+
+    yt-live-chat-header-renderer #header-buttons,
+    yt-live-chat-message-input-renderer #buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     #chat-messages {
       flex: 1 1 auto;
       min-height: 0;
@@ -78,6 +94,8 @@
     }
 
     #emoji-button,
+    #send-button,
+    yt-live-chat-header-renderer button,
     yt-emoji-picker-renderer button {
       display: inline-grid;
       place-items: center;
@@ -158,6 +176,13 @@
 <body>
   <yt-live-chat-app>
     <yt-live-chat-renderer id="chat">
+      <yt-live-chat-header-renderer>
+        <strong>即時聊天</strong>
+        <span id="header-buttons">
+          <button type="button" aria-label="聊天選項">⋮</button>
+          <button type="button" aria-label="關閉聊天室">×</button>
+        </span>
+      </yt-live-chat-header-renderer>
       <div id="chat-messages">
         <div id="contents">
           <yt-live-chat-item-list-renderer>
@@ -193,11 +218,14 @@
           </yt-live-chat-item-list-renderer>
         </div>
       </div>
-      <div id="input-panel">
+      <div id="input-panel" class="yt-live-chat-renderer">
         <yt-live-chat-message-input-renderer>
           <div id="input-container">
             <div id="input" contenteditable="true" data-placeholder="輸入訊息">正在輸入文字</div>
-            <button id="emoji-button" type="button" aria-label="選擇表情符號">☺</button>
+            <span id="buttons">
+              <button id="emoji-button" type="button" aria-label="選擇表情符號">☺</button>
+              <button id="send-button" type="button" aria-label="傳送訊息">➤</button>
+            </span>
           </div>
         </yt-live-chat-message-input-renderer>
         <yt-emoji-picker-renderer aria-label="表情符號">

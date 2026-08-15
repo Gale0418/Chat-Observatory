@@ -240,14 +240,16 @@ test("建立三種模式與高雅控制面板", async () => {
 });
 
 test("聊天室主體使用畫風 canvas，且不以全域規則覆蓋輸入與表情面板", () => {
-  assert.match(contentStyles, /body\.ytce-active\s*\{[\s\S]*var\(--ytce-panel-image\) center \/ cover no-repeat,[\s\S]*var\(--ytce-canvas\) !important;/);
-  assert.match(contentStyles, /body\.ytce-active yt-live-chat-app,[\s\S]*background-color: transparent !important;/);
-  assert.match(contentStyles, /yt-live-chat-renderer #chat-messages/);
+  assert.match(contentStyles, /body\.ytce-active\s*\{[\s\S]*background: var\(--ytce-canvas\) !important;/);
+  assert.match(contentStyles, /yt-live-chat-renderer #chat-messages\s*\{[\s\S]*var\(--ytce-panel-image\) center \/ cover no-repeat/);
+  assert.match(contentStyles, /body\.ytce-active yt-live-chat-app,[\s\S]*background-color: var\(--ytce-canvas\) !important;/);
   assert.match(contentStyles, /#item-scroller\.yt-live-chat-item-list-renderer/);
   assert.doesNotMatch(contentStyles, /yt-live-chat-renderer \*/);
-  assert.doesNotMatch(contentStyles, /#input-panel[^,{]*,[\s\S]*--ytce-canvas/);
+  assert.match(contentStyles, /#input-panel\.yt-live-chat-renderer,[\s\S]*background: var\(--ytce-input-gradient\) !important;/);
+  assert.match(contentStyles, /yt-live-chat-header-renderer yt-icon[\s\S]*fill: currentColor !important;/);
   assert.doesNotMatch(contentStyles, /yt-emoji-picker-renderer[^,{]*,[\s\S]*--ytce-canvas/);
   assert.match(contentStyles, /#ytce-control-panel\s*\{[\s\S]*position: fixed;/);
+  assert.match(contentStyles, /top: calc\(var\(--ytce-native-header-offset, 0px\) \+ 8px\);/);
   assert.match(contentStyles, /padding-top: var\(--ytce-panel-offset, 84px\) !important;/);
 });
 
@@ -988,7 +990,7 @@ test("F) CSS 規範檢查：無 outline:none 且包含 :focus-visible", () => {
   assert.ok(cssContent.includes("--ytce-active-outline"), "深色啟用文字應提供亮色反描邊 token");
   assert.ok(cssContent.includes("--ytce-text-glow"), "文字應提供主題柔光 token");
   assert.match(cssContent, /text-shadow:[\s\S]*var\(--ytce-text-outline\)/, "面板與留言文字應套用反色描邊");
-  assert.match(cssContent, /body\.ytce-active \{[\s\S]*var\(--ytce-chat-image-overlay\),[\s\S]*var\(--ytce-panel-image\) center \/ cover no-repeat/, "聊天室外層畫布應延伸主題背景");
+  assert.match(cssContent, /yt-live-chat-renderer #chat-messages \{[\s\S]*var\(--ytce-chat-image-overlay\),[\s\S]*var\(--ytce-panel-image\) center \/ cover no-repeat/, "主題背景應限制在留言畫布，不可污染原生頂欄與輸入列");
   assert.equal(cssContent.includes("body.ytce-active yt-live-chat-renderer *"), false, "不可用全域後代選擇器破壞 YouTube 元件背景");
   assert.match(cssContent, /prefers-reduced-motion: reduce[\s\S]*#ytce-control-panel::before,[\s\S]*animation: none !important;/, "減少動態偏好必須停用流光偽元素");
   assert.equal(/@import|url\(\s*["']?https?:/i.test(cssContent), false, "不得依賴遠端字型或素材");

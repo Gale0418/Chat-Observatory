@@ -323,7 +323,7 @@ body.ytce-active ::selection {
 
 #ytce-control-panel {
     position: fixed;
-    top: 8px;
+    top: calc(var(--ytce-native-header-offset, 0px) + 8px);
     right: 8px;
     left: 8px;
     z-index: 99999;
@@ -1017,15 +1017,21 @@ body.ytce-active {
     --yt-live-chat-primary-text-color: var(--ytce-chat-text);
     --yt-live-chat-secondary-text-color: var(--ytce-muted);
     --yt-spec-base-background: var(--ytce-canvas);
+    background: var(--ytce-canvas) !important;
+}
+
+body.ytce-active yt-live-chat-app,
+body.ytce-active yt-live-chat-renderer {
+    background-color: var(--ytce-canvas) !important;
+}
+
+body.ytce-active yt-live-chat-renderer #chat-messages {
     background:
         var(--ytce-chat-image-overlay),
         var(--ytce-panel-image) center / cover no-repeat,
         var(--ytce-canvas) !important;
 }
 
-body.ytce-active yt-live-chat-app,
-body.ytce-active yt-live-chat-renderer,
-body.ytce-active yt-live-chat-renderer #chat-messages,
 body.ytce-active yt-live-chat-renderer #chat-messages > #contents,
 body.ytce-active yt-live-chat-item-list-renderer,
 body.ytce-active yt-live-chat-item-list-renderer > #contents,
@@ -1045,6 +1051,28 @@ body.ytce-active yt-live-chat-viewer-engagement-message-renderer {
     color: var(--ytce-chat-text) !important;
     background-color: var(--ytce-surface) !important;
     border-color: var(--ytce-border) !important;
+}
+
+body.ytce-active yt-live-chat-header-renderer,
+body.ytce-active #panel-pages.yt-live-chat-renderer,
+body.ytce-active #input-panel.yt-live-chat-renderer,
+body.ytce-active yt-live-chat-renderer > #input-panel {
+    position: relative;
+    z-index: 30;
+    isolation: isolate;
+}
+
+body.ytce-active #panel-pages.yt-live-chat-renderer,
+body.ytce-active #input-panel.yt-live-chat-renderer,
+body.ytce-active yt-live-chat-renderer > #input-panel {
+    background: var(--ytce-input-gradient) !important;
+    border-top: 1px solid var(--ytce-border) !important;
+}
+
+body.ytce-active yt-live-chat-header-renderer {
+    --yt-live-chat-icon-button-color: var(--ytce-input-icon);
+    --yt-spec-icon-inactive: var(--ytce-input-icon);
+    --yt-spec-icon-active-other: var(--ytce-input-icon-hover);
 }
 
 body.ytce-active yt-live-chat-message-input-renderer {
@@ -1077,8 +1105,21 @@ body.ytce-active yt-live-chat-message-input-renderer #input[data-placeholder]::b
 
 body.ytce-active yt-live-chat-message-input-renderer #emoji-button,
 body.ytce-active yt-live-chat-message-input-renderer #picker-buttons,
-body.ytce-active yt-live-chat-message-input-renderer #send-button {
+body.ytce-active yt-live-chat-message-input-renderer #send-button,
+body.ytce-active yt-live-chat-message-input-renderer #buttons yt-icon-button,
+body.ytce-active yt-live-chat-header-renderer yt-icon-button,
+body.ytce-active yt-live-chat-header-renderer button {
     color: var(--ytce-input-icon) !important;
+    --iron-icon-fill-color: currentColor;
+}
+
+body.ytce-active yt-live-chat-message-input-renderer #emoji-button yt-icon,
+body.ytce-active yt-live-chat-message-input-renderer #picker-buttons yt-icon,
+body.ytce-active yt-live-chat-message-input-renderer #send-button yt-icon,
+body.ytce-active yt-live-chat-message-input-renderer #buttons yt-icon,
+body.ytce-active yt-live-chat-header-renderer yt-icon {
+    color: inherit !important;
+    fill: currentColor !important;
 }
 
 body.ytce-active yt-live-chat-message-input-renderer #emoji-button:hover,
