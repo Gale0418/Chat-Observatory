@@ -986,8 +986,8 @@ test("F) CSS 規範檢查：無 outline:none 且包含 :focus-visible", () => {
       "assets/themes/cosmic-emerald.jpg",
       "assets/themes/cosmic-gold.jpg"
     ],
-    matches: ["https://www.youtube.com/live_chat*"]
-  }], "僅應向 YouTube 暴露四張本機主題背景");
+    matches: ["https://www.youtube.com/*"]
+  }], "僅應向 YouTube 來源暴露四張本機主題背景，WAR match pattern 的 path 必須使用 /*");
 });
 
 test("E) Storage API 拒絕時仍可啟動並安全清理", async () => {
