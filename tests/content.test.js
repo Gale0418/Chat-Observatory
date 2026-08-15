@@ -28,6 +28,15 @@ function getThemeToken(theme, token) {
   return value[1];
 }
 
+function getThemeGradientColors(theme, token) {
+  const selector = theme === "ember" ? ":root" : `body[data-ytce-theme="${theme}"]`;
+  const block = contentStyles.match(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([\\s\\S]*?)\\n\\}`));
+  assert.ok(block, `${theme} 應有畫風色票`);
+  const value = block[1].match(new RegExp(`${token}:\\s*linear-gradient\\([^;]+`, "i"));
+  assert.ok(value, `${theme} 的 ${token} 應使用明顯線性漸層`);
+  return value[0].match(/#[\da-f]{6}/gi);
+}
+
 function waitForMutations(window) {
   return new Promise((resolve) => {
     window.queueMicrotask(() => {
@@ -246,29 +255,56 @@ test("輸入列與表情面板使用各畫風的高對比語意色票", () => {
     "--ytce-input-icon",
     "--ytce-input-icon-hover",
     "--ytce-picker-surface",
-    "--ytce-picker-hover"
+    "--ytce-picker-hover",
+    "--ytce-input-gradient",
+    "--ytce-picker-gradient"
   ]) {
     assert.match(contentStyles, new RegExp(`${token}:`), `${token} 應有預設值`);
   }
 
   assert.match(contentStyles, /yt-live-chat-message-input-renderer\s*\{[\s\S]*--yt-live-chat-text-input-field-placeholder-color: var\(--ytce-input-placeholder\);/);
-  assert.match(contentStyles, /yt-live-chat-message-input-renderer #input-container,[\s\S]*background-color: var\(--ytce-input-surface\) !important;/);
+  assert.match(contentStyles, /yt-live-chat-message-input-renderer #input-container,[\s\S]*background: var\(--ytce-input-gradient\) !important;/);
   assert.match(contentStyles, /yt-emoji-picker-renderer\s*\{[\s\S]*--yt-live-chat-picker-button-active-color: var\(--ytce-accent\);/);
-  assert.match(contentStyles, /yt-emoji-picker-renderer #categories,[\s\S]*background-color: var\(--ytce-picker-surface\) !important;/);
+  assert.match(contentStyles, /yt-emoji-picker-renderer #categories,[\s\S]*background: var\(--ytce-picker-gradient\) !important;/);
   assert.doesNotMatch(contentStyles, /body\.ytce-active\s+yt-live-chat-renderer\s+\*/);
+});
+
+test("四套畫風以紅黑綠黃順序顯示且保留既有儲存 ID", async () => {
+  const harness = await createHarness();
+  try {
+    assert.deepEqual(
+      [...harness.document.querySelectorAll(".ytce-theme-switch button")].map((button) => ({
+        id: button.dataset.theme,
+        label: button.querySelector("span:last-child").textContent,
+        ariaLabel: button.getAttribute("aria-label")
+      })),
+      [
+        { id: "ember", label: "赤曜", ariaLabel: "切換為赤曜畫風" },
+        { id: "aurora", label: "玄曜", ariaLabel: "切換為玄曜畫風" },
+        { id: "paper", label: "翠曜", ariaLabel: "切換為翠曜畫風" },
+        { id: "starlight", label: "金曜", ariaLabel: "切換為金曜畫風" }
+      ]
+    );
+  } finally {
+    harness.cleanup();
+  }
 });
 
 test("四套畫風的輸入文字與表情圖示皆符合對比門檻", () => {
   for (const theme of ["ember", "aurora", "paper", "starlight"]) {
-    const inputSurface = getThemeToken(theme, "--ytce-input-surface");
-    const pickerSurface = getThemeToken(theme, "--ytce-picker-surface");
     const inputText = getThemeToken(theme, "--ytce-input-text");
     const inputIcon = getThemeToken(theme, "--ytce-input-icon");
+    const inputSurfaces = getThemeGradientColors(theme, "--ytce-input-gradient");
+    const pickerSurfaces = getThemeGradientColors(theme, "--ytce-picker-gradient");
 
-    assert.ok(colorContrast(inputText, inputSurface) >= 4.5, `${theme} 輸入文字對比不足`);
-    assert.ok(colorContrast(inputIcon, inputSurface) >= 3, `${theme} 表情按鈕對比不足`);
-    assert.ok(colorContrast(inputText, pickerSurface) >= 4.5, `${theme} 表情面板文字對比不足`);
-    assert.ok(colorContrast(inputIcon, pickerSurface) >= 3, `${theme} 表情面板圖示對比不足`);
+    for (const surface of inputSurfaces) {
+      assert.ok(colorContrast(inputText, surface) >= 4.5, `${theme} 輸入文字在 ${surface} 對比不足`);
+      assert.ok(colorContrast(inputIcon, surface) >= 3, `${theme} 表情按鈕在 ${surface} 對比不足`);
+    }
+    for (const surface of pickerSurfaces) {
+      assert.ok(colorContrast(inputText, surface) >= 4.5, `${theme} 表情面板文字在 ${surface} 對比不足`);
+      assert.ok(colorContrast(inputIcon, surface) >= 3, `${theme} 表情面板圖示在 ${surface} 對比不足`);
+    }
   }
 });
 
@@ -430,7 +466,7 @@ test("A) Settings sanitize 遇到壞資料會 fallback 預設值且 Whitelist", 
   }
 });
 
-test("A) 畫風可切換、持久保存，無效值會回落至熔岩", async () => {
+test("A) 畫風可切換、持久保存，無效值會回落至赤曜", async () => {
   const invalidHarness = await createHarness({ theme: "rainbow-hacker" });
   try {
     assert.equal(invalidHarness.document.body.dataset.ytceTheme, "ember");
@@ -909,12 +945,24 @@ test("F) CSS 規範檢查：無 outline:none 且包含 :focus-visible", () => {
   assert.equal(cssContent.includes("outline:none"), false, "不可使用 outline:none");
   assert.ok(cssContent.includes(":focus-visible"), "必須包含 :focus-visible 焦距環設定");
   assert.ok(cssContent.includes("--ytce-radius-shell"), "視覺圓角應由共同 token 管理");
-  assert.ok(cssContent.includes("--ytce-accent: #e9786f"), "介面應維持單一珊瑚重點色");
+  assert.ok(cssContent.includes("--ytce-accent: #ff4d5a"), "赤曜應維持鮮紅重點色");
+  assert.ok(cssContent.includes("--ytce-accent: #b9d8ff"), "玄曜應維持黑鉻冷光重點色");
+  assert.ok(cssContent.includes("--ytce-accent: #35e6a3"), "翠曜應維持祖母綠重點色");
+  assert.ok(cssContent.includes("--ytce-accent: #ffd15a"), "金曜應維持亮金黃重點色");
   assert.ok(cssContent.includes("prefers-reduced-motion: reduce"), "必須尊重減少動態偏好");
+  assert.ok(cssContent.includes("@keyframes ytce-flow-line"), "精品電競畫風應包含流光飾線");
+  assert.ok(cssContent.includes("@keyframes ytce-energy-sweep"), "啟用模式應包含能量掃光");
+  assert.ok(cssContent.includes("@keyframes ytce-specular-sweep"), "精品材質應包含高光掃過效果");
+  assert.ok(cssContent.includes("--ytce-material-art"), "四套畫風應包含獨立材質紋理");
+  assert.ok(cssContent.includes("--ytce-specular"), "面板內框應包含金屬高光色票");
+  assert.ok(cssContent.includes("--ytce-panel-gradient"), "控制面板應使用明顯主題漸層");
+  assert.ok(cssContent.includes("--ytce-chat-gradient"), "聊天室卡片應使用方向性漸層");
+  assert.ok(cssContent.includes("--ytce-input-gradient"), "輸入區應使用主題漸層");
+  assert.match(cssContent, /prefers-reduced-motion: reduce[\s\S]*#ytce-control-panel::before,[\s\S]*animation: none !important;/, "減少動態偏好必須停用流光偽元素");
   assert.equal(/@import|url\(\s*["']?https?:/i.test(cssContent), false, "不得依賴遠端字型或素材");
   assert.match(cssContent, /body\.ytce-active ::selection/, "文字選取色應納入主題系統");
   assert.match(cssContent, /caret-color: var\(--ytce-accent\)/, "文字游標應納入主題系統");
-  assert.match(cssContent, /color-scheme: light/, "紙墨主題應使用 light 原生表面");
+  assert.equal(cssContent.includes("color-scheme: light"), false, "四套精品深色畫風皆應使用 dark 原生表面");
   assert.match(cssContent, /#ytce-panel-body::\-webkit-scrollbar-thumb/, "面板捲軸應納入主題系統");
 });
 

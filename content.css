@@ -2,63 +2,67 @@
     --ytce-font-size: 28px;
     --ytce-line-height: 39px;
     --ytce-avatar-size: 48px;
-    --ytce-accent: #e9786f;
-    --ytce-accent-strong: #c95550;
-    --ytce-accent-soft: rgba(233, 120, 111, 0.17);
-    --ytce-canvas: #100f0e;
-    --ytce-surface: rgba(25, 23, 22, 0.965);
-    --ytce-surface-raised: rgba(245, 226, 215, 0.065);
-    --ytce-surface-inset: rgba(7, 7, 7, 0.38);
-    --ytce-border: rgba(245, 226, 215, 0.115);
-    --ytce-border-strong: rgba(245, 226, 215, 0.19);
-    --ytce-text: #f5ece7;
-    --ytce-text-soft: #d8cbc5;
-    --ytce-muted: #a89c96;
-    --ytce-shadow: rgba(8, 5, 4, 0.58);
-    --ytce-warning: #d9a45d;
-    --ytce-panel-glow: rgba(233, 120, 111, 0.12);
-    --ytce-accent-glow: rgba(233, 120, 111, 0.3);
-    --ytce-accent-shadow: rgba(126, 42, 38, 0.27);
-    --ytce-control-hover: rgba(245, 226, 215, 0.1);
-    --ytce-control-subtle: rgba(245, 226, 215, 0.055);
-    --ytce-section-fill: rgba(245, 226, 215, 0.026);
-    --ytce-section-hover: rgba(245, 226, 215, 0.032);
-    --ytce-track: rgba(245, 226, 215, 0.14);
-    --ytce-thumb-ring: #f8e9e2;
-    --ytce-active-text: #fff8f4;
-    --ytce-knob: #f9eee8;
-    --ytce-danger-text: #f1aaa4;
-    --ytce-danger-border: rgba(233, 120, 111, 0.18);
-    --ytce-danger-fill: rgba(201, 85, 80, 0.09);
-    --ytce-focus-surface: rgba(10, 8, 8, 0.52);
-    --ytce-reader-center: #181412;
-    --ytce-reader-glow: rgba(233, 120, 111, 0.11);
-    --ytce-chat-text: #f5efeb;
-    --ytce-chat-surface: rgba(245, 226, 215, 0.035);
-    --ytce-chat-surface-hover: rgba(245, 226, 215, 0.065);
-    --ytce-chat-border: rgba(245, 226, 215, 0.055);
-    --ytce-chat-inset: rgba(255, 255, 255, 0.022);
-    --ytce-input-surface: #1b1817;
-    --ytce-input-text: #f5efeb;
-    --ytce-input-placeholder: #b8aaa3;
-    --ytce-input-icon: #d8cbc5;
-    --ytce-input-icon-hover: #fff8f4;
-    --ytce-picker-surface: #211d1b;
-    --ytce-picker-hover: rgba(245, 226, 215, 0.1);
-    --ytce-highlight-fill: rgba(217, 164, 93, 0.2);
-    --ytce-highlight-fade: rgba(217, 164, 93, 0.035);
-    --ytce-highlight-border: rgba(217, 164, 93, 0.22);
-    --ytce-panel-art:
-        radial-gradient(circle at 12% -8%, rgba(233, 120, 111, 0.16), transparent 30%),
-        radial-gradient(circle at 92% 8%, rgba(217, 164, 93, 0.09), transparent 24%),
-        linear-gradient(155deg, rgba(255, 255, 255, 0.035), transparent 45%);
-    --ytce-section-art: linear-gradient(115deg, rgba(255, 255, 255, 0.032), transparent 45%);
-    --ytce-section-art-hover: linear-gradient(115deg, rgba(255, 255, 255, 0.045), transparent 45%);
-    --ytce-topline: linear-gradient(90deg, #8e2f2a, #f49a7e 38%, #d9a45d 68%, transparent 92%);
-    --ytce-active-gradient: linear-gradient(180deg, #f08376, #b73d39);
-    --ytce-brand-gradient: linear-gradient(180deg, #f6b07f, #c7433e 62%, #8b2928);
+    --ytce-accent: #ff4d5a;
+    --ytce-accent-strong: #e52f43;
+    --ytce-accent-soft: rgba(255, 77, 90, 0.18);
+    --ytce-canvas: #100406;
+    --ytce-surface: #1a080d;
+    --ytce-surface-raised: rgba(255, 239, 241, 0.07);
+    --ytce-surface-inset: #0b0205;
+    --ytce-border: rgba(255, 190, 196, 0.16);
+    --ytce-border-strong: rgba(255, 190, 196, 0.29);
+    --ytce-text: #fff1f2;
+    --ytce-text-soft: #e9c8cd;
+    --ytce-muted: #c197a0;
+    --ytce-shadow: rgba(5, 0, 2, 0.78);
+    --ytce-warning: #ffca68;
+    --ytce-panel-glow: rgba(255, 77, 90, 0.15);
+    --ytce-accent-glow: rgba(255, 77, 90, 0.34);
+    --ytce-accent-shadow: rgba(143, 12, 35, 0.43);
+    --ytce-control-hover: rgba(255, 190, 196, 0.12);
+    --ytce-control-subtle: rgba(255, 190, 196, 0.06);
+    --ytce-section-fill: rgba(255, 190, 196, 0.035);
+    --ytce-section-hover: rgba(255, 190, 196, 0.06);
+    --ytce-track: rgba(255, 190, 196, 0.19);
+    --ytce-thumb-ring: #fff5f6;
+    --ytce-active-text: #ffffff;
+    --ytce-knob: #fff0f1;
+    --ytce-danger-text: #ff9ca8;
+    --ytce-danger-border: rgba(255, 77, 90, 0.34);
+    --ytce-danger-fill: rgba(229, 47, 67, 0.13);
+    --ytce-focus-surface: #21090f;
+    --ytce-reader-center: #260a12;
+    --ytce-reader-glow: rgba(255, 77, 90, 0.16);
+    --ytce-chat-text: #fff5f5;
+    --ytce-chat-surface: rgba(255, 77, 90, 0.045);
+    --ytce-chat-surface-hover: rgba(255, 77, 90, 0.105);
+    --ytce-chat-border: rgba(255, 190, 196, 0.105);
+    --ytce-chat-inset: rgba(255, 255, 255, 0.035);
+    --ytce-input-surface: #210a11;
+    --ytce-input-text: #fff5f5;
+    --ytce-input-placeholder: #caa8ae;
+    --ytce-input-icon: #e9c8cd;
+    --ytce-input-icon-hover: #ffffff;
+    --ytce-picker-surface: #260b14;
+    --ytce-picker-hover: rgba(255, 77, 90, 0.16);
+    --ytce-highlight-fill: rgba(255, 202, 104, 0.23);
+    --ytce-highlight-fade: rgba(255, 202, 104, 0.045);
+    --ytce-highlight-border: rgba(255, 202, 104, 0.34);
+    --ytce-panel-art: radial-gradient(circle at 12% -8%, rgba(255, 77, 90, 0.25), transparent 31%), radial-gradient(circle at 91% 8%, rgba(255, 202, 104, 0.14), transparent 25%), linear-gradient(145deg, rgba(255, 255, 255, 0.045), transparent 46%);
+    --ytce-panel-gradient: linear-gradient(135deg, #350914 0%, #18070c 46%, #321506 100%);
+    --ytce-material-art: repeating-linear-gradient(90deg, rgba(255, 238, 240, 0.025) 0 1px, transparent 1px 6px);
+    --ytce-specular: rgba(255, 239, 224, 0.78);
+    --ytce-section-art: linear-gradient(120deg, rgba(255, 77, 90, 0.07), transparent 48%);
+    --ytce-section-art-hover: linear-gradient(120deg, rgba(255, 202, 104, 0.09), transparent 50%);
+    --ytce-section-gradient: linear-gradient(115deg, #290b13 0%, #16070b 54%, #281106 100%);
+    --ytce-chat-gradient: linear-gradient(105deg, rgba(255, 77, 90, 0.16), rgba(19, 6, 9, 0.94) 50%, rgba(255, 202, 104, 0.09));
+    --ytce-input-gradient: linear-gradient(110deg, #2d0c16 0%, #16070b 58%, #2b1107 100%);
+    --ytce-picker-gradient: linear-gradient(125deg, #310d18 0%, #1c0810 52%, #301408 100%);
+    --ytce-topline: linear-gradient(90deg, #85162a, #ff4d5a 38%, #ffca68 72%, transparent 96%);
+    --ytce-active-gradient: linear-gradient(135deg, #ff6973, #d92b43 62%, #9b1735);
+    --ytce-brand-gradient: linear-gradient(180deg, #ffd07a, #ff4d5a 55%, #a41432);
     --ytce-panel-font: "Avenir Next", "SF Pro Text", "Segoe UI Variable", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
-    --ytce-inner-frame: rgba(217, 164, 93, 0.13);
+    --ytce-inner-frame: rgba(255, 202, 104, 0.18);
     --ytce-radius-shell: 20px;
     --ytce-radius-section: 11px;
     --ytce-radius-control: 7px;
@@ -67,194 +71,207 @@
 }
 
 body[data-ytce-theme="aurora"] {
-    --ytce-accent: #49d6c8;
-    --ytce-accent-strong: #159c9f;
-    --ytce-accent-soft: rgba(73, 214, 200, 0.17);
-    --ytce-canvas: #071013;
-    --ytce-surface: rgba(10, 25, 30, 0.97);
-    --ytce-surface-raised: rgba(163, 238, 232, 0.07);
-    --ytce-surface-inset: rgba(2, 12, 16, 0.5);
-    --ytce-border: rgba(163, 238, 232, 0.13);
-    --ytce-border-strong: rgba(163, 238, 232, 0.24);
-    --ytce-text: #e8f8f6;
-    --ytce-text-soft: #c5dcda;
-    --ytce-muted: #8ba7a6;
-    --ytce-shadow: rgba(0, 8, 12, 0.68);
-    --ytce-warning: #f2bd66;
-    --ytce-panel-glow: rgba(73, 214, 200, 0.13);
-    --ytce-accent-glow: rgba(73, 214, 200, 0.3);
-    --ytce-accent-shadow: rgba(7, 104, 109, 0.3);
-    --ytce-control-hover: rgba(163, 238, 232, 0.1);
-    --ytce-control-subtle: rgba(163, 238, 232, 0.055);
-    --ytce-section-fill: rgba(163, 238, 232, 0.026);
-    --ytce-section-hover: rgba(163, 238, 232, 0.04);
-    --ytce-track: rgba(163, 238, 232, 0.16);
-    --ytce-thumb-ring: #dff8f5;
-    --ytce-active-text: #efffff;
-    --ytce-knob: #e6fffc;
-    --ytce-danger-text: #ffaaa0;
-    --ytce-danger-border: rgba(242, 118, 102, 0.22);
-    --ytce-danger-fill: rgba(182, 66, 54, 0.12);
-    --ytce-focus-surface: rgba(2, 13, 17, 0.68);
-    --ytce-reader-center: #0b1b20;
-    --ytce-reader-glow: rgba(73, 214, 200, 0.12);
-    --ytce-chat-text: #e9f8f6;
-    --ytce-chat-surface: rgba(34, 83, 88, 0.22);
-    --ytce-chat-surface-hover: rgba(73, 214, 200, 0.11);
-    --ytce-chat-border: rgba(163, 238, 232, 0.07);
-    --ytce-chat-inset: rgba(178, 255, 248, 0.025);
-    --ytce-input-surface: #0d2026;
-    --ytce-input-text: #e9f8f6;
-    --ytce-input-placeholder: #9fb9b7;
-    --ytce-input-icon: #bfe2de;
-    --ytce-input-icon-hover: #efffff;
-    --ytce-picker-surface: #10282e;
-    --ytce-picker-hover: rgba(73, 214, 200, 0.14);
-    --ytce-panel-art:
-        radial-gradient(circle at 16% -5%, rgba(73, 214, 200, 0.22), transparent 32%),
-        radial-gradient(circle at 88% 12%, rgba(133, 92, 255, 0.18), transparent 28%),
-        linear-gradient(125deg, rgba(255, 255, 255, 0.045), transparent 36%);
-    --ytce-section-art: linear-gradient(135deg, rgba(73, 214, 200, 0.055), transparent 48%);
-    --ytce-section-art-hover: linear-gradient(135deg, rgba(133, 92, 255, 0.075), transparent 52%);
-    --ytce-topline: linear-gradient(90deg, #159c9f, #62f1d8 34%, #9a73ff 72%, transparent 96%);
-    --ytce-active-gradient: linear-gradient(135deg, #5ce2d2, #219fa7 58%, #795be1);
-    --ytce-brand-gradient: linear-gradient(180deg, #8affec, #3bc4bf 55%, #7859dd);
-    --ytce-radius-shell: 24px;
-    --ytce-radius-section: 15px;
-    --ytce-radius-control: 10px;
-    --ytce-chat-radius: 16px;
-    --ytce-avatar-radius: 50%;
-    --ytce-inner-frame: rgba(98, 241, 216, 0.16);
+    --ytce-accent: #b9d8ff;
+    --ytce-accent-strong: #79b8ed;
+    --ytce-accent-soft: rgba(185, 216, 255, 0.17);
+    --ytce-canvas: #07090d;
+    --ytce-surface: #11151b;
+    --ytce-surface-raised: rgba(224, 238, 255, 0.08);
+    --ytce-surface-inset: #05070a;
+    --ytce-border: rgba(210, 229, 255, 0.18);
+    --ytce-border-strong: rgba(210, 229, 255, 0.34);
+    --ytce-text: #f1f6ff;
+    --ytce-text-soft: #c9d6e7;
+    --ytce-muted: #9baabd;
+    --ytce-shadow: rgba(0, 0, 0, 0.84);
+    --ytce-warning: #f4c96b;
+    --ytce-panel-glow: rgba(185, 216, 255, 0.14);
+    --ytce-accent-glow: rgba(185, 216, 255, 0.3);
+    --ytce-accent-shadow: rgba(36, 92, 145, 0.43);
+    --ytce-control-hover: rgba(210, 229, 255, 0.13);
+    --ytce-control-subtle: rgba(210, 229, 255, 0.065);
+    --ytce-section-fill: rgba(210, 229, 255, 0.036);
+    --ytce-section-hover: rgba(210, 229, 255, 0.07);
+    --ytce-track: rgba(210, 229, 255, 0.21);
+    --ytce-thumb-ring: #f5f9ff;
+    --ytce-active-text: #07101b;
+    --ytce-knob: #f1f7ff;
+    --ytce-danger-text: #ff9da5;
+    --ytce-danger-border: rgba(255, 100, 116, 0.35);
+    --ytce-danger-fill: rgba(176, 25, 48, 0.16);
+    --ytce-focus-surface: #151d27;
+    --ytce-reader-center: #171d27;
+    --ytce-reader-glow: rgba(185, 216, 255, 0.15);
+    --ytce-chat-text: #f5f8ff;
+    --ytce-chat-surface: rgba(185, 216, 255, 0.055);
+    --ytce-chat-surface-hover: rgba(185, 216, 255, 0.12);
+    --ytce-chat-border: rgba(210, 229, 255, 0.12);
+    --ytce-chat-inset: rgba(255, 255, 255, 0.045);
+    --ytce-input-surface: #151c25;
+    --ytce-input-text: #f5f8ff;
+    --ytce-input-placeholder: #aebdce;
+    --ytce-input-icon: #c9d6e7;
+    --ytce-input-icon-hover: #ffffff;
+    --ytce-picker-surface: #19222e;
+    --ytce-picker-hover: rgba(185, 216, 255, 0.16);
+    --ytce-highlight-fill: rgba(244, 201, 107, 0.22);
+    --ytce-highlight-fade: rgba(244, 201, 107, 0.045);
+    --ytce-highlight-border: rgba(244, 201, 107, 0.32);
+    --ytce-panel-art: linear-gradient(125deg, rgba(255, 255, 255, 0.09), transparent 35%), linear-gradient(155deg, rgba(185, 216, 255, 0.17), transparent 48%), linear-gradient(90deg, rgba(120, 140, 165, 0.08), transparent 52%);
+    --ytce-panel-gradient: linear-gradient(135deg, #273545 0%, #0a0d12 46%, #1c2733 100%);
+    --ytce-material-art: repeating-linear-gradient(135deg, rgba(220, 236, 255, 0.035) 0 1px, transparent 1px 7px), repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 8px);
+    --ytce-specular: rgba(231, 244, 255, 0.9);
+    --ytce-section-art: linear-gradient(135deg, rgba(185, 216, 255, 0.07), transparent 50%);
+    --ytce-section-art-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 52%);
+    --ytce-section-gradient: linear-gradient(115deg, #202b38 0%, #0b0e13 54%, #17212c 100%);
+    --ytce-chat-gradient: linear-gradient(105deg, rgba(185, 216, 255, 0.17), rgba(8, 11, 15, 0.95) 50%, rgba(121, 184, 237, 0.1));
+    --ytce-input-gradient: linear-gradient(110deg, #243140 0%, #0d1117 58%, #1d2935 100%);
+    --ytce-picker-gradient: linear-gradient(125deg, #29384a 0%, #111720 52%, #202e3c 100%);
+    --ytce-topline: linear-gradient(90deg, #526477, #dcecff 45%, #79b8ed 76%, transparent 97%);
+    --ytce-active-gradient: linear-gradient(135deg, #dcecff, #83bcef 55%, #4d83ad);
+    --ytce-brand-gradient: linear-gradient(180deg, #ffffff, #b9d8ff 58%, #6184a3);
+    --ytce-inner-frame: rgba(185, 216, 255, 0.2);
+    --ytce-radius-shell: 14px;
+    --ytce-radius-section: 9px;
+    --ytce-radius-control: 6px;
+    --ytce-chat-radius: 7px;
+    --ytce-avatar-radius: 22%;
 }
 
 body[data-ytce-theme="paper"] {
-    --ytce-accent: #d5634f;
-    --ytce-accent-strong: #a84235;
-    --ytce-accent-soft: rgba(213, 99, 79, 0.15);
-    --ytce-canvas: #ebe4d9;
-    --ytce-surface: rgba(250, 247, 240, 0.975);
-    --ytce-surface-raised: rgba(73, 55, 43, 0.055);
-    --ytce-surface-inset: rgba(91, 71, 57, 0.065);
-    --ytce-border: rgba(69, 51, 39, 0.14);
-    --ytce-border-strong: rgba(69, 51, 39, 0.24);
-    --ytce-text: #302821;
-    --ytce-text-soft: #574b42;
-    --ytce-muted: #817268;
-    --ytce-shadow: rgba(63, 45, 34, 0.25);
-    --ytce-warning: #a66a16;
-    --ytce-panel-glow: rgba(213, 99, 79, 0.09);
-    --ytce-accent-glow: rgba(213, 99, 79, 0.24);
-    --ytce-accent-shadow: rgba(130, 54, 43, 0.2);
-    --ytce-control-hover: rgba(73, 55, 43, 0.09);
-    --ytce-control-subtle: rgba(73, 55, 43, 0.055);
-    --ytce-section-fill: rgba(73, 55, 43, 0.025);
-    --ytce-section-hover: rgba(73, 55, 43, 0.045);
-    --ytce-track: rgba(73, 55, 43, 0.2);
-    --ytce-thumb-ring: #fffaf2;
-    --ytce-active-text: #fffaf5;
-    --ytce-knob: #fffaf2;
-    --ytce-danger-text: #a84235;
-    --ytce-danger-border: rgba(168, 66, 53, 0.22);
-    --ytce-danger-fill: rgba(213, 99, 79, 0.08);
-    --ytce-focus-surface: rgba(255, 252, 246, 0.9);
-    --ytce-reader-center: #f8f3e9;
-    --ytce-reader-glow: rgba(213, 99, 79, 0.1);
-    --ytce-chat-text: #302821;
-    --ytce-chat-surface: rgba(255, 252, 246, 0.7);
-    --ytce-chat-surface-hover: rgba(255, 250, 241, 0.94);
-    --ytce-chat-border: rgba(69, 51, 39, 0.11);
-    --ytce-chat-inset: rgba(255, 255, 255, 0.38);
-    --ytce-input-surface: #fffaf2;
-    --ytce-input-text: #302821;
-    --ytce-input-placeholder: #706158;
-    --ytce-input-icon: #574b42;
-    --ytce-input-icon-hover: #302821;
-    --ytce-picker-surface: #fffaf2;
-    --ytce-picker-hover: rgba(73, 55, 43, 0.1);
-    --ytce-highlight-fill: rgba(185, 120, 28, 0.17);
-    --ytce-highlight-fade: rgba(185, 120, 28, 0.035);
-    --ytce-highlight-border: rgba(166, 106, 22, 0.25);
-    --ytce-panel-art:
-        radial-gradient(circle at 94% 3%, rgba(183, 129, 61, 0.13), transparent 25%),
-        repeating-linear-gradient(0deg, rgba(73, 55, 43, 0.018) 0 1px, transparent 1px 5px),
-        linear-gradient(145deg, rgba(255, 255, 255, 0.48), transparent 48%);
-    --ytce-section-art: repeating-linear-gradient(90deg, rgba(87, 60, 42, 0.018) 0 1px, transparent 1px 7px);
-    --ytce-section-art-hover: linear-gradient(90deg, rgba(213, 99, 79, 0.045), transparent 36%);
-    --ytce-topline: linear-gradient(90deg, #7d2f25, #d5634f 32%, #b88a4e 72%, #7d2f25);
-    --ytce-active-gradient: linear-gradient(180deg, #d9715d, #9f3c31);
-    --ytce-brand-gradient: linear-gradient(180deg, #d99a5e, #b94838 62%, #792a24);
-    --ytce-panel-font: "Songti TC", "STSong", "Noto Serif TC", "PingFang TC", serif;
-    --ytce-radius-shell: 8px;
-    --ytce-radius-section: 4px;
-    --ytce-radius-control: 3px;
-    --ytce-chat-radius: 2px;
-    --ytce-avatar-radius: 5px;
-    --ytce-inner-frame: rgba(125, 47, 37, 0.18);
+    --ytce-accent: #35e6a3;
+    --ytce-accent-strong: #12b979;
+    --ytce-accent-soft: rgba(53, 230, 163, 0.18);
+    --ytce-canvas: #04110d;
+    --ytce-surface: #0a1b15;
+    --ytce-surface-raised: rgba(209, 255, 231, 0.07);
+    --ytce-surface-inset: #020b08;
+    --ytce-border: rgba(173, 244, 210, 0.17);
+    --ytce-border-strong: rgba(173, 244, 210, 0.3);
+    --ytce-text: #edfff5;
+    --ytce-text-soft: #c5e9d4;
+    --ytce-muted: #8fbca2;
+    --ytce-shadow: rgba(0, 7, 4, 0.8);
+    --ytce-warning: #f2d56f;
+    --ytce-panel-glow: rgba(53, 230, 163, 0.15);
+    --ytce-accent-glow: rgba(53, 230, 163, 0.32);
+    --ytce-accent-shadow: rgba(5, 112, 70, 0.43);
+    --ytce-control-hover: rgba(173, 244, 210, 0.11);
+    --ytce-control-subtle: rgba(173, 244, 210, 0.06);
+    --ytce-section-fill: rgba(173, 244, 210, 0.032);
+    --ytce-section-hover: rgba(173, 244, 210, 0.06);
+    --ytce-track: rgba(173, 244, 210, 0.19);
+    --ytce-thumb-ring: #eefff5;
+    --ytce-active-text: #03140d;
+    --ytce-knob: #e2ffed;
+    --ytce-danger-text: #ff9da8;
+    --ytce-danger-border: rgba(255, 101, 122, 0.34);
+    --ytce-danger-fill: rgba(166, 29, 55, 0.15);
+    --ytce-focus-surface: #0d291d;
+    --ytce-reader-center: #103324;
+    --ytce-reader-glow: rgba(53, 230, 163, 0.15);
+    --ytce-chat-text: #f0fff7;
+    --ytce-chat-surface: rgba(53, 230, 163, 0.045);
+    --ytce-chat-surface-hover: rgba(53, 230, 163, 0.11);
+    --ytce-chat-border: rgba(173, 244, 210, 0.1);
+    --ytce-chat-inset: rgba(225, 255, 238, 0.035);
+    --ytce-input-surface: #0e261b;
+    --ytce-input-text: #f0fff7;
+    --ytce-input-placeholder: #a3cdb1;
+    --ytce-input-icon: #c5e9d4;
+    --ytce-input-icon-hover: #ffffff;
+    --ytce-picker-surface: #113222;
+    --ytce-picker-hover: rgba(53, 230, 163, 0.16);
+    --ytce-highlight-fill: rgba(242, 213, 111, 0.22);
+    --ytce-highlight-fade: rgba(242, 213, 111, 0.045);
+    --ytce-highlight-border: rgba(242, 213, 111, 0.32);
+    --ytce-panel-art: radial-gradient(circle at 12% -8%, rgba(53, 230, 163, 0.24), transparent 31%), radial-gradient(circle at 91% 8%, rgba(242, 213, 111, 0.14), transparent 25%), linear-gradient(145deg, rgba(255, 255, 255, 0.04), transparent 46%);
+    --ytce-panel-gradient: linear-gradient(135deg, #0c422d 0%, #061710 46%, #213714 100%);
+    --ytce-material-art: repeating-linear-gradient(115deg, rgba(210, 255, 230, 0.028) 0 1px, transparent 1px 8px);
+    --ytce-specular: rgba(220, 255, 235, 0.84);
+    --ytce-section-art: linear-gradient(120deg, rgba(53, 230, 163, 0.07), transparent 48%);
+    --ytce-section-art-hover: linear-gradient(120deg, rgba(242, 213, 111, 0.09), transparent 50%);
+    --ytce-section-gradient: linear-gradient(115deg, #0d3526 0%, #06150f 54%, #1a2f13 100%);
+    --ytce-chat-gradient: linear-gradient(105deg, rgba(53, 230, 163, 0.17), rgba(4, 17, 13, 0.95) 50%, rgba(242, 213, 111, 0.09));
+    --ytce-input-gradient: linear-gradient(110deg, #0f3a29 0%, #061710 58%, #1c3214 100%);
+    --ytce-picker-gradient: linear-gradient(125deg, #124630 0%, #082016 52%, #223b17 100%);
+    --ytce-topline: linear-gradient(90deg, #08704b, #35e6a3 38%, #f2d56f 72%, transparent 96%);
+    --ytce-active-gradient: linear-gradient(135deg, #75f2bd, #19be83 62%, #08734b);
+    --ytce-brand-gradient: linear-gradient(180deg, #f2d56f, #35e6a3 56%, #08734b);
+    --ytce-inner-frame: rgba(242, 213, 111, 0.18);
+    --ytce-radius-shell: 18px;
+    --ytce-radius-section: 12px;
+    --ytce-radius-control: 8px;
+    --ytce-chat-radius: 10px;
+    --ytce-avatar-radius: 50%;
 }
 
 body[data-ytce-theme="starlight"] {
-    --ytce-accent: #d8b26a;
-    --ytce-accent-strong: #9b6fe8;
-    --ytce-accent-soft: rgba(216, 178, 106, 0.17);
-    --ytce-canvas: #0d0917;
-    --ytce-surface: rgba(25, 15, 43, 0.975);
-    --ytce-surface-raised: rgba(231, 211, 255, 0.075);
-    --ytce-surface-inset: rgba(8, 4, 18, 0.52);
-    --ytce-border: rgba(221, 194, 255, 0.15);
-    --ytce-border-strong: rgba(224, 190, 255, 0.29);
-    --ytce-text: #fbf4ff;
-    --ytce-text-soft: #e0d0e9;
-    --ytce-muted: #aa96b9;
-    --ytce-shadow: rgba(5, 1, 13, 0.72);
-    --ytce-warning: #efc66f;
-    --ytce-panel-glow: rgba(155, 111, 232, 0.2);
-    --ytce-accent-glow: rgba(207, 157, 255, 0.34);
-    --ytce-accent-shadow: rgba(73, 34, 132, 0.42);
-    --ytce-control-hover: rgba(230, 211, 255, 0.11);
-    --ytce-control-subtle: rgba(230, 211, 255, 0.06);
-    --ytce-section-fill: rgba(230, 211, 255, 0.03);
-    --ytce-section-hover: rgba(230, 211, 255, 0.047);
-    --ytce-track: rgba(230, 211, 255, 0.17);
-    --ytce-thumb-ring: #fff4db;
-    --ytce-active-text: #fffaf0;
-    --ytce-knob: #fff7de;
-    --ytce-danger-text: #ffb4c6;
-    --ytce-danger-border: rgba(255, 139, 174, 0.24);
-    --ytce-danger-fill: rgba(174, 53, 96, 0.13);
-    --ytce-focus-surface: rgba(12, 5, 26, 0.72);
-    --ytce-reader-center: #1f1236;
-    --ytce-reader-glow: rgba(216, 178, 106, 0.13);
-    --ytce-chat-text: #faf3ff;
-    --ytce-chat-surface: rgba(64, 39, 91, 0.3);
-    --ytce-chat-surface-hover: rgba(97, 61, 135, 0.38);
-    --ytce-chat-border: rgba(224, 190, 255, 0.085);
-    --ytce-chat-inset: rgba(255, 240, 255, 0.03);
-    --ytce-input-surface: #211437;
-    --ytce-input-text: #faf3ff;
-    --ytce-input-placeholder: #baa8c7;
-    --ytce-input-icon: #dfcfeb;
-    --ytce-input-icon-hover: #fffaf0;
-    --ytce-picker-surface: #291942;
-    --ytce-picker-hover: rgba(216, 178, 106, 0.14);
-    --ytce-highlight-fill: rgba(216, 178, 106, 0.2);
-    --ytce-highlight-fade: rgba(155, 111, 232, 0.045);
-    --ytce-highlight-border: rgba(216, 178, 106, 0.28);
-    --ytce-panel-art:
-        radial-gradient(circle at 18% 3%, rgba(155, 111, 232, 0.28), transparent 31%),
-        radial-gradient(circle at 86% 7%, rgba(216, 178, 106, 0.16), transparent 23%),
-        radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.5px),
-        radial-gradient(circle at 31% 22%, rgba(255, 255, 255, 0.14) 0 1px, transparent 1.5px);
-    --ytce-section-art: linear-gradient(120deg, rgba(155, 111, 232, 0.08), transparent 42%);
-    --ytce-section-art-hover: linear-gradient(120deg, rgba(216, 178, 106, 0.085), transparent 48%);
-    --ytce-topline: linear-gradient(90deg, transparent 2%, #8b5fda 18%, #e5c67d 50%, #8b5fda 82%, transparent 98%);
-    --ytce-active-gradient: linear-gradient(135deg, #b789f4, #7650bf 55%, #c39d58);
-    --ytce-brand-gradient: linear-gradient(180deg, #ffe7a3, #ba8be9 58%, #6f48b2);
-    --ytce-radius-shell: 28px;
-    --ytce-radius-section: 16px;
-    --ytce-radius-control: 12px;
-    --ytce-chat-radius: 18px;
-    --ytce-avatar-radius: 50%;
-    --ytce-inner-frame: rgba(229, 198, 125, 0.18);
+    --ytce-accent: #ffd15a;
+    --ytce-accent-strong: #e9a927;
+    --ytce-accent-soft: rgba(255, 209, 90, 0.18);
+    --ytce-canvas: #120d03;
+    --ytce-surface: #211603;
+    --ytce-surface-raised: rgba(255, 240, 188, 0.08);
+    --ytce-surface-inset: #0b0701;
+    --ytce-border: rgba(255, 231, 154, 0.18);
+    --ytce-border-strong: rgba(255, 231, 154, 0.33);
+    --ytce-text: #fff8de;
+    --ytce-text-soft: #f1dca5;
+    --ytce-muted: #c8aa6f;
+    --ytce-shadow: rgba(10, 6, 0, 0.82);
+    --ytce-warning: #fff0a5;
+    --ytce-panel-glow: rgba(255, 209, 90, 0.16);
+    --ytce-accent-glow: rgba(255, 209, 90, 0.34);
+    --ytce-accent-shadow: rgba(158, 91, 7, 0.44);
+    --ytce-control-hover: rgba(255, 231, 154, 0.12);
+    --ytce-control-subtle: rgba(255, 231, 154, 0.065);
+    --ytce-section-fill: rgba(255, 231, 154, 0.035);
+    --ytce-section-hover: rgba(255, 231, 154, 0.065);
+    --ytce-track: rgba(255, 231, 154, 0.2);
+    --ytce-thumb-ring: #fff9db;
+    --ytce-active-text: #211400;
+    --ytce-knob: #fff4bd;
+    --ytce-danger-text: #ff9ea0;
+    --ytce-danger-border: rgba(255, 100, 104, 0.34);
+    --ytce-danger-fill: rgba(166, 24, 29, 0.15);
+    --ytce-focus-surface: #2b1c05;
+    --ytce-reader-center: #342205;
+    --ytce-reader-glow: rgba(255, 209, 90, 0.16);
+    --ytce-chat-text: #fff9e6;
+    --ytce-chat-surface: rgba(255, 209, 90, 0.05);
+    --ytce-chat-surface-hover: rgba(255, 209, 90, 0.12);
+    --ytce-chat-border: rgba(255, 231, 154, 0.11);
+    --ytce-chat-inset: rgba(255, 248, 212, 0.04);
+    --ytce-input-surface: #2a1b05;
+    --ytce-input-text: #fff9e6;
+    --ytce-input-placeholder: #d7bc7d;
+    --ytce-input-icon: #f1dca5;
+    --ytce-input-icon-hover: #fffbe9;
+    --ytce-picker-surface: #342306;
+    --ytce-picker-hover: rgba(255, 209, 90, 0.17);
+    --ytce-highlight-fill: rgba(255, 240, 165, 0.24);
+    --ytce-highlight-fade: rgba(255, 240, 165, 0.05);
+    --ytce-highlight-border: rgba(255, 240, 165, 0.35);
+    --ytce-panel-art: radial-gradient(circle at 12% -8%, rgba(255, 209, 90, 0.23), transparent 30%), radial-gradient(circle at 91% 8%, rgba(255, 240, 165, 0.15), transparent 25%), linear-gradient(145deg, rgba(255, 255, 255, 0.055), transparent 45%);
+    --ytce-panel-gradient: linear-gradient(135deg, #4a2e04 0%, #181003 46%, #473408 100%);
+    --ytce-material-art: repeating-linear-gradient(90deg, rgba(255, 245, 205, 0.035) 0 1px, transparent 1px 5px);
+    --ytce-specular: rgba(255, 249, 215, 0.92);
+    --ytce-section-art: linear-gradient(120deg, rgba(255, 209, 90, 0.07), transparent 48%);
+    --ytce-section-art-hover: linear-gradient(120deg, rgba(255, 240, 165, 0.1), transparent 50%);
+    --ytce-section-gradient: linear-gradient(115deg, #392505 0%, #171003 54%, #3b2c08 100%);
+    --ytce-chat-gradient: linear-gradient(105deg, rgba(255, 209, 90, 0.18), rgba(18, 13, 3, 0.95) 50%, rgba(255, 240, 165, 0.1));
+    --ytce-input-gradient: linear-gradient(110deg, #422b06 0%, #1b1203 58%, #3c2b07 100%);
+    --ytce-picker-gradient: linear-gradient(125deg, #503507 0%, #241803 52%, #493508 100%);
+    --ytce-topline: linear-gradient(90deg, #9c650d, #ffd15a 36%, #fff0a5 72%, transparent 96%);
+    --ytce-active-gradient: linear-gradient(135deg, #ffe88b, #e9a927 62%, #9d650c);
+    --ytce-brand-gradient: linear-gradient(180deg, #fff2a8, #ffd15a 55%, #a76b0d);
+    --ytce-inner-frame: rgba(255, 240, 165, 0.2);
+    --ytce-radius-shell: 18px;
+    --ytce-radius-section: 12px;
+    --ytce-radius-control: 8px;
+    --ytce-chat-radius: 10px;
+    --ytce-avatar-radius: 34%;
 }
 
 #ytce-control-panel,
@@ -265,11 +282,6 @@ body[data-ytce-theme="starlight"] {
 html.ytce-active,
 body.ytce-active {
     color-scheme: dark;
-}
-
-html.ytce-active[data-ytce-theme="paper"],
-body.ytce-active[data-ytce-theme="paper"] {
-    color-scheme: light;
 }
 
 body.ytce-active ::selection {
@@ -287,16 +299,18 @@ body.ytce-active ::selection {
     margin: 0;
     color: var(--ytce-text);
     background:
+        var(--ytce-material-art),
         var(--ytce-panel-art),
-        var(--ytce-surface);
+        var(--ytce-panel-gradient);
     border: 1px solid var(--ytce-border);
     border-radius: var(--ytce-chat-radius);
     box-shadow:
         0 10px 28px var(--ytce-shadow),
+        0 0 28px var(--ytce-panel-glow),
         0 1px 0 rgba(255, 246, 240, 0.08) inset,
         0 0 0 1px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(22px) saturate(118%);
-    -webkit-backdrop-filter: blur(22px) saturate(118%);
+    backdrop-filter: blur(22px) saturate(145%);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
     font-family: var(--ytce-panel-font);
     overflow: hidden;
 }
@@ -308,6 +322,8 @@ body.ytce-active ::selection {
     z-index: 1;
     height: 3px;
     background: var(--ytce-topline);
+    background-size: 220% 100%;
+    animation: ytce-flow-line 3.2s linear infinite;
     pointer-events: none;
 }
 
@@ -316,21 +332,27 @@ body.ytce-active ::selection {
     position: absolute;
     inset: 6px;
     z-index: 2;
-    border: 1px solid var(--ytce-inner-frame);
+    padding: 1px;
     border-radius: max(0px, calc(var(--ytce-chat-radius) - 4px));
+    background: linear-gradient(110deg, var(--ytce-inner-frame), transparent 32%, var(--ytce-specular) 50%, transparent 68%, var(--ytce-inner-frame));
+    background-size: 260% 100%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: ytce-flow-line 4.4s linear infinite;
     pointer-events: none;
 }
 
 body[data-ytce-theme="aurora"] #ytce-control-panel {
-    box-shadow: 0 10px 30px var(--ytce-shadow), 0 0 22px rgba(73, 214, 200, 0.07), 0 0 36px rgba(133, 92, 255, 0.05);
+    box-shadow: 0 12px 34px var(--ytce-shadow), 0 0 24px rgba(185, 216, 255, 0.08), 0 0 0 1px rgba(220, 236, 255, 0.08);
 }
 
 body[data-ytce-theme="paper"] #ytce-control-panel {
-    box-shadow: 0 8px 24px var(--ytce-shadow), 0 0 0 1px rgba(184, 138, 78, 0.08), 0 1px 0 #fff inset;
+    box-shadow: 0 12px 34px var(--ytce-shadow), 0 0 26px rgba(53, 230, 163, 0.09), 0 0 0 1px rgba(242, 213, 111, 0.08);
 }
 
 body[data-ytce-theme="starlight"] #ytce-control-panel {
-    box-shadow: 0 12px 34px var(--ytce-shadow), 0 0 24px rgba(155, 111, 232, 0.09), 0 0 0 1px rgba(216, 178, 106, 0.14);
+    box-shadow: 0 12px 34px var(--ytce-shadow), 0 0 26px rgba(255, 209, 90, 0.11), 0 0 0 1px rgba(255, 240, 165, 0.13);
 }
 
 .ytce-panel-header {
@@ -356,6 +378,7 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
     border-radius: 3px;
     background: var(--ytce-brand-gradient);
     box-shadow: 0 0 20px var(--ytce-accent-glow);
+    animation: ytce-accent-breathe 2.8s ease-in-out infinite;
 }
 
 .ytce-brand div {
@@ -385,6 +408,8 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
 .ytce-actions button,
 .ytce-mode-switch button,
 .ytce-theme-switch button {
+    position: relative;
+    overflow: hidden;
     border: 0;
     color: inherit;
     font: inherit;
@@ -505,6 +530,9 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
     color: var(--ytce-text);
     border-color: var(--ytce-accent);
     background: var(--ytce-accent-soft);
+    box-shadow: 0 0 16px var(--ytce-panel-glow), 0 0 0 1px var(--ytce-accent-soft) inset;
+    text-shadow: 0 0 10px var(--ytce-accent-glow);
+    animation: ytce-accent-breathe 2.8s ease-in-out infinite;
 }
 
 .ytce-theme-switch button.is-active .ytce-theme-swatch {
@@ -525,23 +553,25 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
 }
 
 [data-theme="ember"] .ytce-theme-swatch {
-    background: linear-gradient(135deg, #231b18 50%, #e9786f 50%);
+    background: linear-gradient(135deg, #16050a 50%, #ff4d5a 50%);
 }
 
 [data-theme="aurora"] .ytce-theme-swatch {
-    background: linear-gradient(135deg, #071b21 50%, #49d6c8 50%);
+    background: linear-gradient(135deg, #05070a 50%, #dcecff 50%);
 }
 
 [data-theme="paper"] .ytce-theme-swatch {
-    border-color: rgba(69, 51, 39, 0.25);
-    background: linear-gradient(135deg, #f6f0e6 50%, #d5634f 50%);
+    border-color: rgba(173, 244, 210, 0.35);
+    background: linear-gradient(135deg, #04110d 50%, #35e6a3 50%);
 }
 
 [data-theme="starlight"] .ytce-theme-swatch {
-    background: linear-gradient(135deg, #180d2c 42%, #9b6fe8 42% 66%, #e1bd70 66%);
+    background: linear-gradient(135deg, #120d03 50%, #ffd15a 50%);
 }
 
 .ytce-mode-switch button {
+    position: relative;
+    overflow: hidden;
     min-height: 39px;
     border-radius: 6px;
     color: var(--ytce-muted);
@@ -560,9 +590,22 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
 .ytce-mode-switch button.is-active {
     color: var(--ytce-active-text);
     background: var(--ytce-active-gradient);
+    background-size: 220% 100%;
     box-shadow:
         0 7px 18px var(--ytce-accent-shadow),
         0 1px 0 rgba(255, 255, 255, 0.24) inset;
+    animation: ytce-energy-sweep 3.8s ease-in-out infinite;
+}
+
+.ytce-mode-switch button.is-active::after,
+.ytce-theme-switch button.is-active::after {
+    content: "";
+    position: absolute;
+    inset: -80% -55%;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.46) 49%, rgba(255, 255, 255, 0.12) 53%, transparent 64%);
+    transform: translateX(-58%);
+    animation: ytce-specular-sweep 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    pointer-events: none;
 }
 
 .ytce-mode-switch button:active {
@@ -576,8 +619,9 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
     border: 1px solid var(--ytce-border);
     border-radius: var(--ytce-radius-section);
     background:
+        var(--ytce-material-art),
         var(--ytce-section-art),
-        var(--ytce-section-fill);
+        var(--ytce-section-gradient);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.032) inset;
     transition: border-color 180ms ease, opacity 180ms ease, background 180ms ease;
 }
@@ -585,8 +629,9 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
 .ytce-section:hover {
     border-color: var(--ytce-border-strong);
     background:
+        var(--ytce-material-art),
         var(--ytce-section-art-hover),
-        var(--ytce-section-hover);
+        var(--ytce-section-gradient);
 }
 
 .ytce-section.is-muted {
@@ -615,7 +660,9 @@ body[data-ytce-theme="starlight"] #ytce-control-panel {
     margin-left: 8px;
     display: inline-block;
     vertical-align: middle;
-    background: linear-gradient(90deg, var(--ytce-accent), transparent);
+    background: linear-gradient(90deg, transparent, var(--ytce-accent), var(--ytce-warning), transparent);
+    background-size: 220% 100%;
+    animation: ytce-flow-line 3.6s linear infinite;
 }
 
 .ytce-section-title small {
@@ -963,7 +1010,7 @@ body.ytce-active yt-live-chat-message-input-renderer {
 body.ytce-active yt-live-chat-message-input-renderer #input-container,
 body.ytce-active yt-live-chat-message-input-renderer #input {
     color: var(--ytce-input-text) !important;
-    background-color: var(--ytce-input-surface) !important;
+    background: var(--ytce-input-gradient) !important;
     caret-color: var(--ytce-accent) !important;
 }
 
@@ -995,7 +1042,7 @@ body.ytce-active yt-emoji-picker-renderer {
     --yt-live-chat-picker-button-color: var(--ytce-input-icon);
     --yt-live-chat-picker-button-active-color: var(--ytce-accent);
     color: var(--ytce-input-text) !important;
-    background-color: var(--ytce-picker-surface) !important;
+    background: var(--ytce-picker-gradient) !important;
     border-color: var(--ytce-border-strong) !important;
 }
 
@@ -1003,7 +1050,7 @@ body.ytce-active yt-emoji-picker-renderer #categories,
 body.ytce-active yt-emoji-picker-renderer #search-panel,
 body.ytce-active yt-emoji-picker-renderer #emoji-grid {
     color: var(--ytce-input-text) !important;
-    background-color: var(--ytce-picker-surface) !important;
+    background: var(--ytce-picker-gradient) !important;
 }
 
 body.ytce-active yt-emoji-picker-renderer button,
@@ -1048,10 +1095,6 @@ body.ytce-active .ytce-colored-author {
     letter-spacing: 0.01em !important;
 }
 
-body.ytce-active[data-ytce-theme="paper"] .ytce-colored-author {
-    color: color-mix(in srgb, var(--ytce-author-color) 32%, var(--ytce-chat-text)) !important;
-}
-
 body.ytce-active yt-live-chat-text-message-renderer #img.yt-img-shadow,
 body.ytce-active yt-live-chat-paid-message-renderer #img.yt-img-shadow,
 body.ytce-active yt-live-chat-paid-sticker-renderer #img.yt-img-shadow,
@@ -1080,11 +1123,11 @@ body.ytce-active yt-live-chat-sponsorships-gift-purchase-announcement-renderer,
 body.ytce-active yt-live-chat-sponsorships-gift-redemption-announcement-renderer {
     padding: calc(var(--ytce-font-size) * 0.36) 18px !important;
     margin: 0 9px 9px !important;
-    background: var(--ytce-chat-surface) !important;
+    background: var(--ytce-chat-gradient) !important;
     border: 1px solid var(--ytce-chat-border) !important;
     border-radius: var(--ytce-chat-radius) !important;
     box-shadow: 0 1px 0 var(--ytce-chat-inset) inset !important;
-    transition: background-color 160ms ease, border-color 160ms ease !important;
+    transition: filter 160ms ease, border-color 160ms ease !important;
 }
 
 body.ytce-active yt-live-chat-text-message-renderer:hover,
@@ -1093,8 +1136,9 @@ body.ytce-active yt-live-chat-paid-sticker-renderer:hover,
 body.ytce-active yt-live-chat-membership-item-renderer:hover,
 body.ytce-active yt-live-chat-sponsorships-gift-purchase-announcement-renderer:hover,
 body.ytce-active yt-live-chat-sponsorships-gift-redemption-announcement-renderer:hover {
-    background: var(--ytce-chat-surface-hover) !important;
+    background: var(--ytce-chat-gradient) !important;
     border-color: var(--ytce-border-strong) !important;
+    filter: brightness(1.12) saturate(1.12);
 }
 
 body.ytce-active yt-live-chat-paid-message-renderer,
@@ -1145,6 +1189,48 @@ body.ytce-hide-badges yt-live-chat-author-badge-renderer {
     }
 }
 
+@keyframes ytce-flow-line {
+    from {
+        background-position: 120% 0;
+    }
+    to {
+        background-position: -120% 0;
+    }
+}
+
+@keyframes ytce-energy-sweep {
+    0%,
+    100% {
+        background-position: 0% 50%;
+        filter: saturate(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        filter: saturate(1.28) brightness(1.08);
+    }
+}
+
+@keyframes ytce-accent-breathe {
+    0%,
+    100% {
+        filter: saturate(1) brightness(1);
+    }
+    50% {
+        filter: saturate(1.24) brightness(1.08);
+    }
+}
+
+@keyframes ytce-specular-sweep {
+    0%,
+    22% {
+        transform: translateX(-58%);
+    }
+    62%,
+    100% {
+        transform: translateX(58%);
+    }
+}
+
 @media (max-width: 520px) {
     #ytce-control-panel {
         border-radius: var(--ytce-chat-radius);
@@ -1164,13 +1250,19 @@ body.ytce-hide-badges yt-live-chat-author-badge-renderer {
     .ytce-section:hover {
         border-color: var(--ytce-border);
         background:
+            var(--ytce-material-art),
             var(--ytce-section-art),
-            var(--ytce-section-fill);
+            var(--ytce-section-gradient);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
+    #ytce-control-panel,
+    #ytce-control-panel::before,
+    #ytce-control-panel::after,
     #ytce-control-panel *,
+    #ytce-control-panel *::before,
+    #ytce-control-panel *::after,
     #ytce-reader-stage * {
         animation: none !important;
         transition: none !important;

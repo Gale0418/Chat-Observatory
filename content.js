@@ -82,17 +82,17 @@
       </div>
 
       <div class="ytce-theme-switch" role="group" aria-label="介面畫風">
-        <button type="button" data-theme="ember" aria-label="切換為熔岩畫風">
-          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>熔岩</span>
+        <button type="button" data-theme="ember" aria-label="切換為赤曜畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>赤曜</span>
         </button>
-        <button type="button" data-theme="aurora" aria-label="切換為極光畫風">
-          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>極光</span>
+        <button type="button" data-theme="aurora" aria-label="切換為玄曜畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>玄曜</span>
         </button>
-        <button type="button" data-theme="paper" aria-label="切換為紙墨畫風">
-          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>紙墨</span>
+        <button type="button" data-theme="paper" aria-label="切換為翠曜畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>翠曜</span>
         </button>
-        <button type="button" data-theme="starlight" aria-label="切換為星夜畫風">
-          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>星夜</span>
+        <button type="button" data-theme="starlight" aria-label="切換為金曜畫風">
+          <span class="ytce-theme-swatch" aria-hidden="true"></span><span>金曜</span>
         </button>
       </div>
 
