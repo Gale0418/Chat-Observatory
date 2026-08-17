@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "version": "3.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
+  "permissions": ["activeTab", "storage"],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "__MSG_actionTitle__",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/live_chat*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/themes/cosmic-spectrum-black.jpg",
+        "assets/themes/cosmic-spectrum-red.jpg",
+        "assets/themes/cosmic-spectrum-orange.jpg",
+        "assets/themes/cosmic-spectrum-yellow.jpg",
+        "assets/themes/cosmic-spectrum-green.jpg",
+        "assets/themes/cosmic-spectrum-blue.jpg",
+        "assets/themes/cosmic-spectrum-purple.jpg",
+        "assets/themes/cosmic-spectrum-gray.jpg",
+        "assets/themes/cosmic-spectrum-white.jpg",
+        "assets/themes/cosmic-spectrum-gold.jpg",
+        "assets/themes/cosmic-spectrum-silver.jpg",
+        "assets/themes/cosmic-spectrum-rainbow.jpg"
+      ],
+      "matches": ["https://www.youtube.com/*"]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Chat Observatory">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="10" x2="108" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#25272E"/>
+      <stop offset="1" stop-color="#111216"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="18" x2="0" y2="102" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7B81"/>
+      <stop offset=".52" stop-color="#F0525C"/>
+      <stop offset="1" stop-color="#C92F3E"/>
+    </linearGradient>
+    <filter id="glow" x="-100%" y="-50%" width="300%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+
+  <rect x="3" y="3" width="122" height="122" rx="29" fill="url(#bg)"/>
+  <rect x="3.75" y="3.75" width="120.5" height="120.5" rx="28.25" fill="none" stroke="#FFFFFF" stroke-opacity=".11" stroke-width="1.5"/>
+
+  <rect x="23" y="25" width="17" height="78" rx="8.5" fill="#FF5863" opacity=".32" filter="url(#glow)"/>
+  <rect x="24" y="24" width="15" height="80" rx="7.5" fill="url(#accent)"/>
+
+  <path d="M58 31.5H93C101.56 31.5 108.5 38.44 108.5 47V70.5C108.5 79.06 101.56 86 93 86H76L62 98V86H58C49.44 86 42.5 79.06 42.5 70.5V47C42.5 38.44 49.44 31.5 58 31.5Z"
+        fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".72" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M57 49H94" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M57 62H86" stroke="#FFFFFF" stroke-opacity=".72" stroke-width="5" stroke-linecap="round"/>
+  <path d="M57 75H76" stroke="#FF7179" stroke-width="5" stroke-linecap="round"/>
+</svg>

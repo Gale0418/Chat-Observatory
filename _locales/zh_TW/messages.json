@@ -1,0 +1,22 @@
+{
+  "extName": {
+    "message": "Chat Observatory",
+    "description": "擴充功能名稱"
+  },
+  "extDescription": {
+    "message": "一鍵彈出 YouTube 直播聊天室，以大字介面顯示並在本機朗讀留言。",
+    "description": "擴充功能說明"
+  },
+  "actionTitle": {
+    "message": "彈出聊天室控制中心",
+    "description": "工具列按鈕標題"
+  },
+  "actionErrorNoChat": {
+    "message": "找不到直播聊天室，請先開啟 YouTube 直播或直播控制台。",
+    "description": "目前分頁不是支援的直播聊天室時顯示"
+  },
+  "actionErrorOpen": {
+    "message": "無法開啟直播聊天室，請稍後再試。",
+    "description": "無法開啟聊天室彈出視窗時顯示"
+  }
+}
