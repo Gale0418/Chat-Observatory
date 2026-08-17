@@ -878,15 +878,18 @@ body[data-chatobs-theme="starlight"] #chatobs-control-panel {
     padding: 0 8px;
     border: 1px solid var(--chatobs-border);
     border-radius: 6px;
-    color: var(--chatobs-active-text);
+    color: var(--chatobs-text);
     background: var(--chatobs-active-gradient);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    animation: chatobs-accent-breathe 3.8s ease-in-out infinite;
     text-shadow: none;
     transition: border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease, transform 180ms ease;
 }
 
 .chatobs-theme-select-control.is-changing {
-    animation: chatobs-language-select 560ms ease-out;
+    animation:
+        chatobs-language-select 560ms ease-out,
+        chatobs-accent-breathe 3.8s ease-in-out 560ms infinite;
 }
 
 .chatobs-theme-select-control::after {
@@ -982,7 +985,7 @@ body[data-chatobs-theme="starlight"] #chatobs-control-panel {
 
 .chatobs-language-switch button.is-active {
     border-color: var(--chatobs-accent);
-    color: var(--chatobs-active-text);
+    color: var(--chatobs-text);
     font-weight: 800 !important;
     text-shadow: none;
     background: var(--chatobs-active-gradient);
