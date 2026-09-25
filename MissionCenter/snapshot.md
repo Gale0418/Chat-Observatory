@@ -4,18 +4,18 @@
 - 建立時間: 2026-09-25T12:27:43+08:00
 - 進行中任務: CO-E1 已上架版本維護更新（CO-H5、CO-P2）
 - 狀態: In Progress
-- 版本: 1f33383c8e500367f98d0ddda64a137b0b233af7
+- 版本: 1d1bfca6e8d12689e29ce17997241f8e179dbdd1
 - 指紋: ed0ababed6121ed95765c3eca77fe4c24e0c470d0eb4339bec89acb88b2a0750
 - 依賴: None
-- 驗證: 96/96 自動測試、ZIP 23 個項目、Chrome 真實直播與設定持久化通過；CO-H5 實機矩陣與 CO-P2 公開連結更新仍待完成
+- 驗證: 96/96 自動測試、ZIP 23 個項目、Chrome 真實直播與設定持久化通過；3.0.1 已提交商店審查，CO-H5 實機矩陣與 CO-P2 發布後公開連結驗收仍待完成
 - Retry gate: retry
 - Recent attempts JSON: []
 - Diagnosis evidence JSON: []
 - 近期嘗試:
   - 無
 - Notes:
-  - 已上架版 1.0.0 可用；本次工作樹為維護修正，尚未發布到商店。
-  - 公開商店隱私與支援連結指向失效分支；本機文件與替代網址已備妥，公開 GitHub 及商店欄位待同步。
+  - 已上架版 1.0.0 可用；3.0.1 維護版已上傳並提交審查，設定通過審查後自動發布。
+  - GitHub main 政策已更新；商店草稿首頁、隱私與支援網址已修，公開頁仍待新版通過後驗證。
   - CodeRabbit 首輪 18 檔提出 2 個 minor，確認並修正 TTS 無障礙名稱；另一色票建議與實測對比及既有設計相衝突。聚焦覆核 4 檔 0 issues。
   - 2026-09-25 `mission-center snapshot` 回傳 `argument_error`；本檔依 `tasks.md`、Git 與 `smoke-tests.md` 人工更新。
 - Changes:

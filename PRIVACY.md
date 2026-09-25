@@ -36,4 +36,4 @@ Chat Observatory 不會收集、上傳、出售或分享任何個人資料、瀏
 
 支援電子郵件：wiuwwror@gmail.com
 
-目前公開頁面（待同步本版內容）：<https://github.com/Gale0418/Chat-Observatory/blob/main/PRIVACY.md>
+公開頁面：<https://github.com/Gale0418/Chat-Observatory/blob/main/PRIVACY.md>

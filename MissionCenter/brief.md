@@ -1,16 +1,17 @@
 <!-- Generated materialized view. Do not edit directly; rebuild from canonical MissionCenter files. -->
-<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=d8c2b80f822533d2058a1fea2b7e01aa0cbd12607ca07d800727bbf28797ef1b -->
+<!-- mission-center-derived schema=1.0 fingerprint-format=sha256-v2-lf source-fingerprint=d18d25dd999cd3a0ba8922d7b2e61ffe94d4286178178291f19486ac983ff91e -->
 # 任務簡報
 
 - 最後整理: 2026-09-25
-- 來源指紋: `d8c2b80f822533d2058a1fea2b7e01aa0cbd12607ca07d800727bbf28797ef1b`
+- 來源指紋: `d18d25dd999cd3a0ba8922d7b2e61ffe94d4286178178291f19486ac983ff91e`
 - 唯一真實來源: `tasks.md`
 - 專案: Chat Observatory 上架版
 - 北極星: 維護純本機第二電腦大字監看與 TTS 擴充功能，並保持發布產物可重建、可驗證
 - 週期: 已上架版本維護更新
 
 ## 今日摘要 · 2026-09-25
-- 無
+- 維護版 3.0.1 完成 96/96 測試與 23 項 ZIP 封裝；CodeRabbit 首輪 18 檔提出 2 個 minor，修正有效的 TTS 無障礙名稱後，4 檔聚焦覆核 0 issues；另一色票建議因紅色主題對比退步而未採用。
+- 本機與公開 GitHub `main` 的不同歷史已正常合併並 fast-forward 推送，公開 main 政策與版號讀回確認；Chrome Web Store 已上傳 3.0.1、修正首頁／支援／隱私網址與 activeTab 說明、提交審查，狀態待審查且選擇通過後自動發布。公開版仍 1.0.0。
 
 ## 重要護欄 (0)
 - 無

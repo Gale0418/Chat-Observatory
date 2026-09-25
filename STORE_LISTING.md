@@ -52,12 +52,12 @@ Chat Observatory 會開啟獨立聊天室視窗，放大留言、作者名稱與
 1. 完整聊天室：高雅控制面板與大字聊天室。
 2. 收合狀態：乾淨的遠距聊天室畫面。
 
-## 商店資訊（下次更新時核對）
+## 商店資訊（3.0.1 待審查）
 
 - 支援電子郵件：wiuwwror@gmail.com（沿用 LLMeeting 已上架項目的發布者聯絡方式）。
 - 支援網站公開網址：https://github.com/Gale0418/Chat-Observatory/issues
 - 隱私權政策公開網址：https://github.com/Gale0418/Chat-Observatory/blob/main/PRIVACY.md
-- 目前商店頁面的隱私權與支援連結仍指向已失效的 `agent/chat-observatory-rename` 分支；更新商店前，先將這份政策的最新版同步到公開的 `main/PRIVACY.md`，再將商店兩個欄位改成上列已驗證的網址。
+- 2026-09-25 已將最新版政策同步至公開 `main/PRIVACY.md`，並把商店草稿的首頁、支援與隱私權網址改成公開 `main`／Issues。3.0.1 已提交審查且設定通過後自動發布；公開版仍為 1.0.0，待審查通過後再驗證商店對外連結。
 - 開發者帳號的資料使用揭露：不收集或傳送資料；YouTube 聊天內容僅在本機處理以提供顯示與本機朗讀功能。
 
 ## 已備妥素材
