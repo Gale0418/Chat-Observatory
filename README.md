@@ -1,50 +1,68 @@
-# YT Chat Enlarger
+# Chat Observatory 🌌
 
-YT Chat Enlarger 是一個純本機的 Chrome 擴充功能，適合把另一台電腦或第二螢幕當作 YouTube 直播聊天室監看器。
+Chat Observatory is a local-first Chrome extension for turning a YouTube live-chat page into a comfortable, readable second-screen monitor. Big messages, themeable space visuals, multilingual UI labels, and optional local text-to-speech—packed into one friendly little observatory (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 
-## 核心功能
+> **Synthetic demo notice:** The screenshots in [`docs/screenshots/`](docs/screenshots/) use fictional `TEST01`, `TEST02`, and `TEST03` identities and invented multilingual messages. They are test fixtures, not real user conversations.
 
-- 從 YouTube 直播頁或 YouTube Studio 一鍵開啟獨立聊天室。
-- 放大留言、作者名稱與頭像，適合遠距離閱讀。
-- 完整、監看、朗讀三種模式。
-- 赤曜超新星、玄曜黑洞、翠曜星雲晶礦、金曜恆星熔爐四套可即時切換並保存在本機的宇宙畫風。
-- 四套主題都具備本機宇宙材質背景、主題文字色與反色描邊，避免高彩背景吃掉文字。
-- 只使用瀏覽器明確標示為本機的語音朗讀留言；找不到本機語音時不會退回線上服務。
-- 可選本機聲音、語速、音量，以及是否朗讀名字與時間。
-- 清理網址、過長內容與重複文字，降低機械朗讀干擾。
-- 支援一般留言、Super Chat、Super Sticker 與會員訊息。
-- 隱藏頭像、徽章及醒目標示關鍵字。
-- 設定只儲存在本機，不需要帳號或外部伺服器。
+## What it does
 
-## 使用方式
+- Opens a standalone live-chat window from a YouTube watch page or YouTube Studio.
+- Makes authors, avatars, and messages easier to read from a distance.
+- Provides twelve local cosmic themes with responsive colors, contrast outlines, and bundled backgrounds.
+- Lets each user choose a JPG, PNG, or WebP background that is resized, converted, and stored only in local Chrome extension storage.
+- Offers separate message and control-panel sizing, avatar and badge visibility controls, keyword highlighting, and a collapsible control center.
+- Supports Traditional Chinese, Japanese, and English interface labels. Chat messages are never translated.
+- Optionally reads new messages with the browser's explicitly local `SpeechSynthesis` voices.
+- Cleans URLs, repeated text, and configurable prefixes before speech to keep the queue comfortable.
+- Handles regular messages, Super Chat, Super Sticker, and membership messages.
 
-1. 在 Chrome 的擴充功能頁面載入此資料夾。
-2. 在 YouTube 開啟直播觀看頁或直播控制台。
-3. 點擊工具列上的 YT Chat Enlarger 圖示。
-4. 在彈出的聊天室選擇模式並調整顯示或朗讀設定。
-5. 設定完成後可收合控制面板，保留乾淨的大字聊天室。
+## Chrome Web Store data-use disclosure
 
-## 三種模式
+This extension has one purpose: improve the readability of YouTube live chat on a second screen and, when enabled, read new messages aloud using voices already installed on the local device.
 
-- `完整`：顯示大字聊天室，並依 TTS 開關朗讀留言。
-- `監看`：只顯示聊天室，不進行語音朗讀。
-- `朗讀`：隱藏聊天室內容，保留簡潔的朗讀狀態畫面。
+### Data handling
 
-## 四套畫風
+- **Data collected:** None. Chat Observatory does not collect account data, browsing history, analytics, advertising identifiers, or chat transcripts.
+- **Data transmitted:** None. Chat text and settings stay in the browser on the current device; there is no remote relay or cloud processing.
+- **Data sold or shared:** Nothing is sold, rented, or shared with third parties.
+- **Data storage:** Display and speech preferences, plus an optional user-selected background image, are saved in Chrome extension storage. The image is resized and converted locally before storage. Chat messages are not stored by the extension.
+- **Speech:** Text-to-speech uses the browser's `SpeechSynthesis` API and only voices explicitly marked `localService=true`. If no suitable local voice exists, speech stays disabled rather than falling back to an unverified online voice.
 
-- `赤曜`：深酒紅金屬、鮮紅晶光與少量暖金，銳利而華麗。
-- `玄曜`：純黑鏡面、冷白鉻光與冰藍反射，極簡卻有強烈舞台感。
-- `翠曜`：墨綠玻璃、祖母綠亮部與微金細節，沉穩而充滿生命力。
-- `金曜`：炭黑底、飽和金黃與香檳亮面，呈現精品櫥窗般的奢華感。
+### Permissions and why they are needed
 
-畫風與其他設定一樣只保存在本機，並會同步至同一擴充功能開啟的其他聊天室視窗。
-四套畫風皆具備宇宙材質背景、頂部流光、啟用狀態掃光與主題色呼吸亮度；系統開啟「減少動態」時會自動停用動畫。背景圖隨擴充功能封裝，不會從遠端載入。
+- `activeTab` — after the user clicks the toolbar button, reads the current YouTube URL to find the live-chat context and open the standalone chat window.
+- `storage` — saves local display, theme, language, speech, and optional custom-background preferences so the observatory feels consistent across chat windows.
+- YouTube live-chat content access — applies readable styling and observes new messages on supported `https://www.youtube.com/live_chat*` pages.
 
-## 隱私
+Chat Observatory does not require an account, does not use an external server, and is not affiliated with or endorsed by YouTube or Google.
 
-本擴充功能不建立帳號、不使用外部後端，也不收集或傳送聊天室內容。詳細內容請參閱 [PRIVACY.md](PRIVACY.md)。
+## Synthetic screenshot gallery
 
-## 開發驗證
+These images are deterministic UI fixtures made for documentation. Every identity and message is fictional, and each image uses a different theme or layout state.
+
+| Fixture | What it demonstrates |
+| --- | --- |
+| [`TEST01 · Ember`](docs/screenshots/test01-ember.png) | Traditional Chinese UI, red super-chat styling, and readable long-form messages. |
+| [`TEST02 · Aurora`](docs/screenshots/test02-aurora.png) | Japanese and English synthetic messages with the cool black-hole theme. |
+| [`TEST03 · Starlight`](docs/screenshots/test03-starlight.png) | Collapsed control center and a multilingual test queue with bright gold accents. |
+
+## Install locally
+
+1. Open `chrome://extensions` in Chrome.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked** and select this project folder.
+4. Open a YouTube live stream or YouTube Studio live-chat page.
+5. Click the Chat Observatory toolbar icon, then tune the theme, text size, and local voice settings.
+
+## Limitations
+
+- This is a Chrome extension for supported YouTube live-chat URLs; YouTube DOM changes may require selector updates.
+- Interface labels can switch languages, but chat content remains in its original language.
+- Available local voices depend on the operating system and Chrome profile.
+- Custom backgrounds are still images only; supported imports are JPG, PNG, and WebP up to 20 MB, then locally resized and converted to WebP.
+- The extension does not provide translation, remote moderation, cloud speech, or a chat archive.
+
+## Development verification
 
 ```powershell
 npm ci
@@ -52,16 +70,16 @@ npm run verify
 npm run build:extension
 ```
 
-`npm run build:extension` 會重建 `dist/yt-chat-enlarger/` 與 ZIP，並核對來源雜湊及封裝清單。`node_modules`、測試檔案、MissionCenter 與開發文件不會放入商店套件。
+`npm run verify` performs JavaScript syntax checks and the automated test suite. `npm run build:extension` rebuilds `dist/chat-observatory/` and `dist/chat-observatory.zip`, checks source hashes, and packages only the extension runtime files and bundled theme assets.
 
-建置套件可在 PowerShell 7 執行。商店截圖工具會自動尋找 Windows、macOS 或 Linux 的 Chrome，也可傳入 `-ChromePath`；圖示縮放目前使用 Windows 的 `System.Drawing`，因此只支援 Windows，其他平台請保留已驗證的 `icons/icon-*.png`。
+## Project layout
 
-## 資料夾用途
+- `content.js` / `content.css` — live-chat behavior and themeable UI.
+- `background.js` — validated URL handling and standalone chat-window lifecycle.
+- `_locales/` — English, Japanese, and Traditional Chinese extension messages.
+- `assets/themes/` — local cosmic background materials.
+- `docs/screenshots/` — synthetic, non-user documentation screenshots.
+- `tests/` — background, content, and visual fixture tests.
+- `scripts/` — icon, screenshot, and extension-package tooling.
 
-- `icons/`：擴充功能圖示與可重新產生圖示的 SVG 來源。
-- `scripts/`：圖示、商店截圖與發布套件的產生工具。
-- `store-assets/`：Chrome Web Store 使用的正式截圖，需保留。
-- `tests/`：背景服務、內容腳本與視覺 fixture。
-- `dist/`：可重建的發布產物，不應直接手動修改。
-- `MissionCenter/`：專案決策、任務與驗證紀錄。
-- `output/`：Mission Center HUD 產物；不會打包進擴充功能。一次性的 UI 截圖不留在專案內。
+Have fun exploring the chat cosmos—and keep the test data fictional, please! (ง •̀_•́)ง

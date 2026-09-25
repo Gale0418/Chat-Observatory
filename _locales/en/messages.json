@@ -1,0 +1,22 @@
+{
+  "extName": {
+    "message": "Chat Observatory",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Pop out YouTube live chat in large text with local voice reading (｀・ω・´)ゞ",
+    "description": "Extension description"
+  },
+  "actionTitle": {
+    "message": "Open chat control center",
+    "description": "Toolbar action title"
+  },
+  "actionErrorNoChat": {
+    "message": "Live chat not found. Open a YouTube live stream or control room first.",
+    "description": "Shown when the current tab is not a supported live chat page"
+  },
+  "actionErrorOpen": {
+    "message": "Could not open live chat. Please try again.",
+    "description": "Shown when the chat popup cannot be opened"
+  }
+}

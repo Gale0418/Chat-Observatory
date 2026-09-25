@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YT Chat Enlarger Visual Fixture</title>
+  <title>Chat Observatory Visual Fixture</title>
   <link rel="stylesheet" href="../content.css">
   <style>
     html,
@@ -177,7 +177,7 @@
   <yt-live-chat-app>
     <yt-live-chat-renderer id="chat">
       <yt-live-chat-header-renderer>
-        <strong>即時聊天</strong>
+        <strong>LIVE CHAT · SYNTHETIC DEMO</strong>
         <span id="header-buttons">
           <button type="button" aria-label="聊天選項">⋮</button>
           <button type="button" aria-label="關閉聊天室">×</button>
@@ -191,26 +191,26 @@
     <yt-live-chat-text-message-renderer>
       <span id="avatar"></span>
       <span id="content">
-        <span id="author-name">小明</span>
-        <span id="message">主人，右邊那條路好像還有一個寶箱！</span>
+        <span id="author-name">TEST01</span>
+        <span id="message">Hello from the synthetic demo stream! 🌌</span>
       </span>
     </yt-live-chat-text-message-renderer>
 
     <yt-live-chat-paid-message-renderer class="paid">
       <span id="avatar"></span>
       <span id="content">
-        <span id="author-name">支持者阿華</span>
-        <span id="purchase-amount">NT$150</span>
-        <span id="message">今天的直播很有趣，慢慢玩就好～</span>
+        <span id="author-name">TEST02</span>
+        <span id="purchase-amount">US$5.00</span>
+        <span id="message">こんにちは！これはテスト配信です ✨</span>
       </span>
     </yt-live-chat-paid-message-renderer>
 
     <yt-live-chat-membership-item-renderer class="member">
       <span id="avatar"></span>
       <span id="content">
-        <span id="author-name">綿羊會員</span>
-        <span id="header-subtext">加入會員滿 6 個月</span>
-        <span id="message">半年簽到！大家晚上好。</span>
+        <span id="author-name">TEST03</span>
+        <span id="header-subtext">Synthetic test member</span>
+        <span id="message">Bonjour ! Ceci est une simulation multilingue.</span>
       </span>
     </yt-live-chat-membership-item-renderer>
               </div>
@@ -221,22 +221,22 @@
       <div id="input-panel" class="yt-live-chat-renderer">
         <yt-live-chat-message-input-renderer>
           <div id="input-container">
-            <div id="input" contenteditable="true" data-placeholder="輸入訊息">正在輸入文字</div>
+            <div id="input" contenteditable="true" data-placeholder="Type a synthetic message">Testing chat input…</div>
             <span id="buttons">
-              <button id="emoji-button" type="button" aria-label="選擇表情符號">☺</button>
-              <button id="send-button" type="button" aria-label="傳送訊息">➤</button>
+              <button id="emoji-button" type="button" aria-label="Pick a demo emoji">☺</button>
+              <button id="send-button" type="button" aria-label="Send synthetic message">➤</button>
             </span>
           </div>
         </yt-live-chat-message-input-renderer>
-        <yt-emoji-picker-renderer aria-label="表情符號">
+        <yt-emoji-picker-renderer aria-label="Synthetic emoji">
           <div id="categories">
-            <button type="button" aria-label="常用表情">★</button>
-            <button type="button" aria-label="笑臉表情">☺</button>
+            <button type="button" aria-label="Test favorites">★</button>
+            <button type="button" aria-label="Test smiles">☺</button>
           </div>
           <div id="emoji-grid">
-            <button type="button" aria-label="笑臉">😀</button>
-            <button type="button" aria-label="愛心眼">😍</button>
-            <button type="button" aria-label="歡呼">🎉</button>
+            <button type="button" aria-label="Synthetic smile">😀</button>
+            <button type="button" aria-label="Synthetic hearts">😍</button>
+            <button type="button" aria-label="Synthetic cheer">🎉</button>
           </div>
         </yt-emoji-picker-renderer>
       </div>
@@ -245,23 +245,27 @@
 
   <script>
     const fixtureParams = new URLSearchParams(location.search);
-    const fixtureMode = fixtureParams.get("mode") || "complete";
-    const fixtureTheme = fixtureParams.get("theme") || "ember";
+    const fixtureTheme = fixtureParams.get("theme") || "black";
     const fixtureCollapsed = fixtureParams.has("collapsed");
     const fixtureHasVoice = !fixtureParams.has("no-voice");
 
     const fixtureChrome = {
+      i18n: {
+        getMessage(key) {
+          return key === "@@ui_locale" ? "zh_TW" : "";
+        }
+      },
       storage: {
         local: {
           async get(defaults) {
             return {
               ...defaults,
-              mode: fixtureMode,
               theme: fixtureTheme,
               isCollapsed: fixtureCollapsed,
               ttsEnabled: true,
               ttsReadName: true,
-              highlightKeywords: "寶箱"
+              highlightKeywords: "TEST",
+              uiLocale: "auto"
             };
           },
           async set() {}
@@ -316,24 +320,24 @@
     // Chromium 的內建 chrome／speechSynthesis 物件可能無法被頁面覆寫；
     // 最終以公開 UI 操作建立可重現的視覺狀態。
     const prepareFixture = () => {
-      const keywords = document.getElementById("ytce-keywords-input");
-      if (!keywords) return false;
+      const keywords = document.getElementById("chatobs-keywords-input");
+      const themeSelect = document.getElementById("chatobs-theme-select");
+      const panelBody = document.getElementById("chatobs-panel-body");
+      const collapseButton = document.getElementById("chatobs-collapse-button");
+      const voiceSelect = document.getElementById("chatobs-voice-select");
+      if (!keywords || !themeSelect || !panelBody || !collapseButton || !voiceSelect) return false;
 
-      keywords.value = "寶箱";
+      keywords.value = "TEST";
       keywords.dispatchEvent(new Event("input", { bubbles: true }));
 
-      if (!document.querySelector(`[data-mode="${fixtureMode}"]`).classList.contains("is-active")) {
-        document.querySelector(`[data-mode="${fixtureMode}"]`).click();
+      if (themeSelect.value !== fixtureTheme) {
+        themeSelect.value = fixtureTheme;
+        themeSelect.dispatchEvent(new Event("change", { bubbles: true }));
       }
-      if (!document.querySelector(`[data-theme="${fixtureTheme}"]`).classList.contains("is-active")) {
-        document.querySelector(`[data-theme="${fixtureTheme}"]`).click();
-      }
-      const panelBody = document.getElementById("ytce-panel-body");
       if (panelBody.hidden !== fixtureCollapsed) {
-        document.getElementById("ytce-collapse-button").click();
+        collapseButton.click();
       }
 
-      const voiceSelect = document.getElementById("ytce-voice-select");
       if (fixtureHasVoice) {
         voiceSelect.replaceChildren(new Option("美佳 · zh-TW", "fixture-voice"));
         voiceSelect.value = "fixture-voice";
@@ -347,7 +351,7 @@
       if (prepareFixture()) return;
       if (performance.now() >= fixtureDeadline) {
         document.body.dataset.fixtureReady = "error";
-        console.error("YTCE visual fixture timed out while waiting for the control panel.");
+        console.error("CO visual fixture timed out while waiting for the control panel.");
         return;
       }
       window.requestAnimationFrame(waitForFixture);

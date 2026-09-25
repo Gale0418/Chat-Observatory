@@ -1,6 +1,16 @@
 # 每日紀錄
 
-- 最後整理： 2026-08-15
+- 最後整理： 2026-09-25
+
+## 2026-08-20
+- 完成 CodeRabbit 修正版外部審查：只送出 19 個小型文字檔，排除主題圖片、商店截圖、ZIP、`dist` 與鎖檔；首輪 3 個有效 finding 已修復（Chrome/CSS 相容門檻、TTS 試聽後過期計時、視覺 fixture 節點防呆），最後一輪 0 findings。本小時共使用 3 次額度，未超過 150 檔限制。
+- 新增 CO-H10 純本機自訂背景：支援 JPG／PNG／WebP，匯入時依橫直向縮至 2560×1440 或 1440×2560 並轉 WebP；圖片以獨立 storage key 保存，不新增權限或網路傳輸。60/60 測試與 v1.0.0 ZIP 通過，待 Chrome 真圖實機驗收。
+- 完成 CO-H6 至 CO-H8：跨直播 session／視窗切換、8192×4320 與失效座標、pagehide 設定 flush、繁中／發布契約、TTS active item／試聽／speech locale 均已補測與修正。
+- CO-H9 自動門檻通過：`npm run verify` 60/60、`npm run build:extension` 與 ZIP 清單驗證成功；CodeRabbit 修正版最終審查 0 findings。Antigravity delta RPC 與 Chrome 最新版實機仍保留為 Review／手動驗收證據，不冒充通過。
+
+## 2026-08-16
+- 依使用者回饋重繪十二套宇宙背景：由寬幅遠景改為星體／星雲近距離特寫，主體可裁切出畫面邊緣，僅保留少量文字可讀暗部；12 張統一為 1672×941 JPEG，並降低十二色主題的背景遮罩避免重新壓黑。
+- 重新執行 `npm run verify`：51/51 通過；`npm run build:extension` 完成，ZIP 與來源各包含 12 張 `cosmic-spectrum-*.jpg`。
 
 ## 2026-08-15
 - 修復 INC-001：控制面板不再插入 YouTube #items，改為 BODY fixed 並以 ResizeObserver 同步聊天區 offset；補留言順序測試與真實內部 scroller fixture，Chrome 兩尺寸捲動驗收重疊 0px，37/37 tests 與 ZIP 通過。

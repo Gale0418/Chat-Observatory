@@ -17,7 +17,7 @@
 - 2026-08-12：畫風系統擴充為「熔岩、極光、紙墨」三套語意 token；共用同一份元件 CSS 與設定生命週期，不複製版型。每套維持單一重點色，主題值經白名單清洗並透過既有 `storage.local` 持久化與跨視窗同步。
 - 2026-08-12：依使用者決定將畫風總數固定為四套，正式規格為熔岩、極光、紙墨、星夜；除色票外，同時以面板材質、圓角尺度、字體、頭像輪廓與聊天室卡片形狀建立顯著差異，但仍共用元件結構與可及性規則。
 - 2026-08-14：MissionCenter 遷移至最新版單一任務生命週期。`tasks.md` 繼續作為唯一狀態與排序來源；`project.md`、`progress.md`、`brief.md`、`working-set.md` 與 HUD 改由同步工具產生，避免手寫摘要再次分叉；已移除完成相容期的舊 `focus.md`。
-- 2026-08-14：移除任務語意重疊而不抹除歷史證據：YTCE-M1 僅代表已驗證的核心與介面、YTCE-H5 統一承接新版 Chrome 實機驗收、YTCE-P1 收斂為已完成的本機商店素材與文件草稿、YTCE-P2 獨立追蹤仍缺的正式聯絡資訊，YTCE-V1 只負責快照與收尾。
+- 2026-08-14：移除任務語意重疊而不抹除歷史證據：CO-M1 僅代表已驗證的核心與介面、CO-H5 統一承接新版 Chrome 實機驗收、CO-P1 收斂為已完成的本機商店素材與文件草稿、CO-P2 獨立追蹤仍缺的正式聯絡資訊，CO-V1 只負責快照與收尾。
 - 2026-08-14：進度估算只讓可交付的葉節點承擔估時；Epic 與含子任務的聚合列設為 0，避免多層任務重複加總造成虛假進度。
 - 2026-08-14：新版 `snapshot_mission_center.py` 在目前系統 Python 因 `Path.write_text(newline=...)` 不相容而無法寫檔；本次依相同 canonical facts 與 schema 產生 checkpoint，未修改全域技能程式，並以最新版 doctor 驗證格式。
 - 2026-08-14：四套畫風的範圍由控制面板擴大為整個聊天室 canvas、訊息卡、頁首與輸入表面；只鎖定已知 live_chat 容器，不使用全域後代 selector，以保留 emoji picker 與互動控制。設定面板改為 `#items` 內的 sticky 設定列，展開時推動訊息、收合時與訊息同寬，不再以 fixed 浮島遮住聊天室。
@@ -27,3 +27,10 @@
 - 2026-08-15：Web Speech voice 沒有評分或音質欄位，因此介面只稱「推薦」；排序採可解釋的社群偏好與 metadata heuristic，不捏造星等。遠端 Google／第三方 TTS engine 不納入純本機推薦，除非未來另設明確 opt-in、權限與隱私揭露。
 - 2026-08-15：四主題顯示規格改為紅黑綠黃順序的赤曜／玄曜／翠曜／金曜；底層 `ember`／`aurora`／`paper`／`starlight` ID 保留以維持既有儲存相容。視覺允許高調電競漸層、材質紋理與小面積流光，但動畫只作用於飾線、內框與啟用控制，並由 `prefers-reduced-motion` 完整停用。
 - 2026-08-15：四主題的宇宙背景採本機封裝 JPEG，不依賴遠端素材；只透過 `web_accessible_resources` 暴露給正式 `https://www.youtube.com/live_chat*`。圖片只鋪在面板與聊天室外層畫布，留言虛擬清單保持原 DOM 與透明內層；亮色文字用近黑描邊，深色啟用文字改用主題亮色反描邊。
+- 2026-08-20：使用者核准完整修復體檢項目。第一個可驗證里程碑固定為發布 P0 硬化，拆成視窗／螢幕、設定／i18n／發布契約、TTS 狀態機／speech locale 三個實作切片，再由獨立整合驗證門檻收口；智慧語言、DOM Adapter 與聊天室暴雨壓縮只先建立粗粒度 Backlog，不與 P0 混改。
+- 2026-08-20：動態專家路由採 council_full；因變更耦合 MV3 service worker、持久化、語音 queue、多語 UX 與發布相容性，使用官方 Chrome／Web Speech 主要來源交叉驗證。反直覺備案「朗讀中停用試聽」可完全避免吞留言但犧牲核心操作體驗，只保留為 active item 無法安全恢復時的 fallback。
+- 2026-08-20：P0 不新增雲端、AI、第三方依賴或不必要權限；商店不存在的「暫停」能力先改成真實文案。若螢幕位置救援必須依賴 `system.display`，須先證明無權限方案不足並另經權限／隱私評估。
+- 2026-08-20：跨直播沿用同一 popup 並以 `tabs.update` 切換 videoId；session 同時保存 windowId＋videoId。位置採無新權限的保守救援：保留 ±8192 內第二螢幕座標、捨棄更外側污染值，建立失敗再去座標重試；不為完整拓樸新增 `system.display` 權限。
+- 2026-08-20：試聽採單一 FIFO＋`activeSpeechItem` 回插佇列首端，確保 A→試聽→A→B；不同語言仍不拆佇列。朗讀模板依留言語言，中日英使用對應模板，已辨識但未提供模板的語言採英文中性模板，無法辨識則只念正文。
+- 2026-08-20：CodeRabbit 因 agent callback 無法登入、Antigravity delta 因 RPC／agy 不可用、Chrome 因 file URL 安全政策未取得新版實機證據；三者均記為不可用／待人工，不視為通過。CO-H6 至 CO-H9 保留 Review，CO-H5 繼續承接手動重載後驗收。
+- 2026-08-20：使用者明確授權 CodeRabbit 傳輸程式碼後，更新 CLI 並以暫存 review repo 限縮為 19 個文字檔，排除大型圖片、截圖、ZIP、`dist` 與鎖檔；遵守每小時 3 次限制。採納 3 個可重現 finding，將最低 Chrome 調為 111、刷新試聽恢復項目的 `queuedAt`、補齊 visual fixture 節點檢查；最後一次覆核 0 findings。

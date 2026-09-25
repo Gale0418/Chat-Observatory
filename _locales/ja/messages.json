@@ -1,0 +1,22 @@
+{
+  "extName": {
+    "message": "Chat Observatory",
+    "description": "拡張機能名"
+  },
+  "extDescription": {
+    "message": "YouTubeライブチャットを大きく表示し、本機音声で読み上げます (｀・ω・´)ゞ",
+    "description": "拡張機能の説明"
+  },
+  "actionTitle": {
+    "message": "チャットコントロールセンターを開く",
+    "description": "ツールバーアクションのタイトル"
+  },
+  "actionErrorNoChat": {
+    "message": "ライブチャットが見つかりません。YouTubeのライブ配信またはコントロールルームを開いてください。",
+    "description": "対応するライブチャットではないページで表示"
+  },
+  "actionErrorOpen": {
+    "message": "ライブチャットを開けませんでした。もう一度お試しください。",
+    "description": "チャットポップアップを開けない場合に表示"
+  }
+}

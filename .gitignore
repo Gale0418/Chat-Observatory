@@ -4,3 +4,4 @@ output/
 *.zip
 .DS_Store
 Thumbs.db
+MissionCenter/.mission-center/

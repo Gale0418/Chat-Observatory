@@ -13,15 +13,28 @@ const DEFAULT_BOUNDS = {
   popupTop: null
 };
 const BOUNDS_LIMITS = {
-  width: [380, 1600],
-  height: [560, 1400],
-  position: [-10000, 10000]
+  width: [380, 8192],
+  height: [560, 4320],
+  position: [-8192, 8192]
 };
 
+function getLocalizedMessage(key, fallback, substitutions) {
+  try {
+    const message = chrome.i18n?.getMessage?.(key, substitutions);
+    return message || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 let chatWindowId = null;
+let chatVideoId = null;
+let chatTabId = null;
+let sessionWritePending = false;
 let actionQueue = Promise.resolve();
 let pendingBounds = null;
 let boundsSaveTimer = null;
+const actionErrorTimers = new Map();
 
 function extractVideoId(rawUrl = "") {
   try {
@@ -33,7 +46,7 @@ function extractVideoId(rawUrl = "") {
 
     let candidate = null;
     if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(host)) {
-      if (/^\/watch\/?$/.test(url.pathname)) {
+      if (/^\/(?:watch|live_chat)\/?$/.test(url.pathname)) {
         candidate = url.searchParams.get("v");
       } else {
         candidate = url.pathname.match(/^\/(?:live|shorts|embed)\/([a-zA-Z0-9_-]+)\/?$/)?.[1] || null;
@@ -62,32 +75,69 @@ function sessionStorage() {
   return chrome.storage?.session;
 }
 
-async function readChatWindowId() {
+async function readChatSession() {
   const session = sessionStorage();
   if (session?.get) {
     try {
-      const saved = await session.get({ chatWindowId: null });
-      chatWindowId = Number.isInteger(saved?.chatWindowId) ? saved.chatWindowId : null;
+      const saved = await session.get({ chatWindowId: null, chatVideoId: null, chatTabId: null });
+      if (sessionWritePending && chatWindowId !== null) {
+        try {
+          await session.set({ chatWindowId, chatVideoId, chatTabId });
+          sessionWritePending = false;
+        } catch {
+          // Keep the in-memory session until storage is available again.
+        }
+      } else {
+        chatWindowId = Number.isInteger(saved?.chatWindowId) ? saved.chatWindowId : null;
+        chatVideoId = typeof saved?.chatVideoId === "string" && VIDEO_ID_PATTERN.test(saved.chatVideoId)
+          ? saved.chatVideoId
+          : null;
+        chatTabId = Number.isInteger(saved?.chatTabId) ? saved.chatTabId : null;
+      }
     } catch {
       // chrome.storage.session may be unavailable during startup; use memory fallback.
     }
+  } else if (chatWindowId !== null) {
+    sessionWritePending = true;
   }
-  return Number.isInteger(chatWindowId) ? chatWindowId : null;
+  return {
+    windowId: Number.isInteger(chatWindowId) ? chatWindowId : null,
+    videoId: chatVideoId,
+    tabId: chatTabId
+  };
 }
 
-async function saveChatWindowId(id) {
+async function saveChatSession(id, videoId, tabId = null) {
   chatWindowId = Number.isInteger(id) ? id : null;
+  chatVideoId = typeof videoId === "string" && VIDEO_ID_PATTERN.test(videoId) ? videoId : null;
+  chatTabId = Number.isInteger(tabId) ? tabId : null;
   const session = sessionStorage();
-  if (session?.set) await safeCall(session.set.bind(session), { chatWindowId });
+  if (session?.set) {
+    try {
+      await session.set({ chatWindowId, chatVideoId, chatTabId });
+      sessionWritePending = false;
+    } catch {
+      sessionWritePending = true;
+    }
+  } else if (chatWindowId !== null) {
+    sessionWritePending = true;
+  }
 }
 
-async function clearChatWindowId() {
+async function clearChatSession() {
   chatWindowId = null;
+  chatVideoId = null;
+  chatTabId = null;
+  sessionWritePending = false;
   const session = sessionStorage();
   if (session?.remove) {
-    await safeCall(session.remove.bind(session), "chatWindowId");
+    await Promise.all([
+      safeCall(session.remove.bind(session), "chatWindowId"),
+      safeCall(session.remove.bind(session), "chatVideoId"),
+      safeCall(session.remove.bind(session), "chatTabId")
+    ]);
   } else if (session?.set) {
-    await safeCall(session.set.bind(session), { chatWindowId: null });
+    await safeCall(session.set.bind(session), { chatWindowId: null, chatVideoId: null, chatTabId: null });
   }
 }
 
@@ -100,17 +150,72 @@ function sanitizeDimension(value, fallback, [minimum, maximum]) {
 function sanitizePosition(value) {
   const numeric = typeof value === "number" || typeof value === "string" ? Number(value) : NaN;
   if (!Number.isFinite(numeric)) return null;
-  return Math.min(BOUNDS_LIMITS.position[1], Math.max(BOUNDS_LIMITS.position[0], Math.round(numeric)));
+  const rounded = Math.round(numeric);
+  return rounded < BOUNDS_LIMITS.position[0] || rounded > BOUNDS_LIMITS.position[1] ? null : rounded;
+}
+
+function getChatUrl(videoId) {
+  return `https://www.youtube.com/live_chat?is_popout=1&v=${encodeURIComponent(videoId)}`;
+}
+
+function isChatTabUrl(rawUrl) {
+  try {
+    const url = new URL(rawUrl || "");
+    return url.protocol === "https:" &&
+      url.hostname === "www.youtube.com" &&
+      url.pathname === "/live_chat" &&
+      url.searchParams.get("is_popout") === "1";
+  } catch {
+    return false;
+  }
+}
+
+async function getChatTab(window) {
+  for (const tab of window?.tabs || []) {
+    if (!Number.isInteger(tab?.id)) continue;
+    let url = tab.pendingUrl || tab.url || "";
+    if (!url && chrome.tabs?.sendMessage) {
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, { type: "chatobs:probe" });
+        url = response?.url || "";
+      } catch {
+        // Missing content script: this tab is not a verified chat.
+      }
+    }
+    if (isChatTabUrl(url)) return { ...tab, url };
+  }
+  return null;
+}
+
+async function updateChatTab(tab, videoId) {
+  if (!Number.isInteger(tab?.id) || !chrome.tabs?.update) return false;
+  try {
+    await chrome.tabs.update(tab.id, { url: getChatUrl(videoId) });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function clearActionError(tabId) {
+  const timer = actionErrorTimers.get(tabId);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    actionErrorTimers.delete(tabId);
+  }
   await Promise.all([
     safeCall(chrome.action?.setBadgeText?.bind(chrome.action), { tabId, text: "" }),
-    safeCall(chrome.action?.setTitle?.bind(chrome.action), { tabId, title: "彈出聊天室控制中心" })
+    safeCall(chrome.action?.setTitle?.bind(chrome.action), {
+      tabId,
+      title: getLocalizedMessage("actionTitle", "彈出聊天室控制中心")
+    })
   ]);
 }
 
-async function showActionError(tabId, title = "找不到直播聊天室，請先開啟 YouTube 直播或直播控制台。") {
+async function showActionError(tabId, title = getLocalizedMessage(
+  "actionErrorNoChat",
+  "找不到直播聊天室，請先開啟 YouTube 直播或直播控制台。"
+)) {
   await Promise.all([
     safeCall(chrome.action?.setBadgeBackgroundColor?.bind(chrome.action), { tabId, color: "#C83F49" }),
     safeCall(chrome.action?.setBadgeText?.bind(chrome.action), { tabId, text: "!" }),
@@ -120,27 +225,16 @@ async function showActionError(tabId, title = "找不到直播聊天室，請先
     })
   ]);
 
-  setTimeout(() => { void clearActionError(tabId); }, 4500);
+  const previousTimer = actionErrorTimers.get(tabId);
+  if (previousTimer !== undefined) clearTimeout(previousTimer);
+  actionErrorTimers.set(tabId, setTimeout(() => { void clearActionError(tabId); }, 4500));
 }
 
 async function getWindow(id) {
   if (!Number.isInteger(id) || !chrome.windows?.get) return null;
   try {
     const window = await chrome.windows.get(id, { populate: true });
-    if (!window || (window.type && window.type !== "popup")) return null;
-    const visibleTabUrls = (window.tabs || []).map((tab) => tab?.url).filter(Boolean);
-    if (visibleTabUrls.length > 0 && !visibleTabUrls.some((url) => {
-      try {
-        const parsed = new URL(url);
-        return parsed.protocol === "https:" &&
-          parsed.hostname === "www.youtube.com" &&
-          parsed.pathname === "/live_chat" &&
-          parsed.searchParams.get("is_popout") === "1";
-      } catch {
-        return false;
-      }
-    })) return null;
-    return window;
+    return window?.type === "popup" ? window : null;
   } catch {
     return null;
   }
@@ -175,18 +269,41 @@ async function handleActionClick(tab = {}) {
     return;
   }
 
-  const existingId = await readChatWindowId();
-  if (existingId !== null) {
-    const existing = await getWindow(existingId);
+  const existingSession = await readChatSession();
+  if (existingSession.windowId !== null) {
+    const existing = await getWindow(existingSession.windowId);
     if (existing && chrome.windows?.update) {
-      try {
-        await chrome.windows.update(existingId, { focused: true });
-        return;
-      } catch {
-        // Treat a failed update as stale, then make one clean window below.
+      const existingTab = await getChatTab(existing);
+      // A newly opened chat can still be loading before its content script answers.
+      const loadingOwnedTab = !existingTab && existing.tabs?.find((candidate) =>
+        candidate.id === existingSession.tabId &&
+        candidate.status === "loading" &&
+        !candidate.url && !candidate.pendingUrl
+      );
+      // The saved tab belongs to our popup. If Chrome hides its URL and the
+      // content script stays unresponsive, navigate that tab instead of
+      // leaving the action permanently blocked or opening a second popup.
+      const unverifiedOwnedTab = !existingTab && !loadingOwnedTab && existing.tabs?.find((candidate) =>
+        candidate.id === existingSession.tabId && !candidate.url && !candidate.pendingUrl
+      );
+      const chatTab = existingTab || loadingOwnedTab || unverifiedOwnedTab;
+      const sameChat = existingTab && extractVideoId(existingTab.url) === videoId;
+      if (chatTab) {
+        if (!sameChat && !(await updateChatTab(chatTab, videoId))) {
+          await showActionError(tab.id, getLocalizedMessage("actionErrorOpen", "無法開啟直播聊天室，請稍後再試。"));
+          return;
+        }
+        try {
+          await chrome.windows.update(existingSession.windowId, { focused: true });
+          await saveChatSession(existingSession.windowId, videoId, chatTab.id);
+          return;
+        } catch {
+          await showActionError(tab.id, getLocalizedMessage("actionErrorOpen", "無法開啟直播聊天室，請稍後再試。"));
+          return;
+        }
       }
     }
-    await clearChatWindowId();
+    await clearChatSession();
   }
 
   let saved = DEFAULT_BOUNDS;
@@ -197,7 +314,7 @@ async function handleActionClick(tab = {}) {
   }
 
   const createData = {
-    url: `https://www.youtube.com/live_chat?is_popout=1&v=${encodeURIComponent(videoId)}`,
+    url: getChatUrl(videoId),
     type: "popup",
     width: sanitizeDimension(saved?.popupWidth, DEFAULT_BOUNDS.popupWidth, BOUNDS_LIMITS.width),
     height: sanitizeDimension(saved?.popupHeight, DEFAULT_BOUNDS.popupHeight, BOUNDS_LIMITS.height)
@@ -209,17 +326,19 @@ async function handleActionClick(tab = {}) {
 
   const chatWindow = await createChatWindow(createData);
   if (chatWindow?.id !== undefined) {
-    await saveChatWindowId(chatWindow.id);
+    await saveChatSession(chatWindow.id, videoId, chatWindow.tabs?.[0]?.id);
   } else {
-    await showActionError(tab.id, "無法開啟直播聊天室，請稍後再試。");
+    await showActionError(tab.id, getLocalizedMessage("actionErrorOpen", "無法開啟直播聊天室，請稍後再試。"));
   }
 }
 
-chrome.action.onClicked.addListener((tab = {}) => {
-  const currentAction = actionQueue.then(() => handleActionClick(tab));
-  actionQueue = currentAction.catch(() => undefined);
-  return currentAction;
-});
+function serializeSessionOperation(operation) {
+  const current = actionQueue.then(operation);
+  actionQueue = current.catch(() => undefined);
+  return current;
+}
+
+chrome.action.onClicked.addListener((tab = {}) => serializeSessionOperation(() => handleActionClick(tab)));
 
 function clearBoundsSaveTimer() {
   if (boundsSaveTimer !== null) {
@@ -237,9 +356,9 @@ async function flushPendingBounds() {
   }
 }
 
-chrome.windows.onBoundsChanged.addListener(async (window) => {
+chrome.windows.onBoundsChanged.addListener((window) => serializeSessionOperation(async () => {
   if (!window || window.type !== "popup") return;
-  const ownWindowId = await readChatWindowId();
+  const ownWindowId = (await readChatSession()).windowId;
   if (window.id !== ownWindowId) return;
   pendingBounds = {
     popupWidth: sanitizeDimension(window.width, DEFAULT_BOUNDS.popupWidth, BOUNDS_LIMITS.width),
@@ -249,12 +368,12 @@ chrome.windows.onBoundsChanged.addListener(async (window) => {
   };
   clearBoundsSaveTimer();
   boundsSaveTimer = setTimeout(() => { void flushPendingBounds(); }, 250);
-});
+}));
 
-chrome.windows.onRemoved.addListener(async (windowId) => {
-  const ownWindowId = await readChatWindowId();
+chrome.windows.onRemoved.addListener((windowId) => serializeSessionOperation(async () => {
+  const ownWindowId = (await readChatSession()).windowId;
   if (windowId === ownWindowId) {
     await flushPendingBounds();
-    await clearChatWindowId();
+    await clearChatSession();
   }
-});
+}));

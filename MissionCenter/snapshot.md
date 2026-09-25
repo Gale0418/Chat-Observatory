@@ -1,17 +1,23 @@
 # 執行檢查點
 
 - State: active
-- 建立時間: 2026-08-15T23:58:30
-- 進行中任務: YTCE-E1 發布純本機大字聊天室與 TTS 擴充功能
+- 建立時間: 2026-09-25T12:27:43+08:00
+- 進行中任務: CO-E1 已上架版本維護更新（CO-H5、CO-P2）
 - 狀態: In Progress
-- 版本: d5d8f1358b15b0e35c9713a1b653cad3e7dccd4e
-- 指紋: 6da8e8398bf61cc69e9b4df0b36f1bcd70566b2c1f93b1bb5915a0fa5408df47
+- 版本: 1f33383c8e500367f98d0ddda64a137b0b233af7
+- 指紋: ed0ababed6121ed95765c3eca77fe4c24e0c470d0eb4339bec89acb88b2a0750
 - 依賴: None
-- 驗證: 所有未完成子任務通過驗證
+- 驗證: 96/96 自動測試、ZIP 23 個項目、Chrome 真實直播與設定持久化通過；CO-H5 實機矩陣與 CO-P2 公開連結更新仍待完成
 - Retry gate: retry
 - Recent attempts JSON: []
 - Diagnosis evidence JSON: []
 - 近期嘗試:
   - 無
 - Notes:
-  - 四套宇宙材質、主題文字色與反色描邊已完成；Chrome 桌面／430px、50/50 tests 與 12 檔 ZIP 通過。
+  - 已上架版 1.0.0 可用；本次工作樹為維護修正，尚未發布到商店。
+  - 公開商店隱私與支援連結指向失效分支；本機文件與替代網址已備妥，公開 GitHub 及商店欄位待同步。
+  - CodeRabbit 首輪 18 檔提出 2 個 minor，確認並修正 TTS 無障礙名稱；另一色票建議與實測對比及既有設計相衝突。聚焦覆核 4 檔 0 issues。
+  - 2026-09-25 `mission-center snapshot` 回傳 `argument_error`；本檔依 `tasks.md`、Git 與 `smoke-tests.md` 人工更新。
+- Changes:
+  - 修正顏文字及英文 TTS 語音判斷、背景聊天室視窗與設定儲存競態，改善 DOM 觀察及建置安全性。
+  - 版號對齊 3.0.1；`npm run verify` 96/96；`dist/chat-observatory.zip` 建置成功，SHA-256 `70d6d1dde5993adc67feef592a1b3c8df4e86e50df2d0e82593685f47af02d40`。

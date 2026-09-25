@@ -5,8 +5,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
-$stagingRoot = Join-Path $outputRoot 'yt-chat-enlarger'
-$zipPath = Join-Path $outputRoot 'yt-chat-enlarger.zip'
+$stagingRoot = Join-Path $outputRoot 'chat-observatory'
+$zipPath = Join-Path $outputRoot 'chat-observatory.zip'
 
 $relativeOutput = [IO.Path]::GetRelativePath($projectRoot, $outputRoot).Replace('\', '/')
 $isProjectRoot = $relativeOutput -eq '.'
@@ -18,28 +18,56 @@ if ($isProjectRoot -or $isOutsideProject) {
 
 function Test-ReparsePoint {
     param([string]$Path)
-    if (-not (Test-Path -LiteralPath $Path)) {
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
         return $false
     }
-    $item = Get-Item -LiteralPath $Path -Force
     return ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0
 }
 
-if (Test-ReparsePoint $outputRoot) {
-    throw "輸出資料夾不可是符號連結或其他重解析點：$outputRoot"
+function Assert-NoReparsePointsInPath {
+    param(
+        [string]$Path,
+        [string]$Boundary
+    )
+
+    $current = [IO.Path]::GetFullPath($Path)
+    $resolvedBoundary = [IO.Path]::GetFullPath($Boundary)
+
+    while ($true) {
+        if (Test-ReparsePoint $current) {
+            throw "路徑及其父層不可含符號連結或其他重解析點：$current"
+        }
+
+        if ($current -ieq $resolvedBoundary) {
+            break
+        }
+
+        $parent = Split-Path -Path $current -Parent
+        if ([string]::IsNullOrEmpty($parent) -or $parent -ieq $current) {
+            throw "無法驗證輸出路徑的父層：$Path"
+        }
+        $current = $parent
+    }
 }
 
+Assert-NoReparsePointsInPath -Path $outputRoot -Boundary $projectRoot
+
+if (Test-Path -LiteralPath $outputRoot -PathType Leaf) {
+    throw "輸出路徑必須是資料夾：$outputRoot"
+}
+
+if (Test-ReparsePoint $stagingRoot) {
+    throw "拒絕刪除符號連結或其他重解析點：$stagingRoot"
+}
 if (Test-Path -LiteralPath $stagingRoot) {
-    if (Test-ReparsePoint $stagingRoot) {
-        throw "拒絕刪除符號連結或其他重解析點：$stagingRoot"
-    }
     Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 }
 
+if (Test-ReparsePoint $zipPath) {
+    throw "拒絕刪除符號連結或其他重解析點：$zipPath"
+}
 if (Test-Path -LiteralPath $zipPath) {
-    if (Test-ReparsePoint $zipPath) {
-        throw "拒絕刪除符號連結或其他重解析點：$zipPath"
-    }
     Remove-Item -LiteralPath $zipPath -Force
 }
 
@@ -50,10 +78,21 @@ $requiredFiles = @(
     @('background.js'),
     @('content.js'),
     @('content.css'),
-    @('assets', 'themes', 'cosmic-crimson.jpg'),
-    @('assets', 'themes', 'cosmic-black-hole.jpg'),
-    @('assets', 'themes', 'cosmic-emerald.jpg'),
-    @('assets', 'themes', 'cosmic-gold.jpg'),
+    @('_locales', 'en', 'messages.json'),
+    @('_locales', 'ja', 'messages.json'),
+    @('_locales', 'zh_TW', 'messages.json'),
+    @('assets', 'themes', 'cosmic-spectrum-black.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-red.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-orange.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-yellow.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-green.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-blue.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-purple.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-gray.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-white.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-gold.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-silver.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-rainbow.jpg'),
     @('icons', 'icon-16.png'),
     @('icons', 'icon-32.png'),
     @('icons', 'icon-48.png'),
@@ -66,8 +105,13 @@ foreach ($pathSegments in $requiredFiles) {
     foreach ($segment in $pathSegments) {
         $source = Join-Path $source $segment
     }
-    if (-not (Test-Path -LiteralPath $source)) {
+    Assert-NoReparsePointsInPath -Path $source -Boundary $projectRoot
+    $sourceItem = Get-Item -LiteralPath $source -Force -ErrorAction SilentlyContinue
+    if ($null -eq $sourceItem) {
         throw "缺少必要檔案：$relativePath"
+    }
+    if ($sourceItem.PSIsContainer -or $sourceItem -isnot [IO.FileInfo]) {
+        throw "必要來源必須是一般檔案：$relativePath"
     }
     $destination = $stagingRoot
     foreach ($segment in $pathSegments) {

@@ -56,14 +56,109 @@ function Resolve-ChromeExecutable {
     throw "找不到 Chrome。請使用 -ChromePath <可執行檔路徑>，或將 chrome/google-chrome/chromium 加入 PATH。"
 }
 
-$ChromePath = Resolve-ChromeExecutable $ChromePath
-
-if (-not (Test-Path -LiteralPath $fixturePath -PathType Leaf)) {
-    throw "找不到商店截圖版型：$fixturePath"
+function Test-ReparsePoint {
+    param([string]$Path)
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        return $false
+    }
+    return ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0
 }
 
-New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-$fixtureUri = [Uri]::new($fixturePath).AbsoluteUri
+function Assert-NotReparsePoint {
+    param([string]$Path)
+    if (Test-ReparsePoint $Path) {
+        throw "輸出路徑不可是符號連結或其他重解析點：$Path"
+    }
+}
+
+function Assert-NoReparsePointsInPath {
+    param(
+        [string]$Path,
+        [string]$Boundary
+    )
+
+    $current = [IO.Path]::GetFullPath($Path)
+    $resolvedBoundary = [IO.Path]::GetFullPath($Boundary)
+
+    while ($true) {
+        if (Test-ReparsePoint $current) {
+            throw "路徑及其父層不可含符號連結或其他重解析點：$current"
+        }
+        if ($current -ieq $resolvedBoundary) {
+            break
+        }
+
+        $parent = Split-Path -Path $current -Parent
+        if ([string]::IsNullOrEmpty($parent) -or $parent -ieq $current) {
+            throw "無法驗證路徑的父層：$Path"
+        }
+        $current = $parent
+    }
+}
+
+function Assert-RegularFileWithinProject {
+    param(
+        [string]$Path,
+        [string]$Description
+    )
+
+    Assert-NoReparsePointsInPath -Path $Path -Boundary $projectRoot
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        throw "找不到$Description：$Path"
+    }
+    if ($item.PSIsContainer -or $item -isnot [IO.FileInfo]) {
+        throw "$Description 必須是一般檔案：$Path"
+    }
+}
+
+function Remove-OwnedTemporaryDirectory {
+    param([string]$Path)
+
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        return
+    }
+    if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "拒絕刪除符號連結或其他重解析點：$Path"
+    }
+    Remove-Item -LiteralPath $Path -Recurse -Force
+}
+
+$ChromePath = Resolve-ChromeExecutable $ChromePath
+
+Assert-RegularFileWithinProject -Path $fixturePath -Description '商店截圖版型'
+
+$fixtureInputs = @(
+    @('content.js'),
+    @('content.css'),
+    @('assets', 'themes', 'cosmic-spectrum-black.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-red.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-orange.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-yellow.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-green.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-blue.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-purple.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-gray.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-white.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-gold.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-silver.jpg'),
+    @('assets', 'themes', 'cosmic-spectrum-rainbow.jpg')
+)
+foreach ($pathSegments in $fixtureInputs) {
+    $inputPath = $projectRoot
+    foreach ($segment in $pathSegments) {
+        $inputPath = Join-Path $inputPath $segment
+    }
+    Assert-RegularFileWithinProject -Path $inputPath -Description "商店截圖依賴檔案（$($pathSegments -join '/')）"
+}
+
+if (Test-Path -LiteralPath $outputDirectory -PathType Leaf) {
+    throw "商店素材輸出路徑必須是資料夾：$outputDirectory"
+}
+Assert-NoReparsePointsInPath -Path $outputDirectory -Boundary $projectRoot
+Assert-NotReparsePoint $outputDirectory
 
 $captures = @(
     @{
@@ -72,9 +167,17 @@ $captures = @(
     },
     @{
         Name = '02-large-chat.png'
-        Query = '?is_popout=1&mode=monitor&collapsed=1'
+        Query = '?is_popout=1&collapsed=1'
     }
 )
+
+$outputPaths = $captures | ForEach-Object { Join-Path $outputDirectory $_.Name }
+foreach ($outputPath in $outputPaths) {
+    Assert-NotReparsePoint $outputPath
+}
+
+New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+$fixtureUri = [Uri]::new($fixturePath).AbsoluteUri
 function Read-PngDimensions {
     param([string]$Path)
 
@@ -93,12 +196,12 @@ function Read-PngDimensions {
     [pscustomobject]@{ Width = [int]$width; Height = [int]$height }
 }
 
-$temporaryCaptureDirectory = Join-Path ([IO.Path]::GetTempPath()) "ytce-store-output-$([guid]::NewGuid().ToString('N'))"
+$temporaryCaptureDirectory = Join-Path ([IO.Path]::GetTempPath()) "chatobs-store-output-$([guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory -Path $temporaryCaptureDirectory | Out-Null
 
 try {
   foreach ($capture in $captures) {
-    $profilePath = Join-Path ([IO.Path]::GetTempPath()) "ytce-store-$([guid]::NewGuid().ToString('N'))"
+    $profilePath = Join-Path ([IO.Path]::GetTempPath()) "chatobs-store-$([guid]::NewGuid().ToString('N'))"
     $outputPath = Join-Path $temporaryCaptureDirectory $capture.Name
     New-Item -ItemType Directory -Path $profilePath | Out-Null
 
@@ -125,7 +228,7 @@ try {
         $relativeProfile = [IO.Path]::GetRelativePath($resolvedTemp, $resolvedProfile).Replace('\', '/')
         $relativeProfileParts = $relativeProfile -split '/'
         if ($relativeProfileParts.Count -gt 0 -and $relativeProfileParts[0] -ne '..') {
-            Remove-Item -LiteralPath $resolvedProfile -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-OwnedTemporaryDirectory $resolvedProfile
         }
     }
   }
@@ -149,7 +252,9 @@ try {
 
   # 兩張圖都通過驗證後才取代正式素材；Chrome 失敗時保留上一版。
   foreach ($capture in $captures) {
-    Move-Item -LiteralPath (Join-Path $temporaryCaptureDirectory $capture.Name) -Destination (Join-Path $outputDirectory $capture.Name) -Force
+    $destination = Join-Path $outputDirectory $capture.Name
+    Assert-NotReparsePoint $destination
+    Move-Item -LiteralPath (Join-Path $temporaryCaptureDirectory $capture.Name) -Destination $destination -Force
   }
 
   $results
@@ -160,6 +265,6 @@ finally {
   $relativeCaptureDirectory = [IO.Path]::GetRelativePath($resolvedTemp, $resolvedCaptureDirectory).Replace('\', '/')
   $relativeCaptureParts = $relativeCaptureDirectory -split '/'
   if ($relativeCaptureParts.Count -gt 0 -and $relativeCaptureParts[0] -ne '..') {
-    Remove-Item -LiteralPath $resolvedCaptureDirectory -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-OwnedTemporaryDirectory $resolvedCaptureDirectory
   }
 }

@@ -56,6 +56,76 @@ function Resolve-ChromeExecutable {
     throw "找不到 Chrome。請使用 -ChromePath <可執行檔路徑>，或將 chrome/google-chrome/chromium 加入 PATH。"
 }
 
+function Test-ReparsePoint {
+    param([string]$Path)
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        return $false
+    }
+    return ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0
+}
+
+function Assert-NotReparsePoint {
+    param([string]$Path)
+    if (Test-ReparsePoint $Path) {
+        throw "輸出路徑不可是符號連結或其他重解析點：$Path"
+    }
+}
+
+function Assert-NoReparsePointsInPath {
+    param(
+        [string]$Path,
+        [string]$Boundary
+    )
+
+    $current = [IO.Path]::GetFullPath($Path)
+    $resolvedBoundary = [IO.Path]::GetFullPath($Boundary)
+
+    while ($true) {
+        if (Test-ReparsePoint $current) {
+            throw "路徑及其父層不可含符號連結或其他重解析點：$current"
+        }
+        if ($current -ieq $resolvedBoundary) {
+            break
+        }
+
+        $parent = Split-Path -Path $current -Parent
+        if ([string]::IsNullOrEmpty($parent) -or $parent -ieq $current) {
+            throw "無法驗證路徑的父層：$Path"
+        }
+        $current = $parent
+    }
+}
+
+function Assert-RegularFileWithinProject {
+    param(
+        [string]$Path,
+        [string]$Description
+    )
+
+    Assert-NoReparsePointsInPath -Path $Path -Boundary $projectRoot
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        throw "找不到$Description：$Path"
+    }
+    if ($item.PSIsContainer -or $item -isnot [IO.FileInfo]) {
+        throw "$Description 必須是一般檔案：$Path"
+    }
+}
+
+function Remove-OwnedTemporaryDirectory {
+    param([string]$Path)
+
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item) {
+        return
+    }
+    if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "拒絕刪除符號連結或其他重解析點：$Path"
+    }
+    Remove-Item -LiteralPath $Path -Recurse -Force
+}
+
 # System.Drawing 的圖示縮放在非 Windows 不受支援；避免產生不可靠的圖示檔。
 $isWindowsPlatform = $env:OS -eq 'Windows_NT'
 if (-not $isWindowsPlatform) {
@@ -64,13 +134,25 @@ if (-not $isWindowsPlatform) {
 
 $ChromePath = Resolve-ChromeExecutable $ChromePath
 
-if (-not (Test-Path -LiteralPath $sourcePath)) {
-    throw "找不到圖示來源：$sourcePath"
+Assert-RegularFileWithinProject -Path $sourcePath -Description '圖示來源'
+if (-not (Test-Path -LiteralPath $iconDirectory -PathType Container)) {
+    throw "圖示輸出路徑不是資料夾：$iconDirectory"
 }
+Assert-NoReparsePointsInPath -Path $iconDirectory -Boundary $projectRoot
+Assert-NotReparsePoint $iconDirectory
 
 $sourceUri = [Uri]::new($sourcePath).AbsoluteUri
 $masterPath = Join-Path $iconDirectory 'master-512.png'
-$profilePath = Join-Path ([IO.Path]::GetTempPath()) "ytce-icon-$([guid]::NewGuid().ToString('N'))"
+$outputPaths = @(16, 32, 48, 128) | ForEach-Object { Join-Path $iconDirectory "icon-$_.png" }
+foreach ($outputPath in $outputPaths) {
+    Assert-NotReparsePoint $outputPath
+}
+Assert-NotReparsePoint $masterPath
+if (Test-Path -LiteralPath $masterPath) {
+    Remove-Item -LiteralPath $masterPath -Force
+}
+
+$profilePath = Join-Path ([IO.Path]::GetTempPath()) "chatobs-icon-$([guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory -Path $profilePath | Out-Null
 
 try {
@@ -96,13 +178,14 @@ finally {
     $relativeProfile = [IO.Path]::GetRelativePath($resolvedTemp, $resolvedProfile).Replace('\', '/')
     $relativeProfileParts = $relativeProfile -split '/'
     if ($relativeProfileParts.Count -gt 0 -and $relativeProfileParts[0] -ne '..') {
-        Remove-Item -LiteralPath $resolvedProfile -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-OwnedTemporaryDirectory $resolvedProfile
     }
 }
 
 if (-not (Test-Path -LiteralPath $masterPath)) {
     throw "圖示主圖產生失敗：$masterPath"
 }
+Assert-NotReparsePoint $masterPath
 
 Add-Type -AssemblyName System.Drawing
 $master = [Drawing.Image]::FromFile($masterPath)
@@ -110,10 +193,12 @@ $master = [Drawing.Image]::FromFile($masterPath)
 try {
     foreach ($size in @(16, 32, 48, 128)) {
         $outputPath = Join-Path $iconDirectory "icon-$size.png"
+        Assert-NotReparsePoint $outputPath
         $bitmap = [Drawing.Bitmap]::new($size, $size, [Drawing.Imaging.PixelFormat]::Format32bppArgb)
-        $graphics = [Drawing.Graphics]::FromImage($bitmap)
+        $graphics = $null
 
         try {
+            $graphics = [Drawing.Graphics]::FromImage($bitmap)
             $graphics.CompositingQuality = [Drawing.Drawing2D.CompositingQuality]::HighQuality
             $graphics.InterpolationMode = [Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
             $graphics.SmoothingMode = [Drawing.Drawing2D.SmoothingMode]::HighQuality
@@ -122,14 +207,21 @@ try {
             $bitmap.Save($outputPath, [Drawing.Imaging.ImageFormat]::Png)
         }
         finally {
-            $graphics.Dispose()
-            $bitmap.Dispose()
+            if ($null -ne $graphics) {
+                $graphics.Dispose()
+            }
+            if ($null -ne $bitmap) {
+                $bitmap.Dispose()
+            }
         }
     }
 }
 finally {
     $master.Dispose()
-    Remove-Item -LiteralPath $masterPath -Force
+    if (Test-ReparsePoint $masterPath) {
+        throw "拒絕刪除符號連結或其他重解析點：$masterPath"
+    }
+    Remove-Item -LiteralPath $masterPath -Force -ErrorAction SilentlyContinue
 }
 
 Get-ChildItem -LiteralPath $iconDirectory -Filter 'icon-*.png' |

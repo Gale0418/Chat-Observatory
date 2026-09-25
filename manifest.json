@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "YT Chat Enlarger Pro",
-  "version": "3.0.0",
-  "description": "一鍵彈出 YouTube 直播聊天室，以高雅大字介面監看並在本機朗讀留言。",
+  "minimum_chrome_version": "111",
+  "name": "__MSG_extName__",
+  "version": "3.0.1",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": ["activeTab", "storage"],
   "icons": {
     "16": "icons/icon-16.png",
@@ -14,7 +16,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "彈出聊天室控制中心",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
@@ -32,10 +34,18 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/themes/cosmic-crimson.jpg",
-        "assets/themes/cosmic-black-hole.jpg",
-        "assets/themes/cosmic-emerald.jpg",
-        "assets/themes/cosmic-gold.jpg"
+        "assets/themes/cosmic-spectrum-black.jpg",
+        "assets/themes/cosmic-spectrum-red.jpg",
+        "assets/themes/cosmic-spectrum-orange.jpg",
+        "assets/themes/cosmic-spectrum-yellow.jpg",
+        "assets/themes/cosmic-spectrum-green.jpg",
+        "assets/themes/cosmic-spectrum-blue.jpg",
+        "assets/themes/cosmic-spectrum-purple.jpg",
+        "assets/themes/cosmic-spectrum-gray.jpg",
+        "assets/themes/cosmic-spectrum-white.jpg",
+        "assets/themes/cosmic-spectrum-gold.jpg",
+        "assets/themes/cosmic-spectrum-silver.jpg",
+        "assets/themes/cosmic-spectrum-rainbow.jpg"
       ],
       "matches": ["https://www.youtube.com/*"]
     }
