@@ -1,6 +1,6 @@
 {
   "name": "chat-observatory",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "private": true,
   "description": "Chat Observatory 的本機測試與驗證工具，不會打包進 Chrome 擴充功能。",
   "scripts": {

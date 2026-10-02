@@ -44,13 +44,38 @@
     starlight: "gold"
   });
   const VALID_VOICE_MODES = Object.freeze(["auto", "fixed"]);
-  const PREFERRED_ENGLISH_VOICE_NAMES = /samantha|serena|ava|karen|moira|tessa|allison|susan|victoria|zira|zoe/iu;
+  const PREFERRED_ENGLISH_VOICE_NAMES = /\b(?:samantha|serena|ava|karen|moira|tessa|allison|susan|victoria|zira|zoe|hazel|heera|catherine|linda|jenny|aria|sonia|neerja)\b/iu;
+  // Web Speech API 沒有性別欄位，只辨識已知語音名稱；未知名稱不推測性別。
+  // Windows 名稱：https://support.microsoft.com/en-us/accessibility/windows/narrator/appendix-a-supported-languages-and-voices
+  const PREFERRED_FEMALE_VOICE_NAMES = Object.freeze({
+    en: PREFERRED_ENGLISH_VOICE_NAMES,
+    zh: /\b(?:mei[- ]?jia|sin[- ]?ji|ting[- ]?ting|hanhan|yating|huihui|yaoyao|tracy|xiaoxiao)\b|美佳|善怡|婷婷|涵涵|雅婷|慧慧|瑤瑤|瑶瑶|曉曉|晓晓/iu,
+    ja: /\b(?:kyoko|haruka|ayumi|nanami)\b|京子/iu,
+    ko: /\b(?:yuna|heami|sunhi)\b|유나/iu,
+    es: /\b(?:marisol|mónica|monica|paulina|helena|laura|sabina|elvira|dalia)\b/iu,
+    fr: /\b(?:amélie|amelie|hortense|hortence|julie|caroline|denise)\b/iu,
+    de: /\b(?:anna|hedda|katja)\b/iu,
+    it: /\b(?:alice|elsa)\b/iu,
+    pt: /\b(?:luciana|joana|maria|helia|hélia|francisca)\b/iu,
+    ru: /\b(?:milena|irina)\b/iu,
+    ar: /\bhoda\b/iu,
+    he: /\bcarmit\b/iu,
+    el: /\bmelina\b/iu,
+    th: /\bkanya\b/iu,
+    hi: /\b(?:lekha|kalpana)\b/iu
+  });
   const LOW_ENGLISH_VOICE_NAMES = /\b(?:alex|daniel|fred|tom|thomas|aaron|oliver|brian|christopher|james|david|rishi)\b/iu;
   const UI_COPY = Object.freeze({
     "zh-TW": Object.freeze({
       interfaceLanguage: "介面語言",
       controlPanel: "Chat Observatory 控制中心",
       themeGroup: "介面畫風",
+      themeExplore: "探索主題",
+      randomTheme: "隨機換主題",
+      previousTheme: "換回上一款",
+      previousThemeTitle: "換回上一款：{theme}",
+      noPreviousTheme: "換過主題後，就能返回上一款。",
+      themeApplied: "已換成{theme}",
       themeBlack: "玄曜奇點",
       themeRed: "赤曜超新星",
       themeOrange: "橙燼日冕",
@@ -99,13 +124,19 @@
       customBackgroundDecodeFailed: "無法讀取圖片，請換一個檔案再試",
       customBackgroundSaveFailed: "無法儲存圖片，請釋放 Chrome 空間後再試",
       speechSection: "語音朗讀",
-      ttsToggleTitle: "開啟或關閉 TTS",
+      speechShortcut: "朗讀",
+      ttsToggleTitle: "開啟或關閉新留言朗讀",
       voiceMode: "語音模式",
       voiceAuto: "自動配對語言",
       voiceFixed: "固定選定語音",
       voiceSelect: "預設／固定語音",
+      voiceAutoSelect: "偏好／備援語音",
+      voiceFixedSelect: "固定語音",
+      voiceAutoHint: "依留言語言優先選用已知女聲，此選項作為偏好或備援。想讓所有留言使用同一個聲音，請切換為固定模式。",
+      voiceFixedHint: "所有留言都使用所選語音；其他語言可能無法正確朗讀。",
+      voiceSetupHint: "此裝置尚未提供可用的本機語音。請先在系統加入語音，再重新開啟聊天室。",
       localOnly: "（僅本機）",
-      voiceHint: "自動模式會依語言挑選推薦人聲；沒有公開評分，仍可切到固定語音逐一試聽。",
+      voiceHint: "自動模式依語言優先選用已知女聲，找不到時使用備援語音；固定模式可自行選擇。",
       rate: "語速",
       volume: "音量",
       readTime: "朗讀時間",
@@ -113,18 +144,29 @@
       readEmoji: "朗讀表情名稱",
       cleanUrls: "網址改念「連結」",
       collapseRepeats: "壓縮重複文字",
-      testVoice: "試聽",
+      testVoice: "試聽語音",
       skipSpeech: "跳過",
       clearSpeech: "清空",
+      clearSpeechTitle: "停止目前朗讀並清空等待留言；朗讀保持開啟時，新留言仍會朗讀。",
       statusOff: "語音未開啟",
       statusSpeaking: "朗讀中",
+      statusSpeechFailed: "語音播放失敗",
+      statusPreviewFailed: "語音試聽失敗",
+      speechFailureHelp: "朗讀已暫停，未讀完的留言已保留。可以重試，或跳過這則留言繼續。",
+      previewFailureHelp: "無法播放所選語音。請重試，或展開設定選擇另一個本機語音。",
+      retrySpeech: "重試朗讀",
+      retryPreview: "重新試聽",
+      continueSpeech: "繼續朗讀",
+      dismissNotice: "關閉提示",
       statusFixedUnavailable: "固定語音不可用 · 請重新選擇",
       statusAutoWaiting: "自動配對 · 等待本機語音",
       statusAutoOn: "自動配對 · 語音已開啟",
       statusFixedOn: "固定語音 · 已開啟",
       queueWaiting: " · 等待 {count} 則",
-      statusSaveFailed: "設定暫時無法儲存",
-      statusLoadFailed: "無法讀取設定，已使用預設值",
+      statusSaveFailed: "設定尚未儲存，請重試。關閉聊天室可能會遺失這次變更。",
+      statusLoadFailed: "無法讀取設定，暫時使用預設值。請重新開啟聊天室再試。",
+      retrySave: "重試儲存",
+      statusSaving: "正在儲存設定…",
       statusWaitingVoice: "正在等待本機語音",
       statusEnabled: "語音朗讀已開啟",
       statusNoVoice: "找不到可用的本機語音",
@@ -153,6 +195,12 @@
       interfaceLanguage: "表示言語",
       controlPanel: "Chat Observatory コントロールセンター",
       themeGroup: "テーマ",
+      themeExplore: "テーマを試す",
+      randomTheme: "ランダムに変更",
+      previousTheme: "前のテーマへ",
+      previousThemeTitle: "前のテーマへ：{theme}",
+      noPreviousTheme: "テーマを変更すると、前のテーマに戻せます。",
+      themeApplied: "{theme}に変更しました",
       themeBlack: "玄曜・特異点",
       themeRed: "赤曜・超新星",
       themeOrange: "橙燼・コロナ",
@@ -201,13 +249,19 @@
       customBackgroundDecodeFailed: "画像を読み込めません。別のファイルをお試しください",
       customBackgroundSaveFailed: "画像を保存できません。Chromeの空き容量をご確認ください",
       speechSection: "音声読み上げ",
-      ttsToggleTitle: "TTS のオン／オフ",
+      speechShortcut: "音声",
+      ttsToggleTitle: "新しいメッセージの読み上げをオン／オフ",
       voiceMode: "音声モード",
       voiceAuto: "言語に合わせて自動選択",
       voiceFixed: "選択した音声を固定",
       voiceSelect: "既定／固定音声",
+      voiceAutoSelect: "優先／代替音声",
+      voiceFixedSelect: "固定音声",
+      voiceAutoHint: "言語に合う既知の女性音声を優先し、この選択を優先候補または代替音声に使います。すべて同じ音声で読むには固定モードを選んでください。",
+      voiceFixedHint: "すべてのメッセージを選択した音声で読みます。他の言語は正しく読めない場合があります。",
+      voiceSetupHint: "利用可能なローカル音声がありません。システムに音声を追加してからチャットを開き直してください。",
       localOnly: "（ローカルのみ）",
-      voiceHint: "自動モードは言語に合う推奨音声を選びます。評価情報は公開されていないため、固定モードで試聴できます。",
+      voiceHint: "自動モードは言語に合う既知の女性音声を優先し、なければ代替音声を使います。固定モードでは自分で選べます。",
       rate: "読み上げ速度",
       volume: "音量",
       readTime: "時刻を読み上げ",
@@ -215,18 +269,29 @@
       readEmoji: "絵文字名を読み上げ",
       cleanUrls: "URLを「リンク」と読む",
       collapseRepeats: "繰り返し文字を圧縮",
-      testVoice: "試聴",
+      testVoice: "音声を試聴",
       skipSpeech: "スキップ",
       clearSpeech: "クリア",
+      clearSpeechTitle: "現在の読み上げと待機中のメッセージをクリアします。読み上げがオンなら、新しいメッセージは読み上げます。",
       statusOff: "音声オフ",
       statusSpeaking: "読み上げ中",
+      statusSpeechFailed: "音声再生に失敗",
+      statusPreviewFailed: "音声の試聴に失敗",
+      speechFailureHelp: "読み上げを停止し、未完了のメッセージを保持しています。再試行するか、スキップして続けられます。",
+      previewFailureHelp: "選択した音声を再生できません。再試行するか、設定を開いて別のローカル音声を選んでください。",
+      retrySpeech: "読み上げを再試行",
+      retryPreview: "もう一度試聴",
+      continueSpeech: "読み上げを続行",
+      dismissNotice: "閉じる",
       statusFixedUnavailable: "固定音声を利用できません · 再選択してください",
       statusAutoWaiting: "自動選択 · ローカル音声を待機中",
       statusAutoOn: "自動選択 · 音声オン",
       statusFixedOn: "固定音声 · オン",
       queueWaiting: " · {count}件待機",
-      statusSaveFailed: "設定を一時保存できません",
-      statusLoadFailed: "設定を読み込めないため既定値を使用",
+      statusSaveFailed: "設定を保存できません。再試行してください。チャットを閉じると変更が失われる可能性があります。",
+      statusLoadFailed: "設定を読み込めず、既定値を使用しています。チャットを開き直してください。",
+      retrySave: "保存を再試行",
+      statusSaving: "設定を保存中…",
       statusWaitingVoice: "ローカル音声を待っています",
       statusEnabled: "音声読み上げを開始しました",
       statusNoVoice: "利用可能なローカル音声が見つかりません",
@@ -255,6 +320,12 @@
       interfaceLanguage: "Interface language",
       controlPanel: "Chat Observatory control center",
       themeGroup: "Theme",
+      themeExplore: "Explore themes",
+      randomTheme: "Try random theme",
+      previousTheme: "Switch back",
+      previousThemeTitle: "Switch back to {theme}",
+      noPreviousTheme: "Change the theme first to enable switching back.",
+      themeApplied: "Changed to {theme}",
       themeBlack: "Umbra Singularity",
       themeRed: "Crimson Nova",
       themeOrange: "Ember Corona",
@@ -303,13 +374,19 @@
       customBackgroundDecodeFailed: "Could not read that image; try another file",
       customBackgroundSaveFailed: "Could not save the image; free Chrome storage and try again",
       speechSection: "Voice reading",
-      ttsToggleTitle: "Turn TTS on or off",
+      speechShortcut: "Read aloud",
+      ttsToggleTitle: "Turn reading of new messages on or off",
       voiceMode: "Voice mode",
       voiceAuto: "Match language automatically",
       voiceFixed: "Use selected voice",
       voiceSelect: "Default / fixed voice",
+      voiceAutoSelect: "Preferred / fallback voice",
+      voiceFixedSelect: "Fixed voice",
+      voiceAutoHint: "Auto mode prefers known female voices for each language. This choice is a preference or fallback. Choose Fixed to use one voice for every message.",
+      voiceFixedHint: "Every message uses this voice. It may not pronounce other languages correctly.",
+      voiceSetupHint: "No local voice is available on this device. Add a voice in your system settings, then reopen the chat.",
       localOnly: "(local only)",
-      voiceHint: "Auto mode selects a recommended voice for each language. Ratings are not public, so use fixed mode to try voices one by one.",
+      voiceHint: "Auto mode prefers known female voices for each language, with a fallback when unavailable. Fixed mode keeps your choice.",
       rate: "Speech rate",
       volume: "Volume",
       readTime: "Read time",
@@ -317,18 +394,29 @@
       readEmoji: "Read emoji names",
       cleanUrls: "Read URLs as “link”",
       collapseRepeats: "Collapse repeated text",
-      testVoice: "Test",
+      testVoice: "Test voice",
       skipSpeech: "Skip",
       clearSpeech: "Clear",
+      clearSpeechTitle: "Stop the current reading and clear waiting messages. New messages are read while reading is on.",
       statusOff: "Voice off",
       statusSpeaking: "Speaking",
+      statusSpeechFailed: "Speech failed",
+      statusPreviewFailed: "Voice test failed",
+      speechFailureHelp: "Reading is paused. The unfinished message is kept. Retry it, or skip it to continue.",
+      previewFailureHelp: "This voice could not play. Retry, or expand settings and choose another local voice.",
+      retrySpeech: "Retry reading",
+      retryPreview: "Test again",
+      continueSpeech: "Continue reading",
+      dismissNotice: "Dismiss",
       statusFixedUnavailable: "Fixed voice unavailable · Choose again",
       statusAutoWaiting: "Auto match · Waiting for local voice",
       statusAutoOn: "Auto match · Voice on",
       statusFixedOn: "Fixed voice · On",
       queueWaiting: " · {count} queued",
-      statusSaveFailed: "Settings could not be saved temporarily",
-      statusLoadFailed: "Could not load settings; using defaults",
+      statusSaveFailed: "Settings have not been saved. Retry before closing the chat to keep your changes.",
+      statusLoadFailed: "Settings could not load; using defaults for now. Reopen the chat to try again.",
+      retrySave: "Retry saving",
+      statusSaving: "Saving settings…",
       statusWaitingVoice: "Waiting for a local voice",
       statusEnabled: "Voice reading enabled",
       statusNoVoice: "No usable local voice found",
@@ -392,16 +480,25 @@
   let ttsQueue = [];
   let activeUtterance = null;
   let activeSpeechItem = null;
+  let speechFailed = false;
+  let failedSpeechItem = null;
   let speechGeneration = 0;
   let watchdogTimer = null;
   let themeChangeTimer = null;
+  let themeHistory = null;
   let keywordRefreshTimer = null;
   let storageReady = false;
+  let settingsSaveFailed = false;
+  let settingsLoadFailed = false;
+  let isRetryingSave = false;
   let saveRequestedBeforeStorage = false;
   const localSettingsChanged = new Map();
   const localSettingRevisions = new Map();
+  const nextLocalSettingRevisions = new Map();
+  const localDirtyValues = new Map();
   const trackedLocalWriteRevisions = new Map();
   const pendingLocalWrites = new Map();
+  const settingNotificationRevisions = new Map();
   const MAX_RETAINED_LOCAL_WRITES = 8;
   const pendingExternalChanges = new Map();
   let saveQueue = Promise.resolve();
@@ -456,10 +553,31 @@
           <span id="chatobs-status-line" aria-live="polite"></span>
         </div>
       </div>
-      <button class="chatobs-icon-button" id="chatobs-collapse-button" type="button" aria-label="收合控制面板" aria-expanded="true">
-        <span aria-hidden="true"></span>
-      </button>
+      <div class="chatobs-header-actions">
+        <label class="chatobs-quick-tts" title="開啟或關閉新留言朗讀" data-i18n-title="ttsToggleTitle">
+          <span data-i18n="speechShortcut">朗讀</span>
+          <span class="chatobs-switch">
+            <input type="checkbox" id="chatobs-tts-toggle" aria-label="開啟或關閉新留言朗讀">
+            <span aria-hidden="true"></span>
+          </span>
+        </label>
+        <button class="chatobs-icon-button" id="chatobs-collapse-button" type="button" aria-label="收合控制面板" aria-expanded="true" aria-controls="chatobs-panel-body">
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
     </header>
+
+    <div class="chatobs-feedback" id="chatobs-save-feedback" hidden>
+      <p id="chatobs-save-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <button type="button" id="chatobs-retry-save" data-i18n="retrySave">重試儲存</button>
+    </div>
+    <div class="chatobs-feedback" id="chatobs-speech-feedback" hidden>
+      <p id="chatobs-speech-error" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div class="chatobs-feedback-actions">
+        <button type="button" id="chatobs-retry-speech">重試朗讀</button>
+        <button type="button" id="chatobs-skip-failed">跳過</button>
+      </div>
+    </div>
 
     <div id="chatobs-panel-body">
       <div class="chatobs-quick-switches">
@@ -493,6 +611,12 @@
             <option value="rainbow" data-i18n="themeRainbow">虹渦光譜</option>
           </select>
         </label>
+      </div>
+
+      <div class="chatobs-theme-actions" id="chatobs-theme-actions" role="group" aria-label="探索主題">
+        <button type="button" id="chatobs-random-theme" data-i18n="randomTheme" disabled>隨機換主題</button>
+        <button type="button" id="chatobs-previous-theme" data-i18n="previousTheme" disabled>換回上一款</button>
+        <span class="chatobs-sr-only" id="chatobs-theme-feedback" role="status" aria-live="polite" aria-atomic="true"></span>
       </div>
 
       <div class="chatobs-section">
@@ -546,10 +670,6 @@
       <div class="chatobs-section" id="chatobs-tts-section">
         <div class="chatobs-section-title">
           <span data-i18n="speechSection">語音朗讀</span>
-          <label class="chatobs-switch" title="開啟或關閉 TTS" data-i18n-title="ttsToggleTitle">
-            <input type="checkbox" id="chatobs-tts-toggle" aria-label="開啟或關閉 TTS">
-            <span aria-hidden="true"></span>
-          </label>
         </div>
 
         <div class="chatobs-two-columns">
@@ -561,13 +681,13 @@
             </select>
           </label>
           <label class="chatobs-field">
-            <span><span data-i18n="voiceSelect">預設／固定語音</span> <small class="chatobs-privacy-tip" data-i18n="localOnly">（僅本機）</small></span>
-            <select id="chatobs-voice-select">
-              <option value="">正在尋找本機語音…</option>
+            <span><span id="chatobs-voice-label">偏好／備援語音</span> <small class="chatobs-privacy-tip" data-i18n="localOnly">（僅本機）</small></span>
+            <select id="chatobs-voice-select" aria-describedby="chatobs-voice-hint" disabled aria-busy="true">
+              <option value="" disabled selected>正在尋找本機語音…</option>
             </select>
           </label>
         </div>
-        <small class="chatobs-voice-hint" data-i18n="voiceHint">自動模式會依語言挑選推薦人聲；沒有公開評分，仍可切到固定語音逐一試聽。</small>
+        <small class="chatobs-voice-hint" id="chatobs-voice-hint"></small>
 
         <div class="chatobs-two-columns">
           <label class="chatobs-slider-row">
@@ -604,9 +724,9 @@
         </div>
 
         <div class="chatobs-actions">
-          <button type="button" id="chatobs-test-voice" data-i18n="testVoice">試聽</button>
-          <button type="button" id="chatobs-skip-speech" data-i18n="skipSpeech">跳過</button>
-          <button type="button" id="chatobs-clear-speech" class="chatobs-danger" data-i18n="clearSpeech">清空</button>
+          <button type="button" id="chatobs-test-voice" data-i18n="testVoice" disabled>試聽語音</button>
+          <button type="button" id="chatobs-skip-speech" data-i18n="skipSpeech" disabled>跳過</button>
+          <button type="button" id="chatobs-clear-speech" class="chatobs-danger" data-i18n="clearSpeech" data-i18n-title="clearSpeechTitle" disabled>清空</button>
         </div>
       </div>
     </div>
@@ -620,8 +740,19 @@
     body: document.getElementById("chatobs-panel-body"),
     collapseButton: document.getElementById("chatobs-collapse-button"),
     statusLine: document.getElementById("chatobs-status-line"),
+    saveFeedback: document.getElementById("chatobs-save-feedback"),
+    saveStatus: document.getElementById("chatobs-save-status"),
+    retrySave: document.getElementById("chatobs-retry-save"),
+    speechFeedback: document.getElementById("chatobs-speech-feedback"),
+    speechError: document.getElementById("chatobs-speech-error"),
+    retrySpeech: document.getElementById("chatobs-retry-speech"),
+    skipFailed: document.getElementById("chatobs-skip-failed"),
     languageButtons: [...panel.querySelectorAll("[data-locale]")],
     themeSelect: document.getElementById("chatobs-theme-select"),
+    themeActions: document.getElementById("chatobs-theme-actions"),
+    randomTheme: document.getElementById("chatobs-random-theme"),
+    previousTheme: document.getElementById("chatobs-previous-theme"),
+    themeFeedback: document.getElementById("chatobs-theme-feedback"),
     fontSlider: document.getElementById("chatobs-font-slider"),
     fontValue: document.getElementById("chatobs-font-value"),
     panelFontSlider: document.getElementById("chatobs-panel-font-slider"),
@@ -640,6 +771,8 @@
     ttsToggle: document.getElementById("chatobs-tts-toggle"),
     voiceModeSelect: document.getElementById("chatobs-voice-mode-select"),
     voiceSelect: document.getElementById("chatobs-voice-select"),
+    voiceLabel: document.getElementById("chatobs-voice-label"),
+    voiceHint: document.getElementById("chatobs-voice-hint"),
     rateSlider: document.getElementById("chatobs-rate-slider"),
     rateValue: document.getElementById("chatobs-rate-value"),
     volumeSlider: document.getElementById("chatobs-volume-slider"),
@@ -664,6 +797,26 @@
     isImportingBackground = busy;
     ui.backgroundChoose.disabled = busy;
     ui.backgroundRemove.disabled = busy || !customBackgroundDataUrl;
+  }
+
+  function showFeedback(element, visible, focusTarget) {
+    const shouldRestoreFocus = !visible && element.contains(document.activeElement);
+    const visibilityChanged = element.hidden === visible;
+    element.hidden = !visible;
+    if (shouldRestoreFocus) focusTarget.focus();
+    if (visibilityChanged) syncPanelOffset();
+  }
+
+  function updateSettingsFeedback() {
+    const visible = settingsSaveFailed || settingsLoadFailed;
+    const restoreSaveFocus = !settingsSaveFailed && document.activeElement === ui.retrySave;
+    ui.saveStatus.textContent = visible
+      ? t(isRetryingSave ? "statusSaving" : settingsSaveFailed ? "statusSaveFailed" : "statusLoadFailed")
+      : "";
+    ui.retrySave.hidden = !settingsSaveFailed;
+    ui.retrySave.disabled = isRetryingSave;
+    showFeedback(ui.saveFeedback, visible, ui.collapseButton);
+    if (restoreSaveFocus) ui.collapseButton.focus();
   }
 
   function applyLocale() {
@@ -692,6 +845,9 @@
     const panelHeader = panel.querySelector(".chatobs-panel-header");
     const nativeChatHeader = document.querySelector("yt-live-chat-header-renderer");
     const panelHeaderHeight = Math.ceil(panelHeader?.getBoundingClientRect().height || 0);
+    const feedbackHeight = [ui.saveFeedback, ui.speechFeedback]
+      .filter((element) => !element.hidden)
+      .reduce((height, element) => height + Math.ceil(element.getBoundingClientRect().height), 0);
     const nativeChatHeaderHeight = Math.ceil(nativeChatHeader?.getBoundingClientRect().height || 0);
     document.documentElement.style.setProperty(
       "--chatobs-native-header-offset",
@@ -699,7 +855,7 @@
     );
     document.documentElement.style.setProperty(
       "--chatobs-panel-offset",
-      `${Math.max(84, panelHeaderHeight + 16)}px`
+      `${Math.max(84, panelHeaderHeight + feedbackHeight + 16)}px`
     );
   }
 
@@ -888,16 +1044,30 @@
 
   function persistSettings(snapshot = { ...settings }) {
     if (!window.chrome?.storage?.local?.set) return Promise.resolve();
-    const pendingSnapshot = { ...snapshot };
+    const pendingSnapshot = {};
+    for (const key of localSettingRevisions.keys()) {
+      if (!Object.prototype.hasOwnProperty.call(snapshot, key)) continue;
+      pendingSnapshot[key] = localDirtyValues.has(key)
+        ? localDirtyValues.get(key)
+        : snapshot[key];
+    }
+    if (Object.keys(pendingSnapshot).length === 0) {
+      if (localSettingRevisions.size === 0 && settingsSaveFailed) {
+        settingsSaveFailed = false;
+        if (!isCleanedUp) updateSettingsFeedback();
+      }
+      return Promise.resolve();
+    }
     const localWriteCandidates = Object.keys(pendingSnapshot).flatMap((key) => {
       const revision = localSettingRevisions.get(key);
       if (revision === undefined) return [];
       return [{ key, value: pendingSnapshot[key], revision }];
     });
     const registerLocalWrites = () => localWriteCandidates.flatMap(({ key, value, revision }) => {
+      if (localSettingRevisions.get(key) !== revision) return [];
       if (revision <= (trackedLocalWriteRevisions.get(key) || 0)) return [];
       const writes = pendingLocalWrites.get(key) || [];
-      const record = { value, revision, settled: false };
+      const record = { value, revision, settled: false, superseded: false };
       writes.push(record);
       pendingLocalWrites.set(key, writes);
       trackedLocalWriteRevisions.set(key, revision);
@@ -916,16 +1086,28 @@
     };
     saveQueue = saveQueue.catch(() => {}).then(async () => {
       const localWrites = registerLocalWrites();
+      if (localWrites.length === 0) return;
+      const writeSnapshot = Object.fromEntries(
+        localWrites.map(({ key, record }) => [key, record.value])
+      );
       let didSave = false;
       try {
-        await chrome.storage.local.set(pendingSnapshot);
+        await chrome.storage.local.set(writeSnapshot);
         didSave = true;
       } catch {
-        if (!isCleanedUp) updateSpeechStatus(t("statusSaveFailed"));
+        if (localWrites.some(({ record }) => !record.superseded)) settingsSaveFailed = true;
       } finally {
+        let needsReconcile = false;
         localWrites.forEach(({ key, record }) => {
           if (didSave) {
             record.settled = true;
+            if (record.superseded && !localSettingRevisions.has(key)) {
+              markLocalSettingChanged(key);
+              needsReconcile = true;
+            } else if (localSettingRevisions.get(key) === record.revision) {
+              localSettingRevisions.delete(key);
+              localDirtyValues.delete(key);
+            }
           } else {
             const writes = pendingLocalWrites.get(key) || [];
             const index = writes.indexOf(record);
@@ -938,6 +1120,10 @@
           }
           pruneLocalWrites(key);
         });
+        // 已送出的舊值無法取消；完成後沿同一保存佇列還原最新有效設定。
+        if (needsReconcile) void persistSettings();
+        if (didSave && localSettingRevisions.size === 0) settingsSaveFailed = false;
+        if (!isCleanedUp) updateSettingsFeedback();
       }
     });
     return saveQueue;
@@ -957,22 +1143,45 @@
   }
 
   function markLocalSettingChanged(key) {
-    localSettingRevisions.set(key, (localSettingRevisions.get(key) || 0) + 1);
+    const revision = (nextLocalSettingRevisions.get(key) || 0) + 1;
+    nextLocalSettingRevisions.set(key, revision);
+    localSettingRevisions.set(key, revision);
+    localDirtyValues.set(key, settings[key]);
     if (!storageReady) localSettingsChanged.set(key, settings[key]);
   }
 
   function consumePendingLocalWrite(key, value) {
     const writes = pendingLocalWrites.get(key);
-    if (!writes) return false;
+    if (!writes) return null;
+    const currentRevision = localSettingRevisions.get(key);
     const index = writes.findIndex((write) => (
       Object.is(write.value, value) &&
-      write.revision <= (localSettingRevisions.get(key) || 0)
+      (currentRevision === undefined || write.revision <= currentRevision)
     ));
-    if (index === -1) return false;
-    const isStaleLocalWrite = writes[index].revision < (localSettingRevisions.get(key) || 0);
+    if (index === -1) return null;
+    const mustReadCurrentValue = writes[index].superseded && writes[index].settled &&
+      currentRevision === undefined;
+    const isStaleLocalWrite = writes[index].superseded || (
+      currentRevision !== undefined && writes[index].revision < currentRevision
+    );
     writes.splice(index, 1);
     if (writes.length === 0) pendingLocalWrites.delete(key);
-    return isStaleLocalWrite;
+    return mustReadCurrentValue ? "read-current" : isStaleLocalWrite;
+  }
+
+  async function refreshSupersededSetting(key, notificationRevision) {
+    const localRevision = nextLocalSettingRevisions.get(key);
+    try {
+      const stored = await chrome.storage.local.get({ [key]: DEFAULT_SETTINGS[key] });
+      if (isCleanedUp || settingNotificationRevisions.get(key) !== notificationRevision ||
+          nextLocalSettingRevisions.get(key) !== localRevision) return;
+      // 舊通知與真正的外部相同值更新無法只憑值區分；以目前 storage 為準。
+      if (!Object.is(stored[key], settings[key])) {
+        handleStorageChange({ [key]: { newValue: stored[key] } }, "local");
+      }
+    } catch {
+      // 無法確認時保留目前較新的設定，交由後續通知或重新開啟讀回。
+    }
   }
 
   function flushPendingSave() {
@@ -997,7 +1206,18 @@
     const nextSettings = { ...settings };
 
     for (const [key, change] of Object.entries(changes)) {
-      if (change && "newValue" in change && consumePendingLocalWrite(key, change.newValue)) continue;
+      const notificationRevision = (settingNotificationRevisions.get(key) || 0) + 1;
+      if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) {
+        settingNotificationRevisions.set(key, notificationRevision);
+      }
+      const localEcho = change && "newValue" in change
+        ? consumePendingLocalWrite(key, change.newValue)
+        : null;
+      if (localEcho === true) continue;
+      if (localEcho === "read-current") {
+        void refreshSupersededSetting(key, notificationRevision);
+        continue;
+      }
       if (!storageReady) pendingExternalChanges.set(key, change);
       if (key === CUSTOM_BACKGROUND_STORAGE_KEY) {
         customBackgroundDataUrl = sanitizeCustomBackground(change?.newValue);
@@ -1005,6 +1225,14 @@
         continue;
       }
       if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) {
+        // 已載入後，真正的外部更新取代尚未送出的本地修改。
+        if (storageReady && localEcho === null) {
+          for (const write of pendingLocalWrites.get(key) || []) {
+            if (!write.settled) write.superseded = true;
+          }
+          localSettingRevisions.delete(key);
+          localDirtyValues.delete(key);
+        }
         nextSettings[key] = change && "newValue" in change
           ? change.newValue
           : DEFAULT_SETTINGS[key];
@@ -1013,6 +1241,7 @@
     }
 
     if (hasChange || hasBackgroundChange) {
+      if (localSettingRevisions.size === 0) settingsSaveFailed = false;
       settings = sanitizeSettings(nextSettings);
       applySettings({ save: false });
       if (Object.prototype.hasOwnProperty.call(changes, "highlightKeywords")) {
@@ -1259,9 +1488,16 @@
     return score;
   }
 
+  function isKnownFemaleVoice(voice) {
+    const baseLang = normalizeVoiceLang(voice?.lang).split("-")[0];
+    return PREFERRED_FEMALE_VOICE_NAMES[baseLang]?.test(String(voice?.name || "")) === true;
+  }
+
   function pickRecommendedVoice(voices, langTag = "") {
     if (!Array.isArray(voices) || voices.length === 0) return null;
     return [...voices].sort((left, right) => {
+      const femaleDifference = Number(isKnownFemaleVoice(right)) - Number(isKnownFemaleVoice(left));
+      if (femaleDifference !== 0) return femaleDifference;
       const scoreDifference = voiceQualityScore(right, langTag) - voiceQualityScore(left, langTag);
       if (scoreDifference !== 0) return scoreDifference;
       return String(left.name || "").localeCompare(String(right.name || ""));
@@ -1427,11 +1663,12 @@
       return fallbackVoice;
     }
 
-    if (selectedVoice && isVoiceMatchLang(selectedVoice, langTag)) {
+    const matched = findLocalVoiceForLang(localVoices, langTag);
+    if (selectedVoice && isVoiceMatchLang(selectedVoice, langTag) &&
+        (isKnownFemaleVoice(selectedVoice) || !isKnownFemaleVoice(matched))) {
       return selectedVoice;
     }
 
-    const matched = findLocalVoiceForLang(localVoices, langTag);
     return matched || fallbackVoice;
   }
 
@@ -1486,7 +1723,9 @@
   function updateSpeechStatus(message = "") {
     const queueText = ttsQueue.length ? t("queueWaiting", { count: ttsQueue.length }) : "";
     let state = t("statusOff");
-    if (shouldSpeak() && activeUtterance) {
+    if (speechFailed) {
+      state = t(failedSpeechItem ? "statusSpeechFailed" : "statusPreviewFailed");
+    } else if (shouldSpeak() && activeUtterance) {
       state = t("statusSpeaking");
     } else if (shouldSpeak() && !getUsableVoice()) {
       state = settings.ttsVoiceMode === "fixed"
@@ -1496,6 +1735,18 @@
       state = settings.ttsVoiceMode === "auto" ? t("statusAutoOn") : t("statusFixedOn");
     }
     ui.statusLine.textContent = message || `${state}${queueText}`;
+    ui.statusLine.title = ui.statusLine.textContent;
+    const previewVoice = getLocalVoices().find((voice) => voice.voiceURI === ui.voiceSelect.value) || getUsableVoice();
+    ui.testVoice.disabled = !previewVoice;
+    ui.skipSpeech.disabled = !activeUtterance && !speechFailed;
+    ui.clearSpeech.disabled = !activeUtterance && !ttsQueue.length && !speechFailed;
+    ui.speechError.textContent = speechFailed
+      ? t(failedSpeechItem ? "speechFailureHelp" : "previewFailureHelp")
+      : "";
+    ui.retrySpeech.textContent = t(failedSpeechItem ? "retrySpeech" : "retryPreview");
+    ui.retrySpeech.disabled = failedSpeechItem ? !getUsableVoice() : !previewVoice;
+    ui.skipFailed.textContent = t(failedSpeechItem ? "skipSpeech" : shouldSpeak() ? "continueSpeech" : "dismissNotice");
+    showFeedback(ui.speechFeedback, speechFailed, ui.ttsToggle);
   }
 
   function clearWatchdog() {
@@ -1522,31 +1773,37 @@
       const timeoutMs = Math.min(180000, Math.max(10000, Math.round((textLen * 400) / rate + 5000)));
 
       watchdogTimer = window.setTimeout(() => {
-        if (generation === speechGeneration) {
-          try {
-            window.speechSynthesis.cancel();
-          } catch (_) {}
-          finishUtterance(generation);
-        }
+        failUtterance(generation);
       }, timeoutMs);
 
       window.speechSynthesis.speak(utterance);
     } catch {
-      finishUtterance(generation);
+      failUtterance(generation);
     }
   }
 
+  function failUtterance(generation) {
+    if (generation !== speechGeneration || isCleanedUp) return;
+    const hadActiveMessage = Boolean(activeSpeechItem);
+    stopSpeech({ preserveCurrent: true });
+    speechFailed = true;
+    failedSpeechItem = hadActiveMessage ? ttsQueue[0] : null;
+    updateSpeechStatus();
+  }
+
   function startUtterance(utterance, statusMessage = "") {
+    speechFailed = false;
+    failedSpeechItem = null;
     const generation = ++speechGeneration;
     activeUtterance = utterance;
     utterance.onend = () => finishUtterance(generation);
-    utterance.onerror = () => finishUtterance(generation);
+    utterance.onerror = () => failUtterance(generation);
     updateSpeechStatus(statusMessage);
     safeSpeak(utterance, generation);
   }
 
   function speakNext() {
-    if (activeUtterance || !shouldSpeak()) {
+    if (activeUtterance || speechFailed || !shouldSpeak()) {
       updateSpeechStatus();
       return;
     }
@@ -1592,7 +1849,11 @@
     }
     activeUtterance = null;
     activeSpeechItem = null;
-    if (clearQueue) ttsQueue = [];
+    if (clearQueue) {
+      ttsQueue = [];
+      speechFailed = false;
+      failedSpeechItem = null;
+    }
     try {
       window.speechSynthesis.cancel();
     } catch (_) {}
@@ -1627,14 +1888,18 @@
       : "";
     const text = `${prefix}${timeText}${nameText}${message}`;
 
-    while (ttsQueue.length >= settings.queueLimit) ttsQueue.shift();
+    while (ttsQueue.length >= settings.queueLimit) {
+      // Keep the message offered for manual retry; evict the oldest waiting item instead.
+      if (speechFailed && failedSpeechItem && ttsQueue[0] === failedSpeechItem) ttsQueue.splice(1, 1);
+      else ttsQueue.shift();
+    }
     ttsQueue.push({ text, languageText: rawMessage, queuedAt: Date.now() });
     updateSpeechStatus();
     speakNext();
   }
 
   function processRenderer(node, { speak = true } = {}) {
-    if (!(node instanceof Element)) return;
+    if (!(node instanceof Element) || !node.isConnected || !currentItemsContainer?.contains(node)) return;
     if (!storageReady && speak) {
       pendingNodes.add(node);
       return;
@@ -1679,6 +1944,7 @@
     if (isCleanedUp) return;
     const nodesToProcess = Array.from(pendingNodes);
     pendingNodes.clear();
+    settingNotificationRevisions.clear();
     microtaskScheduled = false;
 
     for (const node of nodesToProcess) {
@@ -1763,8 +2029,16 @@
       ui.voiceSelect.add(unavailable);
       ui.voiceSelect.disabled = true;
     }
-
+    ui.voiceSelect.setAttribute("aria-busy", "false");
+    updateVoiceGuidance(localVoices);
+    updateSpeechStatus();
     if (shouldSpeak() && !activeUtterance) speakNext();
+  }
+
+  function updateVoiceGuidance(localVoices = getLocalVoices()) {
+    const fixed = settings.ttsVoiceMode === "fixed";
+    ui.voiceLabel.textContent = t(fixed ? "voiceFixedSelect" : "voiceAutoSelect");
+    ui.voiceHint.textContent = t(localVoices.length ? fixed ? "voiceFixedHint" : "voiceAutoHint" : "voiceSetupHint");
   }
 
   function syncControls() {
@@ -1798,6 +2072,52 @@
     ui.readEmoji.checked = settings.readEmoji;
     ui.cleanUrls.checked = settings.cleanUrls;
     ui.collapseRepeats.checked = settings.collapseRepeats;
+  }
+
+  function getThemeLabel(theme) {
+    return [...ui.themeSelect.options].find((option) => option.value === theme)?.textContent || theme;
+  }
+
+  function updateThemeActions() {
+    if (themeHistory && themeHistory.current !== settings.theme) {
+      themeHistory = null;
+      ui.themeFeedback.textContent = "";
+    }
+    ui.themeActions.setAttribute("aria-label", t("themeExplore"));
+    ui.randomTheme.disabled = !storageReady;
+    ui.previousTheme.disabled = !storageReady || !themeHistory;
+    ui.previousTheme.title = themeHistory
+      ? t("previousThemeTitle", { theme: getThemeLabel(themeHistory.previous) })
+      : t("noPreviousTheme");
+    ui.previousTheme.setAttribute("aria-label", themeHistory
+      ? ui.previousTheme.title
+      : t("previousTheme"));
+    if (ui.themeFeedback.textContent) {
+      const feedback = t("themeApplied", { theme: getThemeLabel(settings.theme) });
+      if (ui.themeFeedback.textContent !== feedback) ui.themeFeedback.textContent = feedback;
+    }
+  }
+
+  function changeTheme(theme) {
+    if (isCleanedUp || !VALID_THEMES.includes(theme)) return;
+    const changed = theme !== settings.theme;
+    if (changed) themeHistory = storageReady ? { previous: settings.theme, current: theme } : null;
+    settings.theme = theme;
+    markLocalSettingChanged("theme");
+    applySettings();
+    if (changed) ui.themeFeedback.textContent = t("themeApplied", { theme: getThemeLabel(theme) });
+    const themeControl = ui.themeSelect.closest(".chatobs-theme-select-control");
+    if (themeControl) {
+      window.clearTimeout(themeChangeTimer);
+      themeChangeTimer = null;
+      themeControl.classList.remove("is-changing");
+      void themeControl.offsetWidth;
+      themeControl.classList.add("is-changing");
+      themeChangeTimer = window.setTimeout(() => {
+        themeControl.classList.remove("is-changing");
+        themeChangeTimer = null;
+      }, 650);
+    }
   }
 
   function applySettings({ save = true } = {}) {
@@ -1839,9 +2159,13 @@
       "aria-label",
       settings.isCollapsed ? t("expandPanel") : t("collapsePanel")
     );
+    ui.collapseButton.title = ui.collapseButton.getAttribute("aria-label");
     applyLocale();
+    updateVoiceGuidance();
+    updateSettingsFeedback();
     refreshKeywords();
     syncControls();
+    updateThemeActions();
     updateSpeechStatus();
     syncPanelOffset();
     if (save) scheduleSave();
@@ -1879,25 +2203,22 @@
       settings.uiLocale = button.dataset.locale;
       markLocalSettingChanged("uiLocale");
       applySettings();
+      populateVoices();
     });
   });
 
   ui.themeSelect.addEventListener("change", () => {
-    settings.theme = ui.themeSelect.value;
-    markLocalSettingChanged("theme");
-    applySettings();
-    const themeControl = ui.themeSelect.closest(".chatobs-theme-select-control");
-    if (themeControl) {
-      window.clearTimeout(themeChangeTimer);
-      themeChangeTimer = null;
-      themeControl.classList.remove("is-changing");
-      void themeControl.offsetWidth;
-      themeControl.classList.add("is-changing");
-      themeChangeTimer = window.setTimeout(() => {
-        themeControl.classList.remove("is-changing");
-        themeChangeTimer = null;
-      }, 650);
-    }
+    changeTheme(ui.themeSelect.value);
+  });
+
+  ui.randomTheme.addEventListener("click", () => {
+    if (!storageReady || isCleanedUp) return;
+    const choices = VALID_THEMES.filter((theme) => theme !== settings.theme);
+    changeTheme(choices[Math.floor(Math.random() * choices.length)]);
+  });
+
+  ui.previousTheme.addEventListener("click", () => {
+    if (storageReady && themeHistory) changeTheme(themeHistory.previous);
   });
 
   bindRange(ui.fontSlider, ui.fontValue, "fontSize", (value) => `${value}px`);
@@ -1990,7 +2311,7 @@
     applySettings();
   });
 
-  ui.testVoice.addEventListener("click", () => {
+  function previewSelectedVoice() {
     const localVoices = getLocalVoices();
     const voice = localVoices.find((candidate) => candidate.voiceURI === ui.voiceSelect.value) ||
       getUsableVoice(localVoices);
@@ -2007,10 +2328,48 @@
     test.pitch = settings.ttsPitch;
 
     startUtterance(test, t("statusTest"));
+  }
+
+  ui.testVoice.addEventListener("click", previewSelectedVoice);
+
+  ui.retrySpeech.addEventListener("click", () => {
+    if (!speechFailed) return;
+    if (failedSpeechItem && ttsQueue.includes(failedSpeechItem) && shouldSpeak()) {
+      // A manual retry keeps the interrupted message eligible after a long error pause.
+      failedSpeechItem.queuedAt = Date.now();
+      speechFailed = false;
+      failedSpeechItem = null;
+      speakNext();
+    } else {
+      previewSelectedVoice();
+    }
   });
 
-  ui.skipSpeech.addEventListener("click", () => {
+  function skipCurrentSpeech() {
+    if (speechFailed && failedSpeechItem && ttsQueue[0] === failedSpeechItem) ttsQueue.shift();
+    speechFailed = false;
+    failedSpeechItem = null;
     stopSpeech({ continueQueue: true });
+  }
+
+  ui.skipSpeech.addEventListener("click", skipCurrentSpeech);
+  ui.skipFailed.addEventListener("click", skipCurrentSpeech);
+
+  ui.retrySave.addEventListener("click", async () => {
+    if (isRetryingSave || !settingsSaveFailed) return;
+    const restoreFocus = document.activeElement === ui.retrySave;
+    isRetryingSave = true;
+    updateSettingsFeedback();
+    window.clearTimeout(saveTimer);
+    saveTimer = null;
+    await persistSettings();
+    isRetryingSave = false;
+    if (!isCleanedUp) {
+      updateSettingsFeedback();
+      if (restoreFocus && document.activeElement === document.body) {
+        (ui.retrySave.hidden ? ui.collapseButton : ui.retrySave).focus();
+      }
+    }
   });
 
   ui.clearSpeech.addEventListener("click", () => {
@@ -2119,6 +2478,7 @@
     keywordRefreshTimer = null;
     window.clearTimeout(themeChangeTimer);
     themeChangeTimer = null;
+    themeHistory = null;
     clearWatchdog();
 
     if (documentObserver) {
@@ -2154,6 +2514,8 @@
     ttsQueue = [];
     activeUtterance = null;
     activeSpeechItem = null;
+    speechFailed = false;
+    failedSpeechItem = null;
     pendingNodes.clear();
   }
 
@@ -2166,7 +2528,7 @@
         [CUSTOM_BACKGROUND_STORAGE_KEY]: ""
       });
     } catch {
-      updateSpeechStatus(t("statusLoadFailed"));
+      settingsLoadFailed = true;
     }
     if (isCleanedUp) return;
     const loadedSettings = sanitizeSettings(stored);

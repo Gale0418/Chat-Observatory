@@ -1,23 +1,17 @@
 # 執行檢查點
 
 - State: active
-- 建立時間: 2026-09-25T12:27:43+08:00
-- 進行中任務: CO-E1 已上架版本維護更新（CO-H5、CO-P2）
-- 狀態: In Progress
-- 版本: 1d1bfca6e8d12689e29ce17997241f8e179dbdd1
-- 指紋: ed0ababed6121ed95765c3eca77fe4c24e0c470d0eb4339bec89acb88b2a0750
-- 依賴: None
-- 驗證: 96/96 自動測試、ZIP 23 個項目、Chrome 真實直播與設定持久化通過；3.0.1 已提交商店審查，CO-H5 實機矩陣與 CO-P2 發布後公開連結驗收仍待完成
-- Retry gate: retry
+- 建立時間: 2026-10-02T22:59:46+08:00
+- 進行中任務: CO-E1 In Progress、CO-H9 Review、CO-H5/CO-P2/CO-V1 In Progress
+- 版本: main待提交／推送；manifest/package/lock3.1.0；公開最後查核3.0.1
+- 指紋: release-final-20261002-9a828401ed4e；parent release-20261002-335fc7620c22
+- 驗證: 129/129，ZIP23項與來源/staging一致，SHA256 e289873991c1069e442d1fb55fbecf7222f84f06e14c1d71c14d646ce5c607d3
+- 依賴: 商店控制台Not allowed；真Chrome/audio未知；最後補修Rabbit quota不足；正式gate limited，final closure未執行
+- Retry gate: needs-evidence
 - Recent attempts JSON: []
 - Diagnosis evidence JSON: []
-- 近期嘗試:
-  - 無
 - Notes:
-  - 已上架版 1.0.0 可用；3.0.1 維護版已上傳並提交審查，設定通過審查後自動發布。
-  - GitHub main 政策已更新；商店草稿首頁、隱私與支援網址已修，公開頁仍待新版通過後驗證。
-  - CodeRabbit 首輪 18 檔提出 2 個 minor，確認並修正 TTS 無障礙名稱；另一色票建議與實測對比及既有設計相衝突。聚焦覆核 4 檔 0 issues。
-  - 2026-09-25 `mission-center snapshot` 回傳 `argument_error`；本檔依 `tasks.md`、Git 與 `smoke-tests.md` 人工更新。
-- Changes:
-  - 修正顏文字及英文 TTS 語音判斷、背景聊天室視窗與設定儲存競態，改善 DOM 觀察及建置安全性。
-  - 版號對齊 3.0.1；`npm run verify` 96/96；`dist/chat-observatory.zip` 建置成功，SHA-256 `70d6d1dde5993adc67feef592a1b3c8df4e86e50df2d0e82593685f47af02d40`。
+  - 三位隔離正式Luna＋獨立仲裁initial完成。TTS11/10、其他8/8/6，總33tools；20分鐘在最終修正版前到期，不宣稱passed/Done。
+  - Rabbit20檔2minor、5檔0issues、6檔1major；有效問題均本機查證修復，最後新補修未外部覆核。
+  - README/英文guide與MissionCenter已同步3.1.0狀態；商店未上傳／送審，release紀錄提供手動交接。
+  - 預覽server、分頁與viewport已清理；沒有關閉工具時不宣稱回收agents。

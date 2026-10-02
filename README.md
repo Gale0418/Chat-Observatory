@@ -1,85 +1,99 @@
-# Chat Observatory 🌌
+# Chat Observatory
 
-Chat Observatory is a local-first Chrome extension for turning a YouTube live-chat page into a comfortable, readable second-screen monitor. Big messages, themeable space visuals, multilingual UI labels, and optional local text-to-speech—packed into one friendly little observatory (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
+把 YouTube 直播聊天室放大，讓第二螢幕看得清楚。
 
-> **Synthetic demo notice:** The screenshots in [`docs/screenshots/`](docs/screenshots/) use fictional `TEST01`, `TEST02`, and `TEST03` identities and invented multilingual messages. They are test fixtures, not real user conversations.
+遊戲打到一半、工作忙起來，不方便一直靠近螢幕看留言？Chat Observatory 會把直播聊天室開成獨立視窗，讓你調整文字大小、選擇背景，並在需要時用裝置上的本機語音朗讀新留言。
 
-## What it does
+[從 Chrome 線上應用程式商店安裝](https://chromewebstore.google.com/detail/chat-observatory/fibmebmihidnbhfajjagfnhoncokdnhf) · [English guide](docs/README.en.md) · [問題回報](https://github.com/Gale0418/Chat-Observatory/issues)
 
-- Opens a standalone live-chat window from a YouTube watch page or YouTube Studio.
-- Makes authors, avatars, and messages easier to read from a distance.
-- Provides twelve local cosmic themes with responsive colors, contrast outlines, and bundled backgrounds.
-- Lets each user choose a JPG, PNG, or WebP background that is resized, converted, and stored only in local Chrome extension storage.
-- Offers separate message and control-panel sizing, avatar and badge visibility controls, keyword highlighting, and a collapsible control center.
-- Supports Traditional Chinese, Japanese, and English interface labels. Chat messages are never translated.
-- Optionally reads new messages with the browser's explicitly local `SpeechSynthesis` voices.
-- Cleans URLs, repeated text, and configurable prefixes before speech to keep the queue comfortable.
-- Handles regular messages, Super Chat, Super Sticker, and membership messages.
+## 先把聊天室看清楚
 
-## Chrome Web Store data-use disclosure
+1. 在 Chrome 安裝擴充功能，開啟要看的 YouTube 直播。
+2. 點工具列的 Chat Observatory 圖示，開啟獨立聊天室。找不到圖示時，先在 Chrome 的擴充功能選單將它固定到工具列。
+3. 把視窗移到第二螢幕，展開控制面板，調整「文字」大小到看得舒服；設定完成後可收合面板。
 
-This extension has one purpose: improve the readability of YouTube live chat on a second screen and, when enabled, read new messages aloud using voices already installed on the local device.
+使用另一台電腦時，請在那台電腦也安裝擴充功能並開啟同一場直播。每台裝置各自讀取 YouTube 聊天室、保存設定。
 
-### Data handling
+## 想聽新留言，再開啟朗讀
 
-- **Data collected:** None. Chat Observatory does not collect account data, browsing history, analytics, advertising identifiers, or chat transcripts.
-- **Data transmitted:** None. Chat text and settings stay in the browser on the current device; there is no remote relay or cloud processing.
-- **Data sold or shared:** Nothing is sold, rented, or shared with third parties.
-- **Data storage:** Display and speech preferences, plus an optional user-selected background image, are saved in Chrome extension storage. The image is resized and converted locally before storage. Chat messages are not stored by the extension.
-- **Speech:** Text-to-speech uses the browser's `SpeechSynthesis` API and only voices explicitly marked `localService=true`. If no suitable local voice exists, speech stays disabled rather than falling back to an unverified online voice.
+先展開控制面板，選擇本機語音並按「試聽語音」，確認音量與語速，再啟用朗讀開關。朗讀只處理啟用後收到的新留言。
 
-### Permissions and why they are needed
+- **自動模式**：嘗試依可辨識的留言語言配對語音，優先使用已知女聲；無法判定語言或缺少對應聲音時使用本機備援語音。可用聲音與發音效果取決於裝置。
+- **固定模式**：所有留言使用你選的語音；其他語言可能念不好。
+- **關閉朗讀**：停止目前朗讀並清空等待留言。
+- **跳過／清空**：跳過目前留言，或停止並清空朗讀；朗讀開關仍開啟時，之後的新留言會繼續朗讀。
 
-- `activeTab` — after the user clicks the toolbar button, reads the current YouTube URL to find the live-chat context and open the standalone chat window.
-- `storage` — saves local display, theme, language, speech, and optional custom-background preferences so the observatory feels consistent across chat windows.
-- YouTube live-chat content access — applies readable styling and observes new messages on supported `https://www.youtube.com/live_chat*` pages.
+留言太多或等待太久時，舊留言可能被略過，避免越念越落後。請以聊天室畫面確認重要留言。
 
-Chat Observatory does not require an account, does not use an external server, and is not affiliated with or endorsed by YouTube or Google.
+## 適合你的觀看方式
 
-## Synthetic screenshot gallery
+- 留言、面板文字與頭像大小分別調整，方便遠距觀看。
+- 十二套宇宙主題，也可匯入自己的 JPG、PNG 或 WebP 背景。
+- 可隱藏頭像與徽章，並用關鍵字標出想注意的留言。
+- 顯示一般留言、Super Chat、Super Sticker 與會員訊息。
+- 介面提供繁體中文、日本語與 English；留言保留原文。
 
-These images are deterministic UI fixtures made for documentation. Every identity and message is fictional, and each image uses a different theme or layout state.
+## 資料留在目前裝置
 
-| Fixture | What it demonstrates |
+Chat Observatory 不需要額外帳號，不設自有後端、不收集分析資料，也不保存聊天室訊息。顯示與朗讀設定、自訂背景只保存在 Chrome 本機擴充功能儲存空間。語音只選用瀏覽器明確標示為本機的服務。
+
+「本機」指擴充功能的資料處理與語音；觀看 YouTube 直播仍需要網路。完整權限用途、保存與刪除方式請看 [隱私權政策](PRIVACY.md)。
+
+## 遇到問題
+
+| 情況 | 可以先這樣做 |
 | --- | --- |
-| [`TEST01 · Ember`](docs/screenshots/test01-ember.png) | Traditional Chinese UI, red super-chat styling, and readable long-form messages. |
-| [`TEST02 · Aurora`](docs/screenshots/test02-aurora.png) | Japanese and English synthetic messages with the cool black-hole theme. |
-| [`TEST03 · Starlight`](docs/screenshots/test03-starlight.png) | Collapsed control center and a multilingual test queue with bright gold accents. |
+| 點圖示沒有開出聊天室 | 先切回 YouTube 直播觀看頁或 YouTube Studio 直播控制台，再點圖示。沒有聊天室的影片無法提供直播留言。 |
+| 找不到語音或沒有聲音 | 確認系統已有所需語言的本機語音，重新開啟聊天室，選擇語音並試聽；也檢查裝置音量。沒有本機語音仍可使用大字畫面。 |
+| 某種語言發音不自然 | 在自動模式確認裝置有該語言的語音；或切換固定模式，自行挑選並試聽。 |
+| 重要留言沒有念到 | 確認朗讀已開啟；忙碌時舊留言可能被略過。畫面仍是監看的主要依據。 |
+| YouTube 更新後畫面不正常 | 提交問題回報，附 Chrome／作業系統版本、重現步驟及直播網址。截圖請先遮住帳號、頭像與私人訊息。 |
 
-## Install locally
+[回報問題或提出建議](https://github.com/Gale0418/Chat-Observatory/issues)。請勿貼上私人聊天室內容。
 
-1. Open `chrome://extensions` in Chrome.
-2. Enable **Developer mode**.
-3. Choose **Load unpacked** and select this project folder.
-4. Open a YouTube live stream or YouTube Studio live-chat page.
-5. Click the Chat Observatory toolbar icon, then tune the theme, text size, and local voice settings.
+## 使用前須知
 
-## Limitations
+- 適用桌面版 Chrome 111 以上及支援的 YouTube 直播聊天室頁面；YouTube 頁面結構變動可能影響功能。
+- 每台電腦需各自安裝；不提供跨裝置聊天室中繼或設定同步。
+- 不提供留言翻譯、聊天室封存或遠端管理。
+- 本機語音取決於作業系統與瀏覽器提供的聲音，無法保證每個語言都有女聲或自然發音。
+- 自訂背景限靜態 JPG、PNG、WebP，匯入上限 20 MB；圖片會在本機縮放並轉成 WebP。
+- 本工具由獨立開發者製作，與 YouTube、Google 無隸屬或背書關係。
 
-- This is a Chrome extension for supported YouTube live-chat URLs; YouTube DOM changes may require selector updates.
-- Interface labels can switch languages, but chat content remains in its original language.
-- Available local voices depend on the operating system and Chrome profile.
-- Custom backgrounds are still images only; supported imports are JPG, PNG, and WebP up to 20 MB, then locally resized and converted to WebP.
-- The extension does not provide translation, remote moderation, cloud speech, or a chat archive.
+## 畫面範例
 
-## Development verification
+以下為早期合成示範，不是實際使用者對話，也不代表最新候選版的全部控制項。`TEST01`、`TEST02`、`TEST03` 與留言皆為測試資料。
 
-```powershell
+| 範例 | 展示內容 |
+| --- | --- |
+| [TEST01 · Ember](docs/screenshots/test01-ember.png) | 繁中介面、Super Chat 樣式與長留言。 |
+| [TEST02 · Aurora](docs/screenshots/test02-aurora.png) | 不同語言的測試留言與宇宙背景。 |
+| [TEST03 · Starlight](docs/screenshots/test03-starlight.png) | 收合面板與大字觀看情境。 |
+
+## 3.1.0 維護更新（準備送審）
+
+公開商店於 2026-10-02 查到的版本為 3.0.1。3.1.0 包含尚未上架的改善：收合時常駐朗讀開關、獨立儲存／朗讀錯誤提示與重試、自動語音女聲優先，以及小視窗操作修復。也新增「隨機換主題」與「換回上一款」：展開面板即可換個風景，不喜歡時一鍵返回；自訂背景會保留。已通過 129 項自動測試及合成介面操作；真實 Chrome 注入與音訊仍未驗收。商店控制台遭工具存取政策阻擋，因此本輪尚未上傳或送審。
+
+若顯示儲存失敗，請在關閉前按「重試儲存」；若設定讀取失敗，重新開啟聊天室再試。朗讀失敗可重試該留言，或跳過繼續。
+
+## 本機開發與驗證
+
+在 Chrome 的 `chrome://extensions` 開啟開發人員模式，選「載入未封裝項目」，指定含有 `manifest.json` 的專案資料夾。開啟直播並點工具列圖示，即可使用工作目錄版本。
+
+以下指令在專案根目錄執行，需要 Node.js；建置與素材腳本另需 PowerShell 7（`pwsh`）。
+
+```sh
 npm ci
 npm run verify
 npm run build:extension
 ```
 
-`npm run verify` performs JavaScript syntax checks and the automated test suite. `npm run build:extension` rebuilds `dist/chat-observatory/` and `dist/chat-observatory.zip`, checks source hashes, and packages only the extension runtime files and bundled theme assets.
+`verify` 執行 JavaScript 語法檢查與自動測試；`build:extension` 產生 `dist/chat-observatory/` 與 `dist/chat-observatory.zip`，核對來源雜湊，只打包擴充功能與本機主題素材。
 
-## Project layout
-
-- `content.js` / `content.css` — live-chat behavior and themeable UI.
-- `background.js` — validated URL handling and standalone chat-window lifecycle.
-- `_locales/` — English, Japanese, and Traditional Chinese extension messages.
-- `assets/themes/` — local cosmic background materials.
-- `docs/screenshots/` — synthetic, non-user documentation screenshots.
-- `tests/` — background, content, and visual fixture tests.
-- `scripts/` — icon, screenshot, and extension-package tooling.
-
-Have fun exploring the chat cosmos—and keep the test data fictional, please! (ง •̀_•́)ง
+| 檔案 | 用途 |
+| --- | --- |
+| `content.js`、`content.css` | 聊天室顯示、主題與朗讀控制。 |
+| `background.js` | 直播網址驗證與獨立視窗生命週期。 |
+| `_locales/` | 繁中、日文與英文擴充功能訊息。 |
+| `tests/`、`scripts/` | 自動測試、合成畫面與封裝工具。 |
+| [STORE_LISTING.md](STORE_LISTING.md) | 三語商店文案與推薦範本。 |

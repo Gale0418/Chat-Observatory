@@ -49,3 +49,26 @@
 | 2026-09-25 | CO-H9 | 3.0.1 版號與正式套件 | `npm run verify`、`npm run build:extension`、檢查 ZIP manifest、項目數與 SHA-256 | 三處版本一致且高於公開主線 3.0.0；測試與封裝通過 | manifest、package 與 lockfile 均為 3.0.1；96/96 tests、0 fail；ZIP 23 項；SHA-256 `70d6d1dde5993adc67feef592a1b3c8df4e86e50df2d0e82593685f47af02d40` | 通過 | automated |
 | 2026-09-25 | CO-H9 | GitHub main 歷史整合與政策同步 | fetch 公開 main、確認無共同祖先；提交本機成果後以正常 merge 保留雙方歷史，再 fast-forward 推送並透過 GitHub 讀回 | 不 force push；公開 main 含 3.0.1 程式與最新版政策 | 公開 main 由 `40aac33` 快轉至 `1d1bfca`；合併後檔案樹與已驗證本機提交一致；GitHub 讀回 `manifest.json` 3.0.1 與 2026-09-25 政策 | 通過 | manual |
 | 2026-09-25 | CO-P2 | Chrome Web Store 3.0.1 上傳及資料欄位修正 | 一般 Chrome 開發者主控台上傳 SHA-256 `70d6d1dd…85f47af02d40` 的 ZIP，修改首頁、支援、隱私政策與 activeTab 用途欄位，儲存並提交審查 | 草稿版號正確、連結可用、審查提交成功；通過審查後自動發布 | 套件草稿顯示 3.0.1、已發布仍 1.0.0；儲存後「提交審查」啟用；提交回條「你已將擴充功能提交審查」，狀態「待審查」、草稿「尚待審查」，自動發布核取為開 | 通過（提交）；公開驗收待審查完成 | manual |
+
+| 2026-10-02 | CO-H9 | 女聲偏好與全面維護回歸 | `npm run verify` | 語法與新舊情境全數通過 | 107/107、0 fail；快照內 chatobs-audit-verify-01.log；涵蓋 removed renderer、dirty revisions、bounds重試、TTS失敗恢復與十二主題對比 | 通過 | automated |
+| 2026-10-02 | CO-H9 | 工作樹候選封裝 | `pwsh -NoLogo -NoProfile -File scripts/build-extension.ps1`；Python zipfile逐檔比較 | ZIP 白名單與來源/staging一致 | 23項逐byte一致；SHA-256 54a330b949d45e5569e6cf9be617d3193e590629bdcfd9250000069ff7a77f8f；未發布 | 通過 | automated |
+| 2026-10-02 | CO-H5 | 當前版本 Chrome／原生語音／視覺 | 檢查本輪可用工具 | 對當前快照做實機操作 | Chrome控制工具與音訊聆聽入口未提供；未冒充實測 | 未執行（工具不可用） | manual |
+
+| 2026-10-02 | CO-H9 | 日常操作品質修復（含mixed failure焦點） | npm run verify | 對應驗證通過；僅限該列範圍 | 115/115，0fail；chatobs-product-verify-final.log，product-20261002-35d5458e8da5 | Pass | automated |
+| 2026-10-02 | CO-H9 | 完整小型來源與補修外部審查 | CodeRabbit15檔＋3檔delta | 對應驗證通過；僅限該列範圍 | 兩輪均0 issues；原始NDJSON與review SHA在product快照／output | Pass | automated |
+| 2026-10-02 | CO-H9 | 日常操作套件 | build-extension.ps1＋逐byte比較 | 對應驗證通過；僅限該列範圍 | ZIP23項，SHA2568507b928891cc59e5b54a2f929a5c4804ca6708e4ebbf4a57bec16fd64845ed0 | Pass | automated |
+| 2026-10-02 | CO-H5 | 合成介面操作／窄視窗／錯誤恢復 | IAB1280×800、380×800、380×560 | 對應驗證通過；僅限該列範圍 | panelBottom844.42→529.23px、retry saving成功；不是Chrome擴充功能注入／音訊驗收 | Pass（合成限定） | manual |
+| 2026-10-02 | CO-H9 | 行銷文案後回歸與封裝 | npm run verify、build:extension、Python逐byte核對 | 語法／既有情境與ZIP一致 | 115/115，ZIP23項來源/staging一致；SHA256 7f512c2a28a87a41e92f476179b91807de8c3783f95c08e4951e57f991876df0 | 通過 | automated |
+| 2026-10-02 | CO-H7 | 三語短說明與入門連結 | Python JSON與Markdown核對、Luna唯讀runtime查證 | <=132、locale/listing一致、連結存在且承諾正確 | zh41/en127/ja63字元；三文件本機連結存在，查證範圍無剩餘確認矛盾 | 通過（文案範圍） | automated |
+| 2026-10-02 | CO-H9 | 行銷差異CodeRabbit | 9檔review packet、CLI --uncommitted --base main | 檢查實際審查範圍與問題 | 0issues，實際7產品檔＋context；STORE與英文guide未列入，已staged待額度補審 | 部分涵蓋 | automated |
+| 2026-10-02 | CO-H5 | 新按鈕文案合成排版 | IAB英文/日文380×800/24px、繁中1280×800/20px | 文案完整與無水平溢出 | 按鈕寬度未溢出、試聽可操作；mock speech/storage，非原生注入/audio | 通過（合成限定） | manual |
+| 2026-10-02 | CO-P2 | 公開版本與支援／政策 | web讀商店/Issues及相同main政策原始檔 | 版號與連結/內容正確 | 公開3.0.1、更新2026-09-25，正確main政策與Issues，raw與本機一致；HTML503未確認恢復 | 部分通過 | manual |
+
+| 2026-10-02 | CO-H9 | 換景與兩個CodeRabbit修補回歸 | npm run verify；先驗證修前2個repro失敗 | 既有契約與新情境通過 | 修前2/2失敗，修後124/124，0fail；chatobs-release-verify-final.log | 通過 | automated |
+| 2026-10-02 | CO-H9 | 3.1.0完整封裝 | build:extension、Python zipfile與metadata核對 | 23項與source/staging一致，version parity | 23項逐byte一致，manifest/package/lock 3.1.0；release-package-check.json | 通過 | automated |
+| 2026-10-02 | CO-H5 | 換景鍵盤與三語排版 | IAB合成1280×800與380×800/24px，Space/Enter | 可返回且焦點維持，新按鈕文字不溢出 | 繁中Space返回黑色，英/日Enter可操作，group/button無水平溢出；非真Chrome/audio | 通過（合成限定） | manual |
+| 2026-10-02 | CO-H9 | Chrome商店3.1.0上傳／送審 | Chrome工具開啟devconsole | 可上傳既有item的新ZIP並取得狀態 | Not allowed，未進入控制台；無上傳與送審副作用 | 未執行（存取受阻） | manual |
+| 2026-10-02 | CO-H9 | 完整來源與修補CodeRabbit | full20檔、focused5檔，CLI NDJSON與hash核對 | 完整scope明確、有效問題修復 | full2minor均重現修復，focused0issues；兩輪全部prepared產品檔列入，STORE/英文guide補審完成 | 通過（code review） | automated |
+| 2026-10-02 | CO-H9 | 最終storage還原與通知歧義回歸 | npm run verify；reconcile負向log留存 | storage/UI最新設定一致、最新本地操作優先 | 129/129，0fail；最終快照release-final-20261002-9a828401ed4e | 通過 | automated |
+| 2026-10-02 | CO-H9 | 最終3.1.0封裝 | build:extension與逐byte比對 | ZIP與source/staging一致 | 23項，SHA256 e289873991c1069e442d1fb55fbecf7222f84f06e14c1d71c14d646ce5c607d3 | 通過 | automated |
+| 2026-10-02 | CO-H9 | 正式expert/council與Rabbit補修 | 三席獨立初稿＋仲裁；6檔Rabbit回條 | 真實分工、問題查證與限制透明 | 2P2與1Rabbit major均本機修復；formal limited，最後補修未外部覆核 | 部分涵蓋 | advisory |

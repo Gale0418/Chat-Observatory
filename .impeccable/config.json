@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "content.css"
+        ],
+        "createdAt": "2026-10-02T12:35:59.296Z",
+        "reason": "Codex reviewed: the only finding is the existing #chatobs-control-panel::before 3px top light strip, identical in HEAD; inset 0 0 auto and per-theme --chatobs-topline tokens establish the incumbent themed panel decoration. Preserve this intentional visual system during a scoped reliability and contrast repair; no card side-border regression."
+      }
+    ]
+  }
+}

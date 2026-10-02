@@ -4,11 +4,11 @@
     "description": "Extension name"
   },
   "extDescription": {
-    "message": "Pop out YouTube live chat in large text with local voice reading (｀・ω・´)ゞ",
+    "message": "Read YouTube live chat on a second screen with large text and optional reading of new messages when local voices are available.",
     "description": "Extension description"
   },
   "actionTitle": {
-    "message": "Open chat control center",
+    "message": "Open YouTube live chat in a separate window",
     "description": "Toolbar action title"
   },
   "actionErrorNoChat": {

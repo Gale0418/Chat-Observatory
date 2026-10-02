@@ -65,13 +65,18 @@ async function createHarness(overrides = {}, options = {}) {
   let cancelCalls = 0;
   let releaseStorageGet = null;
   let releaseFirstStorageSet = null;
+  let releaseSecondStorageSet = null;
   let storageSetCalls = 0;
+  let storageSetFailuresRemaining = options.storageSetFailures || 0;
   const storedValues = { ...overrides };
   const storageGetGate = options.delayStorageGet
     ? new Promise((resolve) => { releaseStorageGet = resolve; })
     : null;
   const firstStorageSetGate = options.blockFirstStorageSet
     ? new Promise((resolve) => { releaseFirstStorageSet = resolve; })
+    : null;
+  const secondStorageSetGate = options.blockSecondStorageSet
+    ? new Promise((resolve) => { releaseSecondStorageSet = resolve; })
     : null;
   let currentVoices = [
     {
@@ -189,23 +194,25 @@ async function createHarness(overrides = {}, options = {}) {
         get: async (defaults) => {
           if (options.storageGetRejects) throw new Error("mock storage get failure");
           if (storageGetGate) await storageGetGate;
-          return { ...defaults, ...overrides };
+          return { ...defaults, ...(options.liveStorageGet ? storedValues : overrides) };
         },
         set: async (value) => {
-          if (options.storageSetRejects) throw new Error("mock storage set failure");
+          if (options.storageSetRejects || storageSetFailuresRemaining > 0) {
+            if (storageSetFailuresRemaining > 0) storageSetFailuresRemaining -= 1;
+            throw new Error("mock storage set failure");
+          }
           storageSetCalls += 1;
           if (storageSetCalls === 1 && firstStorageSetGate) await firstStorageSetGate;
+          if (storageSetCalls === 2 && secondStorageSetGate) await secondStorageSetGate;
           saved.push(value);
-          if (options.emitStorageChangeOnSet) {
-            const changes = {};
-            Object.entries(value).forEach(([key, newValue]) => {
-              if (Object.is(storedValues[key], newValue)) return;
-              changes[key] = { oldValue: storedValues[key], newValue };
-              storedValues[key] = newValue;
-            });
-            if (Object.keys(changes).length > 0) {
-              storageListeners.forEach((listener) => listener(changes, "local"));
-            }
+          const changes = {};
+          Object.entries(value).forEach(([key, newValue]) => {
+            if (Object.is(storedValues[key], newValue)) return;
+            changes[key] = { oldValue: storedValues[key], newValue };
+            storedValues[key] = newValue;
+          });
+          if (options.emitStorageChangeOnSet && Object.keys(changes).length > 0) {
+            storageListeners.forEach((listener) => listener(changes, "local"));
           }
         }
       },
@@ -237,8 +244,14 @@ async function createHarness(overrides = {}, options = {}) {
       voiceListeners.forEach((listener) => listener());
     },
     triggerStorageChange: (changes) => {
+      Object.entries(changes).forEach(([key, change]) => {
+        if (change && "newValue" in change) storedValues[key] = change.newValue;
+        else delete storedValues[key];
+      });
       storageListeners.forEach((fn) => fn(changes, "local"));
     },
+    getStoredValue: (key) => storedValues[key],
+    triggerStorageNotification: (changes) => storageListeners.forEach((fn) => fn(changes, "local")),
     probe: (message) => {
       let response;
       runtimeMessageListeners.forEach((fn) => fn(message, {}, (value) => { response = value; }));
@@ -246,6 +259,7 @@ async function createHarness(overrides = {}, options = {}) {
     },
     releaseStorageGet: () => releaseStorageGet?.(),
     releaseFirstStorageSet: () => releaseFirstStorageSet?.(),
+    releaseSecondStorageSet: () => releaseSecondStorageSet?.(),
     storageSetCallCount: () => storageSetCalls,
     items: dom.window.document.getElementById("items"),
     cleanup: () => {
@@ -479,7 +493,7 @@ test("Chrome 語系自動偵測並可用旗幟按鈕手動切換介面語言", a
     assert.deepEqual(languageButtons.map((button) => button.classList.contains("is-active")), [true, false, false]);
     assert.equal(harness.document.querySelector("[data-i18n='displaySection']").textContent, "畫面");
     const ttsToggle = harness.document.getElementById("chatobs-tts-toggle");
-    assert.equal(ttsToggle.getAttribute("aria-label"), "開啟或關閉 TTS");
+    assert.equal(ttsToggle.getAttribute("aria-label"), "開啟或關閉新留言朗讀");
     const themeLabels = () => [...harness.document.querySelectorAll("#chatobs-theme-select option")].map((option) => option.textContent);
     assert.deepEqual(themeLabels(), [
       "玄曜奇點", "赤曜超新星", "橙燼日冕", "炫陽星暴", "翠晶星雲", "蒼穹冰潮",
@@ -492,8 +506,8 @@ test("Chrome 語系自動偵測並可用旗幟按鈕手動切換介面語言", a
     assert.equal(languageButtons[1].getAttribute("aria-pressed"), "true");
     assert.deepEqual(languageButtons.map((button) => button.classList.contains("is-active")), [false, true, false]);
     assert.equal(harness.document.querySelector("[data-i18n='displaySection']").textContent, "表示");
-    assert.equal(harness.document.querySelector("[data-i18n='testVoice']").textContent, "試聴");
-    assert.equal(ttsToggle.getAttribute("aria-label"), "TTS のオン／オフ");
+    assert.equal(harness.document.querySelector("[data-i18n='testVoice']").textContent, "音声を試聴");
+    assert.equal(ttsToggle.getAttribute("aria-label"), "新しいメッセージの読み上げをオン／オフ");
     assert.deepEqual(themeLabels(), [
       "玄曜・特異点", "赤曜・超新星", "橙燼・コロナ", "炫陽・星嵐", "翠晶・星雲", "蒼穹・氷潮",
       "紫宸・双星", "銀蝕・隕痕", "霜華・白矮星", "金鋳・炉心", "銀河・星環", "虹渦・スペクトル"
@@ -502,8 +516,8 @@ test("Chrome 語系自動偵測並可用旗幟按鈕手動切換介面語言", a
     languageButtons[2].click();
     assert.equal(harness.document.body.dataset.chatobsLocale, "en");
     assert.equal(harness.document.querySelector("[data-i18n='displaySection']").textContent, "Display");
-    assert.equal(harness.document.querySelector("[data-i18n='testVoice']").textContent, "Test");
-    assert.equal(ttsToggle.getAttribute("aria-label"), "Turn TTS on or off");
+    assert.equal(harness.document.querySelector("[data-i18n='testVoice']").textContent, "Test voice");
+    assert.equal(ttsToggle.getAttribute("aria-label"), "Turn reading of new messages on or off");
     assert.deepEqual(languageButtons.map((button) => button.classList.contains("is-active")), [false, false, true]);
     assert.deepEqual(themeLabels(), [
       "Umbra Singularity", "Crimson Nova", "Ember Corona", "Helios Storm", "Verdant Prism", "Azure Icefall",
@@ -639,6 +653,20 @@ test("巢狀新增的一般留言會清理網址與重複字後朗讀", async ()
 
     assert.equal(harness.spoken.length, 1);
     assert.equal(harness.spoken[0].text, "看 連結 哈哈哈");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("待處理 mutation 中已移除的 renderer 不會被朗讀", async () => {
+  const harness = await createHarness({ ttsEnabled: true });
+  try {
+    const renderer = createTextMessage(harness.document, "小明", "已移除的留言");
+    harness.items.append(renderer);
+    renderer.remove();
+    await waitForMutations(harness.window);
+
+    assert.equal(harness.spoken.length, 0, "已離開聊天室的 renderer 不應進入 TTS");
   } finally {
     harness.cleanup();
   }
@@ -1232,20 +1260,26 @@ test("B) 未知語言只朗讀中性正文，不套用錯誤語系前綴", async
   }
 });
 
-test("B) speechSynthesis.speak 拋錯時不會卡住佇列", async () => {
+test("B) speechSynthesis.speak 拋錯時保留佇列並提供重試提示", async () => {
   const harness = await createHarness({ ttsEnabled: true }, { speakThrows: true });
   try {
     harness.items.append(createTextMessage(harness.document, "小華", "第一則"));
     harness.items.append(createTextMessage(harness.document, "小華", "第二則"));
     await waitForMutations(harness.window);
 
-    assert.match(harness.document.getElementById("chatobs-status-line").textContent, /語音已開啟/);
+    assert.match(harness.document.getElementById("chatobs-status-line").textContent, /語音播放失敗/);
+    harness.window.speechSynthesis.speak = (utterance) => harness.spoken.push(utterance);
+    harness.document.getElementById("chatobs-test-voice").click();
+    harness.spoken.at(-1).onend();
+    assert.equal(harness.spoken.at(-1).text, "第一則");
+    harness.spoken.at(-1).onend();
+    assert.equal(harness.spoken.at(-1).text, "第二則");
   } finally {
     harness.cleanup();
   }
 });
 
-test("B) 語音未回報完成時 watchdog 會解除 active 狀態", async () => {
+test("B) 語音未回報完成時 watchdog 會解除 active 並提示重試", async () => {
   const harness = await createHarness(
     { ttsEnabled: true },
     { accelerateWatchdog: true }
@@ -1255,7 +1289,31 @@ test("B) 語音未回報完成時 watchdog 會解除 active 狀態", async () =>
     await waitForMutations(harness.window);
     await waitForMutations(harness.window);
 
-    assert.match(harness.document.getElementById("chatobs-status-line").textContent, /語音已開啟/);
+    assert.match(harness.document.getElementById("chatobs-status-line").textContent, /語音播放失敗/);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("B) 引擎錯誤不吞後續留言，跳過失敗項可恢復佇列且舊回呼不干擾", async () => {
+  const harness = await createHarness({ ttsEnabled: true });
+  try {
+    harness.items.append(createTextMessage(harness.document, "A", "第一則"));
+    harness.items.append(createTextMessage(harness.document, "B", "第二則"));
+    await waitForMutations(harness.window);
+    const failed = harness.spoken[0];
+    failed.onerror({ error: "not-allowed" });
+    harness.items.append(createTextMessage(harness.document, "C", "第三則"));
+    await waitForMutations(harness.window);
+    assert.equal(harness.spoken.length, 1);
+    assert.match(harness.document.getElementById("chatobs-status-line").textContent, /語音播放失敗/);
+    harness.document.getElementById("chatobs-skip-speech").click();
+    await waitForMutations(harness.window);
+    assert.equal(harness.spoken.at(-1).text, "第二則");
+    failed.onerror({ error: "interrupted" });
+    assert.equal(harness.spoken.length, 2);
+    harness.spoken.at(-1).onend();
+    assert.equal(harness.spoken.at(-1).text, "第三則");
   } finally {
     harness.cleanup();
   }
@@ -1636,6 +1694,47 @@ test("英文留言優先使用較明亮的本機語音，只有已知男聲時�
   }
 });
 
+test("自動切換中日英文時女聲優先於高品質預設男聲與已選男聲", async () => {
+  const cases = [
+    ["zh-TW", "Zhiwei", "Meijia (Compact)", "大家晚安"],
+    ["ja-JP", "Otoya", "Kyoko (Compact)", "みなさん、こんにちは"],
+    ["en-US", "Daniel", "Samantha (Compact)", "Hello everyone"],
+    ["zh-TW", "Zhiwei", "Microsoft Hanhan Desktop", "歡迎回來"],
+    ["ja-JP", "Ichiro", "Microsoft Haruka Desktop", "こんにちは、元気ですか"]
+  ];
+  for (const [lang, maleName, femaleName, message] of cases) {
+    const harness = await createHarness({ ttsEnabled: true, ttsVoiceMode: "auto", ttsVoiceURI: "male" });
+    try {
+      harness.setVoices([
+        { name: `${maleName} (Enhanced)`, lang, voiceURI: "male", localService: true, default: true },
+        { name: femaleName, lang, voiceURI: "female", localService: true }
+      ]);
+      harness.triggerVoicesChanged();
+      harness.items.append(createTextMessage(harness.document, "User", message));
+      await waitForMutations(harness.window);
+      assert.equal(harness.spoken.at(-1).voice.voiceURI, "female", `${lang}: ${femaleName}`);
+    } finally {
+      harness.cleanup();
+    }
+  }
+});
+
+test("固定模式保留手選男聲，不套用自動模式女聲偏好", async () => {
+  const harness = await createHarness({ ttsEnabled: true, ttsVoiceMode: "fixed", ttsVoiceURI: "male" });
+  try {
+    harness.setVoices([
+      { name: "Daniel", lang: "en-GB", voiceURI: "male", localService: true },
+      { name: "Samantha", lang: "en-US", voiceURI: "female", localService: true }
+    ]);
+    harness.triggerVoicesChanged();
+    harness.items.append(createTextMessage(harness.document, "User", "Hello everyone"));
+    await waitForMutations(harness.window);
+    assert.equal(harness.spoken.at(-1).voice.voiceURI, "male");
+  } finally {
+    harness.cleanup();
+  }
+});
+
 test("混合語言留言保持單一 Utterance，佇列維持 FIFO 順序", async () => {
   const harness = await createHarness({ ttsEnabled: true, ttsVoiceMode: "auto" });
   try {
@@ -1768,7 +1867,229 @@ test("E) Storage API 拒絕時仍可啟動並安全清理", async () => {
       new harness.window.Event("input", { bubbles: true })
     );
     await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
-    assert.match(harness.document.getElementById("chatobs-status-line").textContent, /設定/);
+    assert.match(harness.document.getElementById("chatobs-save-status").textContent, /設定尚未儲存/);
+    assert.equal(harness.document.getElementById("chatobs-save-feedback").hidden, false);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("收合面板仍可開關朗讀，並保留使用者的收合偏好", async () => {
+  const harness = await createHarness();
+  try {
+    const body = harness.document.getElementById("chatobs-panel-body");
+    const toggle = harness.document.getElementById("chatobs-tts-toggle");
+    assert.equal(body.hidden, true);
+    assert.equal(body.contains(toggle), false, "主要操作必須在收合內容以外");
+    toggle.checked = true;
+    toggle.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(harness.spoken.length, 1, "收合時仍可啟動本機語音確認");
+    assert.equal(body.hidden, true);
+    toggle.checked = false;
+    toggle.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(harness.document.getElementById("chatobs-status-line").textContent, "語音未開啟");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("儲存失敗提示不被語音狀態蓋掉，可直接重試尚未儲存的欄位", async () => {
+  const harness = await createHarness({}, { storageSetFailures: 1 });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    const feedback = harness.document.getElementById("chatobs-save-feedback");
+    assert.equal(await waitForCondition(harness.window, () => !feedback.hidden), true);
+    harness.document.getElementById("chatobs-test-voice").click();
+    harness.triggerVoicesChanged();
+    assert.equal(feedback.hidden, false, "試聽與語音清單更新不能消除未儲存警告");
+    const retry = harness.document.getElementById("chatobs-retry-save");
+    retry.focus();
+    retry.click();
+    assert.equal(await waitForCondition(harness.window, () => feedback.hidden), true);
+    assert.deepEqual(Object.fromEntries(Object.entries(harness.saved[0])), { fontSize: 32 });
+    assert.equal(harness.document.activeElement.id, "chatobs-collapse-button", "成功隱藏重試區後保留可操作焦點");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("讀取與儲存同時失敗後成功重試，隱藏按鈕會把焦點移回可操作控制", async () => {
+  const harness = await createHarness({}, { storageGetRejects: true, storageSetFailures: 1 });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    const retry = harness.document.getElementById("chatobs-retry-save");
+    assert.equal(await waitForCondition(harness.window, () => !retry.hidden), true);
+    retry.focus();
+    retry.click();
+    assert.equal(await waitForCondition(harness.window, () => harness.saved.length === 1), true);
+    assert.equal(harness.document.getElementById("chatobs-save-feedback").hidden, false,
+      "其餘原本偏好尚未重新讀回，載入警告仍須保留");
+    assert.equal(retry.hidden, true);
+    assert.equal(harness.document.activeElement.id, "chatobs-collapse-button");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("外部更新取代最後未儲存欄位後清除失敗提示，其他欄位更新不清除", async () => {
+  const harness = await createHarness({}, { storageSetFailures: 1 });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    const feedback = harness.document.getElementById("chatobs-save-feedback");
+    const retry = harness.document.getElementById("chatobs-retry-save");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(await waitForCondition(harness.window, () => !retry.hidden), true);
+    harness.triggerStorageChange({ theme: { newValue: "blue" } });
+    assert.equal(feedback.hidden, false, "fontSize 尚未儲存，其他欄位更新不應消除警告");
+    retry.focus();
+    harness.triggerStorageChange({ fontSize: { newValue: 50 } });
+    assert.equal(slider.value, "50");
+    assert.equal(feedback.hidden, true, "外部更新已取代最後一個未儲存欄位");
+    assert.equal(retry.hidden, true);
+    assert.equal(harness.document.activeElement.id, "chatobs-collapse-button");
+    retry.click();
+    harness.window.dispatchEvent(new harness.window.Event("pagehide"));
+    await waitForMutations(harness.window);
+    assert.equal(harness.saved.length, 0, "不可補存失敗的舊值");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("隱藏頭像時尺寸滑桿真正不顯示，再開啟會恢復", async () => {
+  const harness = await createHarness({ isCollapsed: false });
+  try {
+    const style = harness.document.createElement("style");
+    style.textContent = contentStyles;
+    harness.document.head.append(style);
+    const toggle = harness.document.getElementById("chatobs-hide-avatars");
+    const row = harness.document.getElementById("chatobs-avatar-row");
+    assert.equal(harness.window.getComputedStyle(row).display, "grid");
+    toggle.checked = true;
+    toggle.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(row.hidden, true);
+    assert.equal(harness.window.getComputedStyle(row).display, "none");
+    toggle.checked = false;
+    toggle.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(row.hidden, false);
+    assert.equal(harness.window.getComputedStyle(row).display, "grid");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("設定載入失敗後持續說明預設值來源，不被朗讀狀態掩蓋", async () => {
+  const harness = await createHarness({}, { storageGetRejects: true });
+  try {
+    const feedback = harness.document.getElementById("chatobs-save-feedback");
+    assert.equal(feedback.hidden, false);
+    harness.document.getElementById("chatobs-test-voice").click();
+    harness.spoken.at(-1).onend();
+    assert.match(harness.document.getElementById("chatobs-save-status").textContent, /無法讀取設定.*預設值/);
+    assert.equal(feedback.hidden, false);
+    assert.equal(harness.document.getElementById("chatobs-retry-save").hidden, true);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("語音關閉時試聽失敗仍有正確提示與重試，不誤稱留言失敗", async () => {
+  const harness = await createHarness();
+  try {
+    harness.document.getElementById("chatobs-test-voice").click();
+    const preview = harness.spoken[0];
+    preview.onerror({ error: "audio-busy" });
+    const feedback = harness.document.getElementById("chatobs-speech-feedback");
+    assert.equal(feedback.hidden, false);
+    assert.equal(harness.document.getElementById("chatobs-status-line").textContent, "語音試聽失敗");
+    assert.match(harness.document.getElementById("chatobs-speech-error").textContent, /所選語音/);
+    assert.equal(harness.document.getElementById("chatobs-skip-failed").textContent, "關閉提示");
+    harness.document.getElementById("chatobs-retry-speech").click();
+    assert.equal(harness.spoken.length, 2);
+    assert.equal(harness.spoken[1].text, preview.text);
+    harness.spoken[1].onend();
+    assert.equal(feedback.hidden, true);
+    assert.equal(harness.document.getElementById("chatobs-tts-toggle").checked, false);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("收合時可直接重試失敗留言，長時間等待與佇列溢位不丟失該留言", async () => {
+  const harness = await createHarness({ ttsEnabled: true, queueLimit: 3 });
+  try {
+    harness.items.append(createTextMessage(harness.document, "A", "未讀完的留言"));
+    await waitForMutations(harness.window);
+    harness.spoken[0].onerror({ error: "audio-busy" });
+    const now = harness.window.Date.now();
+    harness.window.Date.now = () => now + 60000;
+    for (let index = 1; index <= 5; index += 1) {
+      harness.items.append(createTextMessage(harness.document, "B", `新留言 ${index}`));
+    }
+    await waitForMutations(harness.window);
+    assert.equal(harness.spoken.length, 1);
+    const retry = harness.document.getElementById("chatobs-retry-speech");
+    assert.equal(harness.document.getElementById("chatobs-panel-body").hidden, true);
+    retry.focus();
+    retry.click();
+    assert.equal(harness.spoken.at(-1).text, "未讀完的留言");
+    assert.equal(harness.document.activeElement.id, "chatobs-tts-toggle");
+    harness.spoken.at(-1).onend();
+    assert.equal(harness.spoken.at(-1).text, "新留言 4", "僅移除最舊的等待項，保留最後兩則");
+    harness.spoken.at(-1).onend();
+    assert.equal(harness.spoken.at(-1).text, "新留言 5");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("切換介面語言同步更新動態語音選項與模式說明，保持選定語音", async () => {
+  const harness = await createHarness({ ttsVoiceURI: "test-local-zh-tw" });
+  try {
+    const select = harness.document.getElementById("chatobs-voice-select");
+    assert.match(select.selectedOptions[0].textContent, /推薦/);
+    harness.document.querySelector('[data-locale="en"]').click();
+    assert.match(select.selectedOptions[0].textContent, /Recommended/);
+    assert.doesNotMatch(select.selectedOptions[0].textContent, /推薦/);
+    assert.equal(select.value, "test-local-zh-tw");
+    assert.match(harness.document.getElementById("chatobs-voice-label").textContent, /fallback/);
+    const mode = harness.document.getElementById("chatobs-voice-mode-select");
+    mode.value = "fixed";
+    mode.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(harness.document.getElementById("chatobs-voice-label").textContent, "Fixed voice");
+    assert.match(harness.document.getElementById("chatobs-voice-hint").textContent, /Every message/);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("語音載入與無可用語音時停用試聽，延遲語音到達後恢復操作", async () => {
+  const harness = await createHarness({}, { delayStorageGet: true });
+  try {
+    const select = harness.document.getElementById("chatobs-voice-select");
+    const preview = harness.document.getElementById("chatobs-test-voice");
+    assert.equal(select.disabled, true);
+    assert.equal(select.getAttribute("aria-busy"), "true");
+    assert.equal(preview.disabled, true);
+    harness.setVoices([]);
+    harness.releaseStorageGet();
+    await waitForMutations(harness.window);
+    assert.equal(select.getAttribute("aria-busy"), "false");
+    assert.equal(preview.disabled, true);
+    assert.match(harness.document.getElementById("chatobs-voice-hint").textContent, /系統加入語音/);
+    preview.click();
+    assert.equal(harness.spoken.length, 0);
+    harness.setVoices([{ name: "Local", lang: "zh-TW", voiceURI: "late", localService: true }]);
+    harness.triggerVoicesChanged();
+    assert.equal(select.disabled, false);
+    assert.equal(preview.disabled, false);
+    preview.click();
+    assert.equal(harness.spoken.length, 1);
   } finally {
     harness.cleanup();
   }
@@ -1850,6 +2171,104 @@ test("storage.set 會依呼叫順序序列化，避免慢寫入覆蓋新設定",
     assert.deepEqual(harness.saved.map((value) => value.fontSize), [32, 36]);
   } finally {
     harness.releaseFirstStorageSet();
+    harness.cleanup();
+  }
+});
+
+test("storage.set 只保存目前 dirty 欄位，成功後清除對應 revision", async () => {
+  const harness = await createHarness({ theme: "red" });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(
+      await waitForCondition(harness.window, () => harness.saved.length === 1),
+      true,
+      "第一次 dirty 設定應保存"
+    );
+    assert.deepEqual(Object.fromEntries(Object.entries(harness.saved[0])), { fontSize: 32 });
+
+    const themeSelect = harness.document.getElementById("chatobs-theme-select");
+    themeSelect.value = "blue";
+    themeSelect.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(
+      await waitForCondition(harness.window, () => harness.saved.length === 2),
+      true,
+      "第二次 dirty 設定應保存"
+    );
+    assert.deepEqual(Object.fromEntries(Object.entries(harness.saved[1])), { theme: "blue" });
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("storage.set 失敗時 dirty revision 會保留到下一次保存", async () => {
+  const harness = await createHarness({}, { storageSetFailures: 1 });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
+    assert.equal(harness.saved.length, 0, "第一次保存預期失敗");
+
+    const themeSelect = harness.document.getElementById("chatobs-theme-select");
+    themeSelect.value = "blue";
+    themeSelect.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+    assert.equal(
+      await waitForCondition(harness.window, () => harness.saved.length === 1),
+      true,
+      "下一次保存應成功"
+    );
+    assert.deepEqual(Object.fromEntries(Object.entries(harness.saved[0])), { fontSize: 32, theme: "blue" });
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("排隊中的保存不會用已完成 revision 的舊欄位覆寫外部更新", async () => {
+  const harness = await createHarness({}, {
+    blockFirstStorageSet: true,
+    blockSecondStorageSet: true,
+    emitStorageChangeOnSet: true
+  });
+  try {
+    const fontSlider = harness.document.getElementById("chatobs-font-slider");
+    fontSlider.value = "32";
+    fontSlider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(
+      await waitForCondition(harness.window, () => harness.storageSetCallCount() >= 1),
+      true,
+      "第一筆 fontSize 保存應開始"
+    );
+
+    const rateSlider = harness.document.getElementById("chatobs-rate-slider");
+    rateSlider.value = "1.10";
+    rateSlider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
+
+    harness.releaseFirstStorageSet();
+    assert.equal(
+      await waitForCondition(harness.window, () => harness.saved.length === 1),
+      true,
+      "第一筆保存應完成"
+    );
+    harness.triggerStorageChange({ fontSize: { oldValue: 32, newValue: 50 } });
+    harness.releaseSecondStorageSet();
+    assert.equal(
+      await waitForCondition(harness.window, () => harness.saved.length === 2),
+      true,
+      "第二筆保存應完成"
+    );
+
+    assert.deepEqual(
+      Object.fromEntries(Object.entries(harness.saved[1])),
+      { ttsRate: 1.1 },
+      "第二筆不可帶入已完成的舊 fontSize revision"
+    );
+    assert.equal(fontSlider.value, "50", "外部 fontSize 更新不可被舊 queued snapshot 蓋回");
+  } finally {
+    harness.releaseFirstStorageSet();
+    harness.releaseSecondStorageSet();
     harness.cleanup();
   }
 });
@@ -1965,6 +2384,249 @@ test("storage get 延遲期間 pagehide 只保存本地變更欄位", async () =
     assert.equal(Object.hasOwn(harness.saved[0], "highlightKeywords"), false);
   } finally {
     harness.releaseStorageGet();
+    harness.cleanup();
+  }
+});
+
+test("主題探索可隨機換景並往返上一款，不改變收合或啟用語音", async () => {
+  const harness = await createHarness({ theme: "red" });
+  try {
+    const random = harness.document.getElementById("chatobs-random-theme");
+    const previous = harness.document.getElementById("chatobs-previous-theme");
+    const theme = () => harness.document.body.dataset.chatobsTheme;
+    assert.equal(harness.document.getElementById("chatobs-panel-body").hidden, true);
+    assert.equal(random.disabled, false);
+    assert.equal(previous.disabled, true);
+    previous.click();
+    assert.equal(theme(), "red");
+    random.click();
+    const picked = theme();
+    assert.notEqual(picked, "red");
+    assert.equal(previous.disabled, false);
+    assert.match(previous.getAttribute("aria-label"), /赤曜超新星/);
+    previous.click();
+    assert.equal(theme(), "red");
+    previous.click();
+    assert.equal(theme(), picked);
+    assert.equal(harness.document.getElementById("chatobs-panel-body").hidden, true);
+    assert.equal(harness.spoken.length, 0, "換景不應自行播放聲音");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("主題探索在隨機索引兩端都不重抽目前主題", async () => {
+  const harness = await createHarness();
+  const originalRandom = harness.window.Math.random;
+  try {
+    const select = harness.document.getElementById("chatobs-theme-select");
+    const random = harness.document.getElementById("chatobs-random-theme");
+    const themes = [...select.options].map((option) => option.value);
+    for (const current of themes) {
+      for (const value of [0, 1 - Number.EPSILON]) {
+        select.value = current;
+        select.dispatchEvent(new harness.window.Event("change", { bubbles: true }));
+        harness.window.Math.random = () => value;
+        random.click();
+        assert.ok(themes.includes(select.value));
+        assert.notEqual(select.value, current);
+      }
+    }
+  } finally {
+    harness.window.Math.random = originalRandom;
+    harness.cleanup();
+  }
+});
+
+test("主題探索快速往返只保存最後主題，自寫入回聲保留返回記憶", async () => {
+  const harness = await createHarness({ theme: "gold" }, { emitStorageChangeOnSet: true });
+  try {
+    const random = harness.document.getElementById("chatobs-random-theme");
+    const previous = harness.document.getElementById("chatobs-previous-theme");
+    random.click();
+    random.click();
+    previous.click();
+    const finalTheme = harness.document.body.dataset.chatobsTheme;
+    assert.equal(await waitForCondition(harness.window, () => harness.saved.length > 0), true);
+    assert.deepEqual(Object.fromEntries(Object.entries(harness.saved.at(-1))), { theme: finalTheme });
+    assert.equal(harness.saved.length, 1, "連點應沿用既有debounce");
+    assert.equal(previous.disabled, false, "自己的保存回聲不應被當成外部換景");
+    previous.click();
+    assert.notEqual(harness.document.body.dataset.chatobsTheme, finalTheme);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("主題探索的返回記憶跟隨語系，其他設定保留記憶，外部換景清除記憶", async () => {
+  const harness = await createHarness({ theme: "red" });
+  try {
+    const previous = harness.document.getElementById("chatobs-previous-theme");
+    harness.document.getElementById("chatobs-random-theme").click();
+    harness.document.querySelector('[data-locale="ja"]').click();
+    assert.match(previous.title, /赤曜・超新星/);
+    assert.match(harness.document.getElementById("chatobs-theme-feedback").textContent, /変更しました/);
+    harness.triggerStorageChange({ fontSize: { newValue: 40 } });
+    assert.equal(previous.disabled, false);
+    const current = harness.document.body.dataset.chatobsTheme;
+    const external = current === "blue" ? "purple" : "blue";
+    harness.triggerStorageChange({ theme: { newValue: external } });
+    assert.equal(harness.document.body.dataset.chatobsTheme, external);
+    assert.equal(previous.disabled, true);
+    assert.equal(harness.document.getElementById("chatobs-theme-feedback").textContent, "");
+    previous.click();
+    assert.equal(harness.document.body.dataset.chatobsTheme, external);
+    await new Promise((resolve) => harness.window.setTimeout(resolve, 300));
+    assert.equal(harness.document.body.dataset.chatobsTheme, external);
+    assert.ok(harness.saved.every((snapshot) => !("theme" in snapshot)), "外部換景後不可補存已過期的本地主題");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("主題探索等設定載入後才啟用，返回的是裝置保存的主題", async () => {
+  const harness = await createHarness({ theme: "silver" }, { delayStorageGet: true });
+  try {
+    const random = harness.document.getElementById("chatobs-random-theme");
+    const previous = harness.document.getElementById("chatobs-previous-theme");
+    assert.equal(random.disabled, true);
+    assert.equal(previous.disabled, true);
+    random.click();
+    assert.equal(harness.saved.length, 0);
+    harness.releaseStorageGet();
+    await waitForMutations(harness.window);
+    assert.equal(random.disabled, false);
+    assert.equal(harness.document.body.dataset.chatobsTheme, "silver");
+    random.click();
+    previous.click();
+    assert.equal(harness.document.body.dataset.chatobsTheme, "silver");
+  } finally {
+    harness.releaseStorageGet();
+    harness.cleanup();
+  }
+});
+
+test("主題探索保留自訂背景與正在朗讀的留言，佇列仍接續播放", async () => {
+  const background = "data:image/webp;base64,bW9jay1pbWFnZQ==";
+  const harness = await createHarness({ theme: "black", ttsEnabled: true, customBackgroundDataUrl: background });
+  try {
+    harness.items.append(createTextMessage(harness.document, "A", "第一則留言"));
+    harness.items.append(createTextMessage(harness.document, "B", "第二則留言"));
+    await waitForMutations(harness.window);
+    const active = harness.spoken[0];
+    const cancellations = harness.getCancelCalls();
+    harness.document.getElementById("chatobs-random-theme").click();
+    harness.document.getElementById("chatobs-previous-theme").click();
+    assert.equal(harness.document.body.style.getPropertyValue("--chatobs-panel-image"), `url("${background}")`);
+    assert.equal(harness.document.body.dataset.chatobsCustomBackground, "true");
+    assert.equal(harness.spoken.length, 1);
+    assert.equal(harness.spoken[0], active);
+    assert.equal(harness.getCancelCalls(), cancellations);
+    active.onend();
+    await waitForMutations(harness.window);
+    assert.equal(harness.spoken.at(-1).text, "第二則留言");
+  } finally {
+    harness.cleanup();
+  }
+});
+
+test("主題探索在pagehide後不新增換景或計時器", async () => {
+  const harness = await createHarness();
+  try {
+    const random = harness.document.getElementById("chatobs-random-theme");
+    random.click();
+    const current = harness.document.body.dataset.chatobsTheme;
+    harness.window.dispatchEvent(new harness.window.Event("pagehide"));
+    random.click();
+    assert.equal(harness.document.body.dataset.chatobsTheme, current);
+  } finally {
+    harness.cleanup();
+  }
+});
+
+
+test("外部設定取代已送出寫入後，落後自身通知不會把 UI 蓋回舊值", async () => {
+  const harness = await createHarness({}, { blockFirstStorageSet: true, emitStorageChangeOnSet: true });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(await waitForCondition(harness.window, () => harness.storageSetCallCount() === 1), true);
+    harness.triggerStorageChange({ fontSize: { newValue: 50 } });
+    assert.equal(slider.value, "50");
+    harness.releaseFirstStorageSet();
+    assert.equal(await waitForCondition(harness.window, () => harness.saved.length >= 1), true);
+    assert.equal(slider.value, "50", "已被取代的自身寫入回聲應消費並忽略");
+    assert.equal(await waitForCondition(harness.window, () => harness.getStoredValue("fontSize") === 50), true,
+      "已送出的舊寫入完成後，storage 也必須恢復最新外部值");
+    harness.triggerStorageChange({ fontSize: { newValue: 32 } });
+    assert.equal(slider.value, "32", "已消費回聲不能吞掉之後真正的外部相同值更新");
+  } finally {
+    harness.releaseFirstStorageSet();
+    harness.cleanup();
+  }
+});
+
+test("外部值修復寫入會保留中途最新本地操作，不把設定還原成較舊外部值", async () => {
+  const harness = await createHarness({}, { blockFirstStorageSet: true, emitStorageChangeOnSet: true });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(await waitForCondition(harness.window, () => harness.storageSetCallCount() === 1), true);
+    harness.triggerStorageChange({ fontSize: { newValue: 50 } });
+    slider.value = "40";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    harness.releaseFirstStorageSet();
+    assert.equal(await waitForCondition(harness.window, () => harness.getStoredValue("fontSize") === 40), true);
+    assert.equal(slider.value, "40");
+    assert.ok(harness.saved.every((snapshot) => snapshot.fontSize !== 50), "不得補存較舊的外部選擇");
+  } finally {
+    harness.releaseFirstStorageSet();
+    harness.cleanup();
+  }
+});
+
+
+test("被取代的寫入未收到回聲時，真正外部相同值更新仍會讀回並套用", async () => {
+  const harness = await createHarness({}, { blockFirstStorageSet: true, liveStorageGet: true });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(await waitForCondition(harness.window, () => harness.storageSetCallCount() === 1), true);
+    harness.triggerStorageChange({ fontSize: { newValue: 50 } });
+    harness.releaseFirstStorageSet();
+    assert.equal(await waitForCondition(harness.window, () =>
+      harness.saved.length >= 2 && harness.getStoredValue("fontSize") === 50), true);
+    harness.triggerStorageChange({ fontSize: { newValue: 32 } });
+    assert.equal(await waitForCondition(harness.window, () => slider.value === "32"), true);
+    assert.equal(harness.getStoredValue("fontSize"), 32);
+  } finally {
+    harness.releaseFirstStorageSet();
+    harness.cleanup();
+  }
+});
+
+test("已還原 storage 後才收到舊通知，讀回實值而不回復舊 UI", async () => {
+  const harness = await createHarness({}, { blockFirstStorageSet: true, liveStorageGet: true });
+  try {
+    const slider = harness.document.getElementById("chatobs-font-slider");
+    slider.value = "32";
+    slider.dispatchEvent(new harness.window.Event("input", { bubbles: true }));
+    assert.equal(await waitForCondition(harness.window, () => harness.storageSetCallCount() === 1), true);
+    harness.triggerStorageChange({ fontSize: { newValue: 50 } });
+    harness.releaseFirstStorageSet();
+    assert.equal(await waitForCondition(harness.window, () =>
+      harness.saved.length >= 2 && harness.getStoredValue("fontSize") === 50), true);
+    harness.triggerStorageNotification({ fontSize: { newValue: 32 } });
+    await waitForMutations(harness.window);
+    assert.equal(slider.value, "50");
+    assert.equal(harness.getStoredValue("fontSize"), 50);
+    harness.triggerStorageChange({ fontSize: { newValue: 32 } });
+    assert.equal(slider.value, "32", "舊回聲消費後不能吞掉真正外部更新");
+  } finally {
+    harness.releaseFirstStorageSet();
     harness.cleanup();
   }
 });

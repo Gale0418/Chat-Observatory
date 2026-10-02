@@ -34,7 +34,12 @@ let sessionWritePending = false;
 let actionQueue = Promise.resolve();
 let pendingBounds = null;
 let boundsSaveTimer = null;
+let boundsSaveInFlight = false;
+let boundsSaveGeneration = 0;
+let boundsSaveRetryCount = 0;
 const actionErrorTimers = new Map();
+const BOUNDS_SAVE_DELAY_MS = 250;
+const BOUNDS_SAVE_MAX_RETRIES = 3;
 
 function extractVideoId(rawUrl = "") {
   try {
@@ -207,7 +212,7 @@ async function clearActionError(tabId) {
     safeCall(chrome.action?.setBadgeText?.bind(chrome.action), { tabId, text: "" }),
     safeCall(chrome.action?.setTitle?.bind(chrome.action), {
       tabId,
-      title: getLocalizedMessage("actionTitle", "彈出聊天室控制中心")
+      title: getLocalizedMessage("actionTitle", "開啟獨立直播聊天室")
     })
   ]);
 }
@@ -274,19 +279,9 @@ async function handleActionClick(tab = {}) {
     const existing = await getWindow(existingSession.windowId);
     if (existing && chrome.windows?.update) {
       const existingTab = await getChatTab(existing);
-      // A newly opened chat can still be loading before its content script answers.
-      const loadingOwnedTab = !existingTab && existing.tabs?.find((candidate) =>
-        candidate.id === existingSession.tabId &&
-        candidate.status === "loading" &&
-        !candidate.url && !candidate.pendingUrl
-      );
-      // The saved tab belongs to our popup. If Chrome hides its URL and the
-      // content script stays unresponsive, navigate that tab instead of
-      // leaving the action permanently blocked or opening a second popup.
-      const unverifiedOwnedTab = !existingTab && !loadingOwnedTab && existing.tabs?.find((candidate) =>
-        candidate.id === existingSession.tabId && !candidate.url && !candidate.pendingUrl
-      );
-      const chatTab = existingTab || loadingOwnedTab || unverifiedOwnedTab;
+      // A saved ID or loading status does not prove the tab still hosts our chat.
+      // Preserve unverified pages; only URL/probe-confirmed chats can be navigated.
+      const chatTab = existingTab;
       const sameChat = existingTab && extractVideoId(existingTab.url) === videoId;
       if (chatTab) {
         if (!sameChat && !(await updateChatTab(chatTab, videoId))) {
@@ -347,12 +342,46 @@ function clearBoundsSaveTimer() {
   }
 }
 
+function scheduleBoundsSave(delay = BOUNDS_SAVE_DELAY_MS) {
+  if (!pendingBounds || boundsSaveInFlight) return;
+  clearBoundsSaveTimer();
+  boundsSaveTimer = setTimeout(() => {
+    boundsSaveTimer = null;
+    void flushPendingBounds();
+  }, delay);
+}
+
 async function flushPendingBounds() {
   clearBoundsSaveTimer();
+  if (!pendingBounds || boundsSaveInFlight) return;
+
   const bounds = pendingBounds;
-  pendingBounds = null;
-  if (bounds) {
-    await safeCall(chrome.storage.local?.set?.bind(chrome.storage.local), bounds);
+  const generation = boundsSaveGeneration;
+  boundsSaveInFlight = true;
+  let saved = false;
+  try {
+    const setter = chrome.storage.local?.set;
+    if (typeof setter === "function") {
+      await setter.call(chrome.storage.local, bounds);
+      saved = true;
+    }
+  } catch {
+    // Keep the latest bounds for a bounded retry.
+  } finally {
+    boundsSaveInFlight = false;
+  }
+
+  const isCurrent = pendingBounds === bounds && boundsSaveGeneration === generation;
+  if (saved && isCurrent) {
+    pendingBounds = null;
+    boundsSaveRetryCount = 0;
+  } else if (saved || !isCurrent) {
+    // A newer bounds snapshot arrived while this write was in flight.
+    boundsSaveRetryCount = 0;
+    scheduleBoundsSave();
+  } else if (boundsSaveRetryCount < BOUNDS_SAVE_MAX_RETRIES) {
+    boundsSaveRetryCount += 1;
+    scheduleBoundsSave(BOUNDS_SAVE_DELAY_MS * (2 ** (boundsSaveRetryCount - 1)));
   }
 }
 
@@ -366,8 +395,9 @@ chrome.windows.onBoundsChanged.addListener((window) => serializeSessionOperation
     popupLeft: sanitizePosition(window.left),
     popupTop: sanitizePosition(window.top)
   };
-  clearBoundsSaveTimer();
-  boundsSaveTimer = setTimeout(() => { void flushPendingBounds(); }, 250);
+  boundsSaveGeneration += 1;
+  boundsSaveRetryCount = 0;
+  scheduleBoundsSave();
 }));
 
 chrome.windows.onRemoved.addListener((windowId) => serializeSessionOperation(async () => {

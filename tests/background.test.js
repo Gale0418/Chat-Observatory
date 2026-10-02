@@ -32,6 +32,7 @@ function createHarness(options = {}) {
   let nextWindowId = options.nextWindowId || 42;
   let nextTabId = 1000;
   let sessionSetCalls = 0;
+  let localSetCalls = 0;
   let windowUpdateCalls = 0;
   let tabUpdateCalls = 0;
   let releaseLocalSet = null;
@@ -52,6 +53,8 @@ function createHarness(options = {}) {
         get: async (defaults) => ({ ...defaults, ...localData }),
         set: async (value) => {
           if (localSetGate) await localSetGate;
+          localSetCalls += 1;
+          if (localSetCalls <= (options.localSetFailures || 0)) throw new Error("local set unavailable");
           localSets.push(value);
           Object.assign(localData, value);
           return reject(undefined, "local set");
@@ -133,6 +136,7 @@ function createHarness(options = {}) {
     chrome, actionHandler, createdWindows, updatedWindows, badgeTexts, badgeBackgrounds, titles,
     boundsHandlers, removedHandlers, sessionData, localData, localSets, windowsById, updatedTabs,
     getTimerCount: () => timers.size,
+    getLocalSetCount: () => localSetCalls,
     releaseLocalSet: () => releaseLocalSet?.(),
     runTimers: async () => {
       const callbacks = [...timers.values()];
@@ -250,33 +254,30 @@ test("URL 不可見且 content script 無回應時不會誤聚焦別人的 popup
   assert.equal(harness.createdWindows.length, 1);
 });
 
-test("已記錄的聊天室 tab 無法 probe 時重新導向同一分頁並重用視窗", async () => {
-  const probeResponses = {};
+test("已記錄的分頁 URL 不可見且無法 probe 時保留原頁並建立新聊天室", async () => {
   const harness = createHarness({
     sessionData: { chatWindowId: 99, chatVideoId: "abcDEF_1234", chatTabId: 100 },
-    windowsById: { 99: { id: 99, type: "popup", tabs: [{ id: 100, status: "complete" }] } },
-    probeResponses
+    windowsById: { 99: { id: 99, type: "popup", tabs: [{ id: 100, status: "complete" }] } }
   });
   const live = { id: 1, url: "https://www.youtube.com/live/abcDEF_1234" };
   await harness.actionHandler(live);
-  assert.equal(harness.createdWindows.length, 0);
-  assert.equal(harness.updatedTabs.length, 1);
-  assert.equal(harness.updatedTabs[0].id, 100);
-  assert.equal(harness.updatedWindows.length, 1);
-  assert.equal(harness.sessionData.chatWindowId, 99);
-  probeResponses[100] = "https://www.youtube.com/live_chat?is_popout=1&v=abcDEF_1234";
+  assert.equal(harness.createdWindows.length, 1);
+  assert.equal(harness.updatedTabs.length, 0, "舊 tab ID 不能證明目前仍是聊天室");
+  assert.equal(harness.updatedWindows.length, 0);
+  assert.notEqual(harness.sessionData.chatWindowId, 99);
   await harness.actionHandler(live);
-  assert.equal(harness.createdWindows.length, 0);
-  assert.equal(harness.updatedWindows.length, 2);
+  assert.equal(harness.createdWindows.length, 1);
+  assert.equal(harness.updatedWindows.length, 1);
+  assert.notEqual(harness.updatedWindows[0].id, 99);
 });
 
-test("無法 probe 且第一次重新導向失敗時保留原視窗供重試", async () => {
+test("已確認聊天室第一次重新導向失敗時保留原視窗供重試", async () => {
   const harness = createHarness({
     sessionData: { chatWindowId: 99, chatVideoId: "abcDEF_1234", chatTabId: 100 },
-    windowsById: { 99: { id: 99, type: "popup", tabs: [{ id: 100, status: "complete" }] } },
+    windowsById: { 99: { id: 99, type: "popup", tabs: [{ id: 100, url: "https://www.youtube.com/live_chat?is_popout=1&v=abcDEF_1234", status: "complete" }] } },
     tabUpdateFailures: 1
   });
-  const live = { id: 1, url: "https://www.youtube.com/live/abcDEF_1234" };
+  const live = { id: 1, url: "https://www.youtube.com/live/xyzXYZ_5678" };
   await harness.actionHandler(live);
   assert.equal(harness.createdWindows.length, 0);
   assert.equal(harness.sessionData.chatWindowId, 99);
@@ -287,15 +288,26 @@ test("無法 probe 且第一次重新導向失敗時保留原視窗供重試", a
   assert.equal(harness.updatedWindows.length, 1);
 });
 
-test("剛建立且仍載入中的自家分頁可重用，不會因 probe 尚未就緒重開視窗", async () => {
+test("剛建立且仍載入中的分頁由 pendingUrl 確認後可重用", async () => {
+  const harness = createHarness({
+    sessionData: { chatWindowId: 99, chatVideoId: "abcDEF_1234", chatTabId: 100 },
+    windowsById: { 99: { id: 99, type: "popup", tabs: [{ id: 100, status: "loading", pendingUrl: "https://www.youtube.com/live_chat?is_popout=1&v=abcDEF_1234" }] } }
+  });
+  await harness.actionHandler({ id: 1, url: "https://www.youtube.com/live/abcDEF_1234" });
+  assert.equal(harness.createdWindows.length, 0);
+  assert.equal(harness.updatedTabs.length, 0);
+  assert.equal(harness.updatedWindows[0].id, 99);
+});
+
+test("載入狀態本身不能證明 URL 不可見的舊分頁仍是聊天室", async () => {
   const harness = createHarness({
     sessionData: { chatWindowId: 99, chatVideoId: "abcDEF_1234", chatTabId: 100 },
     windowsById: { 99: { id: 99, type: "popup", tabs: [{ id: 100, status: "loading" }] } }
   });
   await harness.actionHandler({ id: 1, url: "https://www.youtube.com/live/abcDEF_1234" });
-  assert.equal(harness.createdWindows.length, 0);
-  assert.equal(harness.updatedTabs[0].id, 100);
-  assert.equal(harness.updatedWindows[0].id, 99);
+  assert.equal(harness.createdWindows.length, 1);
+  assert.equal(harness.updatedTabs.length, 0);
+  assert.equal(harness.updatedWindows.length, 0);
 });
 
 test("聊天室分頁正在導向其他網站時不會沿用舊 URL", async () => {
@@ -512,4 +524,56 @@ test("bounds debounce 在連續事件後只寫入最後一次", async () => {
   assert.equal(harness.localSets.length, 1);
   assert.equal(harness.localSets[0].popupWidth, 700);
   assert.equal(harness.localSets[0].popupHeight, 800);
+});
+
+test("bounds 儲存失敗會保留最新值並有限次重試", async () => {
+  const harness = createHarness({ sessionData: { chatWindowId: 42 }, localSetFailures: 1 });
+  await harness.boundsHandlers[0]({ id: 42, type: "popup", width: 600, height: 700, left: 10, top: 20 });
+
+  await harness.runTimers();
+  assert.equal(harness.localSets.length, 0);
+
+  await Promise.resolve();
+  await harness.runTimers();
+  assert.equal(harness.localSets.length, 1);
+  assert.equal(harness.localSets[0].popupWidth, 600);
+  assert.equal(harness.localSets[0].popupHeight, 700);
+  assert.equal(harness.localSets[0].popupLeft, 10);
+  assert.equal(harness.localSets[0].popupTop, 20);
+});
+
+test("bounds 儲存失敗達到上限後不會無限重試且仍保留 pending", async () => {
+  const harness = createHarness({ sessionData: { chatWindowId: 42 }, localSetFailures: 99 });
+  await harness.boundsHandlers[0]({ id: 42, type: "popup", width: 600, height: 700, left: 10, top: 20 });
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await harness.runTimers();
+    await Promise.resolve();
+  }
+
+  assert.equal(harness.getLocalSetCount(), 4);
+  assert.equal(harness.getTimerCount(), 0);
+});
+
+test("bounds 寫入期間收到新值時不會被舊 snapshot 清掉或並行寫入", async () => {
+  const harness = createHarness({ sessionData: { chatWindowId: 42 }, delayLocalSet: true });
+  await harness.boundsHandlers[0]({ id: 42, type: "popup", width: 600, height: 700, left: 10, top: 20 });
+  await harness.runTimers();
+
+  await harness.boundsHandlers[0]({ id: 42, type: "popup", width: 640, height: 740, left: 30, top: 40 });
+  assert.equal(harness.localSets.length, 0);
+  harness.releaseLocalSet();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(harness.localSets.length, 1);
+  assert.equal(harness.localSets[0].popupWidth, 600);
+  assert.equal(harness.localSets[0].popupHeight, 700);
+  assert.equal(harness.localSets[0].popupLeft, 10);
+  assert.equal(harness.localSets[0].popupTop, 20);
+
+  await harness.runTimers();
+  assert.equal(harness.localSets.length, 2);
+  assert.equal(harness.localSets[1].popupWidth, 640);
+  assert.equal(harness.localSets[1].popupHeight, 740);
+  assert.equal(harness.localSets[1].popupLeft, 30);
+  assert.equal(harness.localSets[1].popupTop, 40);
 });

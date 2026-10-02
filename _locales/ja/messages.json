@@ -4,11 +4,11 @@
     "description": "拡張機能名"
   },
   "extDescription": {
-    "message": "YouTubeライブチャットを大きく表示し、本機音声で読み上げます (｀・ω・´)ゞ",
+    "message": "YouTube のライブチャットを別ウィンドウに大きく表示。端末にローカル音声があれば、新しいメッセージの読み上げを選べます。",
     "description": "拡張機能の説明"
   },
   "actionTitle": {
-    "message": "チャットコントロールセンターを開く",
+    "message": "ライブチャットを別ウィンドウで開く",
     "description": "ツールバーアクションのタイトル"
   },
   "actionErrorNoChat": {
