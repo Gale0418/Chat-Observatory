@@ -3,6 +3,7 @@
 - 最後整理： 2026-10-02
 
 ## 2026-10-02
+- 2026-10-02T23:09:55+08:00：3.1.0來源已上傳GitHub main `c15c95a1b817e0e66030966f2e4cc206845bd259`，公開API讀回與Git fetch確認；Git tree `ffa648954ec69bf5276addd9464ec8e530521fc9` 與本機提交完全相同。HTTPS／gh憑證失效後使用GitHub外掛正常向前更新，不強推；本機main已對齊。README／MissionCenter更新隨提交上傳，正式gate仍limited、真實音訊未知、商店Not allowed未上傳／送審。
 - 2026-10-02T22:59:46+08:00：3.1.0最終129/129與ZIP23項一致；CodeRabbit full20/2minor、focused5/0issues、council6/1major均已確認修補，最後補修外部覆核受3次／小時限制未執行。三位正式critic＋獨立仲裁初稿完成，正式gate limited（realChrome/audio未知、TTS11/10、wall budget到期）；快照release-final-20261002-9a828401ed4e。準備main推送；商店Not allowed，未上傳或送審。
 - 2026-10-02T22:29:00+08:00：使用者明確核准正式critic_full總24k／40tools／20min，每席6k／10tools／5min；兩位隔離Luna席位已派送。第三席fresh spawn受thread limit，正式席位數不得降低或以助手報告代替。
 - 2026-10-02T22:20:39+08:00：新增隨機換景／返回、修復外部換景debounce競態；CodeRabbit完整20檔提出2minor，均先重現再修復，124/124與3.1.0 ZIP23項一致；5檔focused覆核完成0issues。使用者授權main推送與送審；Chrome控制台Not allowed，尚未上傳／送審；正式gate預算已核准，分席審查中。見delight-quality與release-3.1.0紀錄。

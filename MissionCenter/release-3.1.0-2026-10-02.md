@@ -1,10 +1,10 @@
 # 3.1.0 維護版發布紀錄
 
-- 更新時間：2026-10-02T22:59:46+08:00。
+- 更新時間：2026-10-02T23:09:55+08:00。
 - 使用者授權：直接在main存Git、CodeRabbit、GitHub推送與商店送審。
 - 公開版本：本輪先前確認3.0.1，2026-09-25更新。
 - 準備版：3.1.0；manifest/package/lock一致，未新增權限或依賴。
-- Git：技術驗證完成，準備提交／推送main；不把準備當成遠端已更新。
+- Git：GitHub `main` 已更新至 `c15c95a1b817e0e66030966f2e4cc206845bd259`，公開API讀回確認。HTTPS／gh keyring憑證失效，改用已連接GitHub外掛建立相同tree後以force=false向前更新；本機main經tree完全相同檢查後對齊，原本機提交 `da055439a6641db3d9cb0954c60216ba9ac636a2` 保留於reflog。上傳回條：`output/release-github-receipt.json`。
 - 商店：**未上傳、未送審**。Chrome工具開啟devconsole回覆`Not allowed`，未進入控制台，沒有外部提交回條。
 - 產物：`dist/chat-observatory.zip`，23項，8365738bytes；SHA-256 `e289873991c1069e442d1fb55fbecf7222f84f06e14c1d71c14d646ce5c607d3`。來源／staging／ZIP逐byte一致。
 
