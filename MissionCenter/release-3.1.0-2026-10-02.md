@@ -5,7 +5,7 @@
 - 公開版本：本輪先前確認3.0.1，2026-09-25更新。
 - 準備版：3.1.0；manifest/package/lock一致，未新增權限或依賴。
 - Git：GitHub `main` 已更新至 `c15c95a1b817e0e66030966f2e4cc206845bd259`，公開API讀回確認。HTTPS／gh keyring憑證失效，改用已連接GitHub外掛建立相同tree後以force=false向前更新；本機main經tree完全相同檢查後對齊，原本機提交 `da055439a6641db3d9cb0954c60216ba9ac636a2` 保留於reflog。上傳回條：`output/release-github-receipt.json`。
-- 商店：**未上傳、未送審**。Chrome工具開啟devconsole回覆`Not allowed`，未進入控制台，沒有外部提交回條。
+- 商店：**已上傳、已送審，待審查**（2026-10-02T23:26:33+08:00）。Chrome 原生 AX 介面可操作；先前錯誤來自擴充功能無法對商店頁面執行腳本，不是整個後台禁止操作。上傳草稿確認3.1.0，送審成功對話框與狀態頁已讀回；通過後自動發布已勾選。回條：`output/release-store-receipt.json`，截圖／AX：`output/release-store-status-3.1.0.png`／`.txt`。公開版仍3.0.1。
 - 產物：`dist/chat-observatory.zip`，23項，8365738bytes；SHA-256 `e289873991c1069e442d1fb55fbecf7222f84f06e14c1d71c14d646ce5c607d3`。來源／staging／ZIP逐byte一致。
 
 ## 更新內容
@@ -34,3 +34,10 @@
 [Chrome官方更新流程](https://developer.chrome.com/docs/webstore/update)：開發者控制台選既有item `fibmebmihidnbhfajjagfnhoncokdnhf`，Package→Upload New Package選上述ZIP，核對3.1.0，再Submit for Review並選通過後自動發布。商店可採STORE_LISTING.md三語核心草稿，取得實際回條後才更新送審狀態。
 
 本次自建server PID55232已核對命令/cwd/port後SIGINT exit0；IAB預覽與自建空白Chrome頁已關閉、viewport reset。沒有關閉工具的Luna程序不宣稱已回收。
+
+## 本輪商店操作補記
+
+- 首頁與隱私政策原 GitHub blob 連結遭商店檢查器判定無法連線；首頁改為專案根頁，政策改為同一份公開 raw 文件，儲存後提交按鈕啟用。政策內容與資料揭露未更動。
+- 三語套件摘要隨新版 manifest 更新；此次保留既有詳細說明與圖片，STORE_LISTING 三語詳細說明仍為草稿。
+- 送審不等於已公開；等待 Google 審查。既有正式品質 gate limited 與真實音訊未知保持原紀錄，不宣稱 Done。
+- Mission Center external-operation CLI 的 help／prepare 未提供有效參數說明，未建立 canonical CLI operation；已另存明確標示的 manual receipt 與原始 UI 證據。

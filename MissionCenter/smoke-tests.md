@@ -72,3 +72,6 @@
 | 2026-10-02 | CO-H9 | 最終storage還原與通知歧義回歸 | npm run verify；reconcile負向log留存 | storage/UI最新設定一致、最新本地操作優先 | 129/129，0fail；最終快照release-final-20261002-9a828401ed4e | 通過 | automated |
 | 2026-10-02 | CO-H9 | 最終3.1.0封裝 | build:extension與逐byte比對 | ZIP與source/staging一致 | 23項，SHA256 e289873991c1069e442d1fb55fbecf7222f84f06e14c1d71c14d646ce5c607d3 | 通過 | automated |
 | 2026-10-02 | CO-H9 | 正式expert/council與Rabbit補修 | 三席獨立初稿＋仲裁；6檔Rabbit回條 | 真實分工、問題查證與限制透明 | 2P2與1Rabbit major均本機修復；formal limited，最後補修未外部覆核 | 部分涵蓋 | advisory |
+
+| 2026-10-02 | CO-V1 | Chrome商店上傳與送審 | 原生AX讀回3.1.0草稿、成功modal與狀態頁 | Pass（送審限定） | output/release-store-receipt.json；待審查，通過後自動發布；不是公開版驗收 |
+| 2026-10-02 | CO-P2 | 商店首頁／政策連結檢查 | 儲存專案根頁與同內容raw政策 | Pass（草稿限定） | 提交按鈕由disabled轉enabled，提交成功；公開新連結仍待發布確認 |

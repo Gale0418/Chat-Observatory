@@ -4,7 +4,7 @@
 
 以下三語文案為本輪整理的發布草稿，尚未送出商店更新。功能介紹以現有核心能力為主；本輪候選版的常駐朗讀開關、錯誤重試、女聲優先與隨機換主題／換回上一款須待驗收後再補進公開說明。
 
-2026-10-02 公開頁已確認版本為 **3.0.1**，更新日期為 2026-09-25。先前「公開版仍為 1.0.0、3.0.1 待審查」的紀錄已過期。本工作目錄的維護候選版已升為 **3.1.0**，尚未上傳或送審；不能視為公開商店已更新。
+2026-10-02 公開頁已確認版本為 **3.0.1**，更新日期為 2026-09-25。先前「公開版仍為 1.0.0、3.0.1 待審查」的紀錄已過期。本工作目錄的維護候選版已升為 **3.1.0**，已上傳並送審，設定通過後自動發布；目前待審查，不能視為公開商店已更新。
 
 公開頁：[Chat Observatory](https://chromewebstore.google.com/detail/chat-observatory/fibmebmihidnbhfajjagfnhoncokdnhf)。
 
@@ -159,3 +159,7 @@ Chat Observatory は独立したツールです。YouTube や Google との提�
 
 - [Chrome 官方商店頁建議](https://developer.chrome.com/docs/webstore/best-listing)：說明應簡潔、準確，截圖須對應最新功能。
 - [Chat Observatory 公開商店](https://chromewebstore.google.com/detail/chat-observatory/fibmebmihidnbhfajjagfnhoncokdnhf)：2026-10-02 查核公開版本、更新日期及支援／隱私連結。
+
+## 2026-10-02 商店送審狀態
+
+3.1.0 ZIP 已上傳並送審；三語套件摘要由 manifest 更新。此次保留既有詳細說明與商店圖片，未將上述三語詳細說明草稿送出。首頁改為 https://github.com/Gale0418/Chat-Observatory，隱私政策欄位改為同一份公開原始文件 https://raw.githubusercontent.com/Gale0418/Chat-Observatory/main/PRIVACY.md；商店連結檢查通過，狀態為待審查。

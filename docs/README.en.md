@@ -44,7 +44,7 @@ These older fixtures use fictional identities and messages. They are not real us
 
 ## 3.1.0 update (prepared for submission)
 
-The published store version checked on October 2, 2026 is 3.0.1. The 3.1.0 source includes unpublished improvements: a persistent reading switch, separate save and speech retry controls, and female voice preference in automatic mode. The candidate also adds Try random theme and Switch back: try a different look from the expanded panel, then return to the previous theme. A custom background stays in place. The source passes 129 automated tests and synthetic UI checks. Real Chrome injection and audio remain unverified. Access to the store developer console was denied by the browser tool, so this update has not been uploaded or submitted.
+The published store version checked on October 2, 2026 is 3.0.1. The 3.1.0 source includes unpublished improvements: a persistent reading switch, separate save and speech retry controls, and female voice preference in automatic mode. The candidate also adds Try random theme and Switch back: try a different look from the expanded panel, then return to the previous theme. A custom background stays in place. The source passes 129 automated tests and synthetic UI checks. Real Chrome injection and audio remain unverified. Version 3.1.0 was uploaded and submitted for Chrome Web Store review on October 2, 2026, with automatic publishing after approval enabled. Review is pending; the public version remains 3.0.1.
 
 ## Help
 
